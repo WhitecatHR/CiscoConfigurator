@@ -66,13 +66,26 @@ public partial class MainWindow : Window
 
     private static readonly Dictionary<string, string[]> ModuleOrder = new(StringComparer.OrdinalIgnoreCase)
     {
+        // Grundaufbau: zuerst Identität und globale Geräteeinstellungen.
         ["Basis"] = new[] { "basic", "banner" },
-        ["Management"] = new[] { "ssh", "userRights", "aaa", "radiusTacacs", "monitoringBase" },
-        ["Interfaces"] = new[] { "interfaceRoles", "interfaceProfiles", "interfaces", "ranges", "trunkUplink", "etherChannelExt", "subinterfaces", "routerStick", "qinq", "qosBasic" },
-        ["Switching"] = new[] { "vlanIpPlan", "vlans", "accessBaseline", "stpExtended", "voip", "portSecurityExt", "switchSec", "switchSecExt", "errdisableRecovery" },
+
+        // login local benötigt zuerst einen lokalen Benutzer; danach folgen SSH, AAA und zentrale Dienste.
+        ["Management"] = new[] { "userRights", "ssh", "aaa", "radiusTacacs", "monitoringBase" },
+
+        // Von der Planung über einzelne Ports bis zu logischen und erweiterten Interfaces.
+        ["Interfaces"] = new[] { "interfaceRoles", "interfaceProfiles", "interfaces", "ranges", "etherChannelExt", "trunkUplink", "subinterfaces", "routerStick", "qinq", "qosBasic" },
+
+        // VLAN-Grundlage vor Access-Funktionen, STP und Schutzmechanismen.
+        ["Switching"] = new[] { "vlanIpPlan", "vlans", "accessBaseline", "voip", "stpExtended", "portSecurityExt", "switchSec", "switchSecExt", "errdisableRecovery" },
+
+        // Routing-Basis vor Protokollen, Richtlinien, Redundanz, VRF und MPLS.
         ["Routing"] = new[] { "routingBase", "staticRoutes", "ospf", "ospfAdvanced", "isis", "bgp", "bgpAdvanced", "routeMapFilter", "fhrp", "ipSlaTracking", "vrfLite", "vrfDefs", "vrfSvi", "vrfStaticRoutes", "vrfOspf", "vrfOspfv3", "vrfBgp", "mpls" },
+
+        // Adressvergabe und Filter vor den erweiterten IPv6-Routingfunktionen.
         ["IPv6/DHCP/ACL"] = new[] { "dhcp", "aclAssistant", "acl", "ipv6", "ipv6Extended", "ospfv3", "ipv6RoutingProtocols" },
-        ["Security/WAN"] = new[] { "security", "nat", "zoneFirewall", "dmzAssistant", "wanFailover", "vpn", "greIpsec", "vpnAdvanced", "customCommands" }
+
+        // Hardening und Zonierung vor NAT, WAN-Redundanz und VPN.
+        ["Security/WAN"] = new[] { "security", "zoneFirewall", "dmzAssistant", "nat", "wanFailover", "vpn", "greIpsec", "vpnAdvanced", "customCommands" }
     };
 
     private sealed record DuplicateConfigIssue(string Context, string Command, int Count, IReadOnlyList<int> Lines);
@@ -98,7 +111,9 @@ public partial class MainWindow : Window
         BuildCommandTab();
         BuildCheckTab();
         BuildAdvancedFeatureTabs();
-        if (MainTabs.Items.Count > 0) MainTabs.SelectedIndex = 0;
+        RebuildMainNavigation();
+        if (_tabsByName.TryGetValue("Übersicht", out var overviewTab))
+            MainTabs.SelectedItem = overviewTab;
         HookButtons();
         ApplyFilters();
         UpdateConditionalFieldVisibility();
@@ -311,6 +326,66 @@ public partial class MainWindow : Window
     {
         if (_tabsByName.TryGetValue(tabName, out var tab))
             MainTabs.SelectedItem = tab;
+    }
+
+    private void RebuildMainNavigation()
+    {
+        // Die Hauptnavigation wird unabhängig von der Erzeugungsreihenfolge aufgebaut.
+        // Dadurch bleiben Fachbereiche und Dokumentationswerkzeuge dauerhaft übersichtlich gruppiert.
+        MainTabs.Items.Clear();
+
+        AddNavigationGroupHeader("KONFIGURATION");
+        foreach (var tabName in new[]
+                 {
+                     "Übersicht",
+                     "Basis",
+                     "Management",
+                     "Interfaces",
+                     "Switching",
+                     "Routing",
+                     "IPv6/DHCP/ACL",
+                     "Security/WAN",
+                     "Gegenstelle",
+                     "Import",
+                     "Betrieb"
+                 })
+        {
+            AddNavigationTab(tabName);
+        }
+
+        AddNavigationGroupHeader("DOKUMENTATION");
+        foreach (var tabName in new[]
+                 {
+                     "Projekt",
+                     "IPAM / Ports",
+                     "Subnetting",
+                     "Analyse",
+                     "Ausgabe",
+                     "Befehlsregister",
+                     "Diagramm / Bericht"
+                 })
+        {
+            AddNavigationTab(tabName);
+        }
+    }
+
+    private void AddNavigationTab(string tabName)
+    {
+        if (_tabsByName.TryGetValue(tabName, out var tab))
+            MainTabs.Items.Add(tab);
+    }
+
+    private void AddNavigationGroupHeader(string title)
+    {
+        var header = new TabItem
+        {
+            Header = title,
+            IsEnabled = false,
+            Focusable = false,
+            IsHitTestVisible = false,
+            Style = TryFindResource("NavigationGroupHeaderStyle") as Style
+        };
+        MainTabs.Items.Add(header);
     }
 
     private void OpenModule(string tabName, string moduleName)
@@ -2574,8 +2649,10 @@ public partial class MainWindow : Window
 
     private static string DisplayNameForTab(string tab) => tab switch
     {
+        "Management" => "Management & Zugriff",
+        "Interfaces" => "Interfaces & Ports",
         "IPv6/DHCP/ACL" => "Netzdienste",
-        "Security/WAN" => "Sicherheit / WAN",
+        "Security/WAN" => "Sicherheit & WAN",
         _ => tab
     };
 
