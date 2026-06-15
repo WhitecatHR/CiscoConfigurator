@@ -24,6 +24,8 @@ public sealed class ProjectDeviceSnapshot
     public Dictionary<string, string> Values { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, bool> Modules { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string GeneratedConfiguration { get; set; } = "";
+    public double? DiagramX { get; set; }
+    public double? DiagramY { get; set; }
     public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
     public string Status => string.IsNullOrWhiteSpace(GeneratedConfiguration) ? "Entwurf" : "Konfiguration vorhanden";
 }

@@ -344,7 +344,15 @@ public partial class MainWindow : Window
                      "Switching",
                      "Routing",
                      "IPv6/DHCP/ACL",
-                     "Security/WAN",
+                     "Security/WAN"
+                 })
+        {
+            AddNavigationTab(tabName);
+        }
+
+        AddNavigationGroupHeader("WERKZEUGE");
+        foreach (var tabName in new[]
+                 {
                      "Gegenstelle",
                      "Import",
                      "Betrieb"
@@ -1910,7 +1918,7 @@ public partial class MainWindow : Window
 
         var topGrid = new Grid();
         topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(260) });
+        topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(300) });
         topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(14) });
         topGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(360) });
         top.Child = topGrid;
@@ -1924,7 +1932,7 @@ public partial class MainWindow : Window
         });
         info.Children.Add(new TextBlock
         {
-            Text = "Cisco-Syntax nach Bereich, Modul, Modus und Bedeutung durchsuchen.",
+            Text = "Aktualisierte Cisco-Konfigurations-, Diagnose-, Prüf- und Wartungsbefehle durchsuchen.",
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 12,
             Margin = new Thickness(0, 3, 0, 0)
@@ -2074,7 +2082,12 @@ public partial class MainWindow : Window
                     Contains(r.Meaning, q));
             }
 
-            var filtered = rows.ToList();
+            var filtered = rows
+                .GroupBy(r => $"{r.Module}{r.Mode}{r.Command}", StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .OrderBy(r => r.Module, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(r => r.Command, StringComparer.OrdinalIgnoreCase)
+                .ToList();
             commandGrid.ItemsSource = filtered;
             var selectedArea = groupSelector.SelectedItem?.ToString() ?? "Alle Bereiche";
             resultText.Text = $"{selectedArea} · {filtered.Count} Befehle";

@@ -49,14 +49,55 @@ public static class NetworkDiagramService
         var rows = Math.Max(1, (int)Math.Ceiling(count / (double)columns));
         var cellW = Math.Max(180, width / columns);
         var cellH = Math.Max(130, height / rows);
+        const double nodeWidth = 170;
+        const double nodeHeight = 92;
+
         for (var i = 0; i < project.Devices.Count; i++)
         {
+            var device = project.Devices[i];
             var row = i / columns;
             var column = i % columns;
-            result[project.Devices[i].Id] = new DiagramPoint(column * cellW + 25, row * cellH + 25, 150, 82);
+            var defaultX = column * cellW + 25;
+            var defaultY = row * cellH + 45;
+            var x = device.DiagramX ?? defaultX;
+            var y = device.DiagramY ?? defaultY;
+            x = Math.Clamp(x, 5, Math.Max(5, width - nodeWidth - 5));
+            y = Math.Clamp(y, 35, Math.Max(35, height - nodeHeight - 5));
+            result[device.Id] = new DiagramPoint(x, y, nodeWidth, nodeHeight);
         }
         return result;
     }
+
+    public static string GetLinkColor(string? linkType) => (linkType ?? string.Empty).Trim().ToLowerInvariant() switch
+    {
+        "access" => "#22c55e",
+        "trunk" => "#f59e0b",
+        "port-channel" => "#60a5fa",
+        "routed link" => "#06b6d4",
+        "wan" => "#c084fc",
+        "tunnel" => "#f472b6",
+        "serial" => "#a3e635",
+        "fiber" => "#38bdf8",
+        "wireless" => "#facc15",
+        _ => "#94a3b8"
+    };
+
+    public static string GetLinkDashArray(string? linkType) => (linkType ?? string.Empty).Trim().ToLowerInvariant() switch
+    {
+        "wan" => "10 6",
+        "tunnel" => "5 5",
+        "serial" => "12 5 3 5",
+        "wireless" => "3 6",
+        _ => string.Empty
+    };
+
+    public static double GetLinkThickness(string? linkType) => (linkType ?? string.Empty).Trim().ToLowerInvariant() switch
+    {
+        "port-channel" => 6,
+        "trunk" => 4,
+        "fiber" => 4,
+        _ => 3
+    };
 
     public static string BuildSvg(NetworkProject project, int width = 1400, int height = 900)
     {
@@ -64,22 +105,43 @@ public static class NetworkDiagramService
         var sb = new StringBuilder();
         sb.AppendLine($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{width}\" height=\"{height}\" viewBox=\"0 0 {width} {height}\">");
         sb.AppendLine("<rect width=\"100%\" height=\"100%\" fill=\"#0b0e13\"/>");
-        sb.AppendLine("<defs><marker id=\"arrow\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"4\" orient=\"auto\"><path d=\"M0,0 L8,4 L0,8 z\" fill=\"#e8791a\"/></marker></defs>");
+
+        var legendTypes = project.Links.Select(x => string.IsNullOrWhiteSpace(x.LinkType) ? "Ethernet" : x.LinkType.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var legendX = 20.0;
+        foreach (var type in legendTypes)
+        {
+            var color = GetLinkColor(type);
+            var dash = GetLinkDashArray(type);
+            var dashAttribute = string.IsNullOrWhiteSpace(dash) ? string.Empty : $" stroke-dasharray=\"{dash}\"";
+            sb.AppendLine($"<line x1=\"{legendX:0}\" y1=\"20\" x2=\"{legendX + 34:0}\" y2=\"20\" stroke=\"{color}\" stroke-width=\"{GetLinkThickness(type):0}\"{dashAttribute}/>");
+            sb.AppendLine($"<text x=\"{legendX + 40:0}\" y=\"24\" fill=\"#cbd5e1\" font-family=\"Segoe UI\" font-size=\"12\">{SecurityElement.Escape(type)}</text>");
+            legendX += 65 + Math.Max(40, type.Length * 7);
+        }
+
         foreach (var link in project.Links)
         {
             if (!layout.TryGetValue(link.SourceDeviceId, out var a) || !layout.TryGetValue(link.TargetDeviceId, out var b)) continue;
             var x1 = a.X + a.Width / 2; var y1 = a.Y + a.Height / 2;
             var x2 = b.X + b.Width / 2; var y2 = b.Y + b.Height / 2;
-            sb.AppendLine($"<line x1=\"{x1:0}\" y1=\"{y1:0}\" x2=\"{x2:0}\" y2=\"{y2:0}\" stroke=\"#e8791a\" stroke-width=\"3\" marker-end=\"url(#arrow)\"/>");
-            var label = SecurityElement.Escape($"{link.SourceInterface} ↔ {link.TargetInterface}");
-            sb.AppendLine($"<text x=\"{(x1 + x2) / 2:0}\" y=\"{(y1 + y2) / 2 - 7:0}\" fill=\"#fbbf24\" font-family=\"Segoe UI\" font-size=\"12\" text-anchor=\"middle\">{label}</text>");
+            var color = GetLinkColor(link.LinkType);
+            var dash = GetLinkDashArray(link.LinkType);
+            var dashAttribute = string.IsNullOrWhiteSpace(dash) ? string.Empty : $" stroke-dasharray=\"{dash}\"";
+            sb.AppendLine($"<line x1=\"{x1:0}\" y1=\"{y1:0}\" x2=\"{x2:0}\" y2=\"{y2:0}\" stroke=\"{color}\" stroke-width=\"{GetLinkThickness(link.LinkType):0}\"{dashAttribute}/>");
+            sb.AppendLine($"<circle cx=\"{x1:0}\" cy=\"{y1:0}\" r=\"5\" fill=\"{color}\"/><circle cx=\"{x2:0}\" cy=\"{y2:0}\" r=\"5\" fill=\"{color}\"/>");
+            var type = string.IsNullOrWhiteSpace(link.LinkType) ? "Ethernet" : link.LinkType.Trim();
+            var description = string.IsNullOrWhiteSpace(link.Description) ? string.Empty : $" · {link.Description.Trim()}";
+            var label = SecurityElement.Escape($"{type}: {link.SourceInterface} ↔ {link.TargetInterface}{description}");
+            sb.AppendLine($"<rect x=\"{(x1 + x2) / 2 - 105:0}\" y=\"{(y1 + y2) / 2 - 22:0}\" width=\"210\" height=\"22\" rx=\"6\" fill=\"#0b0e13\" fill-opacity=\"0.92\" stroke=\"{color}\" stroke-width=\"1\"/>");
+            sb.AppendLine($"<text x=\"{(x1 + x2) / 2:0}\" y=\"{(y1 + y2) / 2 - 7:0}\" fill=\"{color}\" font-family=\"Segoe UI\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">{label}</text>");
         }
         foreach (var device in project.Devices)
         {
             if (!layout.TryGetValue(device.Id, out var p)) continue;
             sb.AppendLine($"<rect x=\"{p.X:0}\" y=\"{p.Y:0}\" width=\"{p.Width:0}\" height=\"{p.Height:0}\" rx=\"12\" fill=\"#171c25\" stroke=\"#e8791a\" stroke-width=\"2\"/>");
-            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 30:0}\" fill=\"#ffffff\" font-family=\"Segoe UI\" font-size=\"16\" font-weight=\"bold\" text-anchor=\"middle\">{SecurityElement.Escape(device.Name)}</text>");
-            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 55:0}\" fill=\"#9ca6b5\" font-family=\"Segoe UI\" font-size=\"12\" text-anchor=\"middle\">{SecurityElement.Escape(device.DeviceType)}</text>");
+            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 34:0}\" fill=\"#ffffff\" font-family=\"Segoe UI\" font-size=\"16\" font-weight=\"bold\" text-anchor=\"middle\">{SecurityElement.Escape(device.Name)}</text>");
+            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 59:0}\" fill=\"#9ca6b5\" font-family=\"Segoe UI\" font-size=\"12\" text-anchor=\"middle\">{SecurityElement.Escape(device.DeviceType)}</text>");
+            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 77:0}\" fill=\"#64748b\" font-family=\"Segoe UI\" font-size=\"10\" text-anchor=\"middle\">{SecurityElement.Escape(device.ConfigMode)}</text>");
         }
         sb.AppendLine("</svg>");
         return sb.ToString();
@@ -107,7 +169,8 @@ public static class ReportExportService
         {
             var source = project.Devices.FirstOrDefault(x => x.Id == l.SourceDeviceId)?.Name ?? l.SourceDeviceId;
             var target = project.Devices.FirstOrDefault(x => x.Id == l.TargetDeviceId)?.Name ?? l.TargetDeviceId;
-            sb.AppendLine($"- {source} {l.SourceInterface} ↔ {target} {l.TargetInterface} | {l.LinkType}");
+            var description = string.IsNullOrWhiteSpace(l.Description) ? string.Empty : $" | {l.Description}";
+            sb.AppendLine($"- {source} {l.SourceInterface} ↔ {target} {l.TargetInterface} | {l.LinkType}{description}");
         }
         sb.AppendLine();
         sb.AppendLine("ABHÄNGIGKEITEN");

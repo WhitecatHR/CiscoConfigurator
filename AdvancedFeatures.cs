@@ -49,7 +49,23 @@ public partial class MainWindow
     private TextBox? _linkSourceIfBox;
     private TextBox? _linkTargetIfBox;
     private ComboBox? _linkTypeCombo;
+    private TextBox? _linkDescriptionBox;
     private TextBox? _reportPreviewBox;
+    private readonly Dictionary<string, Border> _diagramDeviceElements = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<DiagramLinkVisual> _diagramLinkElements = new();
+    private ProjectDeviceSnapshot? _draggedDiagramDevice;
+    private Border? _draggedDiagramElement;
+    private Point _diagramDragOffset;
+
+    private sealed class DiagramLinkVisual
+    {
+        public required ProjectLink Link { get; init; }
+        public required Line Line { get; init; }
+        public required TextBlock Label { get; init; }
+        public required Border LabelBorder { get; init; }
+        public required Ellipse SourceEndpoint { get; init; }
+        public required Ellipse TargetEndpoint { get; init; }
+    }
     private DispatcherTimer? _autoSaveTimer;
     private readonly Dictionary<string, TextBox> _moduleLivePreviewBoxes = new(StringComparer.OrdinalIgnoreCase);
     private IReadOnlyList<DependencyFinding> _advancedDependencyFindings = Array.Empty<DependencyFinding>();
@@ -500,28 +516,42 @@ public partial class MainWindow
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-        root.Children.Add(CreateAdvancedHeader("Topologie aus dem Projekt", "Stellt Projektgeräte und definierte Verbindungen grafisch dar und exportiert eine skalierbare SVG-Datei."));
+        root.Children.Add(CreateAdvancedHeader(
+            "Interaktives Netzwerkdiagramm",
+            "Geräte können mit der Maus verschoben werden. Verbindungstyp, Interfaces und optionale Beschreibung werden direkt an der Verbindung angezeigt und im Projekt gespeichert."));
 
-        var linkRow = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
+        var linkRow = new WrapPanel { Margin = new Thickness(0, 8, 0, 5) };
         _linkSourceCombo = new ComboBox { Width = 155, DisplayMemberPath = nameof(ProjectDeviceSnapshot.Name), ItemsSource = _currentProject.Devices };
-        _linkSourceIfBox = new TextBox { Width = 145, Text = "Gi0/0" };
+        _linkSourceIfBox = new TextBox { Width = 125, Text = "Gi0/0", ToolTip = "Quellinterface" };
         _linkTargetCombo = new ComboBox { Width = 155, DisplayMemberPath = nameof(ProjectDeviceSnapshot.Name), ItemsSource = _currentProject.Devices };
-        _linkTargetIfBox = new TextBox { Width = 145, Text = "Gi0/0" };
-        _linkTypeCombo = new ComboBox { Width = 120, ItemsSource = new[] { "Ethernet", "Trunk", "Port-Channel", "WAN", "Tunnel" }, SelectedIndex = 0 };
+        _linkTargetIfBox = new TextBox { Width = 125, Text = "Gi0/0", ToolTip = "Zielinterface" };
+        _linkTypeCombo = new ComboBox
+        {
+            Width = 135,
+            ItemsSource = new[] { "Ethernet", "Access", "Trunk", "Port-Channel", "Routed Link", "WAN", "Tunnel", "Serial", "Fiber", "Wireless" },
+            SelectedIndex = 0,
+            ToolTip = "Verbindungstyp. Der Typ steuert Farbe und Linienart im Diagramm."
+        };
+        _linkDescriptionBox = new TextBox { Width = 170, ToolTip = "Optionale Bezeichnung, z. B. OSPF Transit, MPLS Core oder Internet-Uplink." };
         var addLink = new Button { Content = "Verbindung hinzufügen", Style = TryFindResource("PrimaryButtonStyle") as Style };
         var removeLink = new Button { Content = "Letzte entfernen" };
-        var refresh = new Button { Content = "Diagramm aktualisieren" };
+        var refresh = new Button { Content = "Aktualisieren" };
+        var autoLayout = new Button { Content = "Automatisch anordnen", ToolTip = "Verwirft manuelle Positionen und ordnet alle Geräte neu an." };
         var export = new Button { Content = "SVG Export" };
         addLink.Click += (_, _) => AddProjectLink();
         removeLink.Click += (_, _) => RemoveLastProjectLink();
         refresh.Click += (_, _) => RefreshNetworkDiagram();
+        autoLayout.Click += (_, _) => ResetDiagramLayout();
         export.Click += (_, _) => ExportNetworkDiagramSvg();
         foreach (var element in new UIElement[]
                  {
                      AdvancedInlineLabel("Quelle"), _linkSourceCombo, _linkSourceIfBox,
                      AdvancedInlineLabel("Ziel"), _linkTargetCombo, _linkTargetIfBox,
-                     _linkTypeCombo, addLink, removeLink, refresh, export
+                     AdvancedInlineLabel("Typ"), _linkTypeCombo,
+                     AdvancedInlineLabel("Bezeichnung"), _linkDescriptionBox,
+                     addLink, removeLink, refresh, autoLayout, export
                  })
         {
             if (element is FrameworkElement fe) fe.Margin = new Thickness(3);
@@ -529,12 +559,50 @@ public partial class MainWindow
         }
         Grid.SetRow(linkRow, 1); root.Children.Add(linkRow);
 
-        var scroll = new ScrollViewer { HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Background = new SolidColorBrush(Color.FromRgb(11, 14, 19)) };
-        _diagramCanvas = new Canvas { Width = 1400, Height = 900, Background = new SolidColorBrush(Color.FromRgb(11, 14, 19)) };
+        var legend = new WrapPanel { Margin = new Thickness(3, 0, 3, 8) };
+        legend.Children.Add(new TextBlock
+        {
+            Text = "Geräte per Drag & Drop verschieben  ·  Verbindungstypen:",
+            Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0)
+        });
+        foreach (var type in new[] { "Ethernet", "Access", "Trunk", "Port-Channel", "Routed Link", "WAN", "Tunnel", "Serial", "Fiber", "Wireless" })
+            legend.Children.Add(CreateDiagramLegendBadge(type));
+        Grid.SetRow(legend, 2); root.Children.Add(legend);
+
+        var scroll = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Background = new SolidColorBrush(Color.FromRgb(11, 14, 19))
+        };
+        _diagramCanvas = new Canvas { Width = 1400, Height = 900, Background = new SolidColorBrush(Color.FromRgb(11, 14, 19)), ClipToBounds = true };
         scroll.Content = _diagramCanvas;
-        Grid.SetRow(scroll, 2); root.Children.Add(scroll);
+        Grid.SetRow(scroll, 3); root.Children.Add(scroll);
         tab.Content = root;
         return tab;
+    }
+
+    private Border CreateDiagramLegendBadge(string linkType)
+    {
+        var color = ParseDiagramColor(NetworkDiagramService.GetLinkColor(linkType));
+        return new Border
+        {
+            BorderBrush = new SolidColorBrush(color),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Background = new SolidColorBrush(Color.FromArgb(35, color.R, color.G, color.B)),
+            Padding = new Thickness(7, 3, 7, 3),
+            Margin = new Thickness(0, 0, 5, 0),
+            Child = new TextBlock { Text = linkType, Foreground = new SolidColorBrush(color), FontSize = 11, FontWeight = FontWeights.SemiBold }
+        };
+    }
+
+    private static Color ParseDiagramColor(string value)
+    {
+        try { return (Color)ColorConverter.ConvertFromString(value); }
+        catch { return Color.FromRgb(148, 163, 184); }
     }
 
     private TabItem BuildReportSubTab()
@@ -723,6 +791,8 @@ public partial class MainWindow
             Values = new Dictionary<string, string>(source.Values, StringComparer.OrdinalIgnoreCase),
             Modules = new Dictionary<string, bool>(source.Modules, StringComparer.OrdinalIgnoreCase),
             GeneratedConfiguration = source.GeneratedConfiguration,
+            DiagramX = source.DiagramX.HasValue ? source.DiagramX.Value + 35 : null,
+            DiagramY = source.DiagramY.HasValue ? source.DiagramY.Value + 35 : null,
             LastUpdatedUtc = DateTime.UtcNow
         };
         copy.Values["hostname"] = copy.Name;
@@ -1248,13 +1318,28 @@ public partial class MainWindow
             MessageBox.Show(this, "Quelle und Ziel dürfen nicht identisch sein.", "Verbindung", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
+
+        var sourceInterface = _linkSourceIfBox?.Text.Trim() ?? string.Empty;
+        var targetInterface = _linkTargetIfBox?.Text.Trim() ?? string.Empty;
+        var linkType = _linkTypeCombo?.SelectedItem?.ToString() ?? "Ethernet";
+        if (_currentProject.Links.Any(x =>
+                x.SourceDeviceId.Equals(source.Id, StringComparison.OrdinalIgnoreCase) &&
+                x.TargetDeviceId.Equals(target.Id, StringComparison.OrdinalIgnoreCase) &&
+                x.SourceInterface.Equals(sourceInterface, StringComparison.OrdinalIgnoreCase) &&
+                x.TargetInterface.Equals(targetInterface, StringComparison.OrdinalIgnoreCase)))
+        {
+            MessageBox.Show(this, "Diese Verbindung ist bereits im Projekt vorhanden.", "Verbindung", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
         _currentProject.Links.Add(new ProjectLink
         {
             SourceDeviceId = source.Id,
             TargetDeviceId = target.Id,
-            SourceInterface = _linkSourceIfBox?.Text.Trim() ?? string.Empty,
-            TargetInterface = _linkTargetIfBox?.Text.Trim() ?? string.Empty,
-            LinkType = _linkTypeCombo?.SelectedItem?.ToString() ?? "Ethernet"
+            SourceInterface = sourceInterface,
+            TargetInterface = targetInterface,
+            LinkType = linkType,
+            Description = _linkDescriptionBox?.Text.Trim() ?? string.Empty
         });
         RefreshNetworkDiagram();
         ScheduleAutoSave();
@@ -1267,45 +1352,240 @@ public partial class MainWindow
         ScheduleAutoSave();
     }
 
+    private void ResetDiagramLayout()
+    {
+        foreach (var device in _currentProject.Devices)
+        {
+            device.DiagramX = null;
+            device.DiagramY = null;
+        }
+        RefreshNetworkDiagram();
+        ScheduleAutoSave();
+    }
+
     private void RefreshNetworkDiagram()
     {
         if (_diagramCanvas == null) return;
         _diagramCanvas.Children.Clear();
+        _diagramDeviceElements.Clear();
+        _diagramLinkElements.Clear();
+
         var layout = NetworkDiagramService.CalculateLayout(_currentProject, _diagramCanvas.Width, _diagramCanvas.Height);
         foreach (var link in _currentProject.Links)
         {
-            if (!layout.TryGetValue(link.SourceDeviceId, out var a) || !layout.TryGetValue(link.TargetDeviceId, out var b)) continue;
-            var line = new Line
-            {
-                X1 = a.X + a.Width / 2, Y1 = a.Y + a.Height / 2,
-                X2 = b.X + b.Width / 2, Y2 = b.Y + b.Height / 2,
-                Stroke = new SolidColorBrush(Color.FromRgb(232, 121, 26)), StrokeThickness = 3
-            };
-            _diagramCanvas.Children.Add(line);
-            var label = new TextBlock { Text = $"{link.SourceInterface} ↔ {link.TargetInterface}", Foreground = new SolidColorBrush(Color.FromRgb(251, 191, 36)), Background = new SolidColorBrush(Color.FromArgb(210, 11, 14, 19)), Padding = new Thickness(4, 2, 4, 2) };
-            Canvas.SetLeft(label, (line.X1 + line.X2) / 2 - 50); Canvas.SetTop(label, (line.Y1 + line.Y2) / 2 - 18); _diagramCanvas.Children.Add(label);
+            if (!layout.TryGetValue(link.SourceDeviceId, out var source) || !layout.TryGetValue(link.TargetDeviceId, out var target)) continue;
+            AddDiagramLinkVisual(link, source, target);
         }
+
         foreach (var device in _currentProject.Devices)
         {
-            if (!layout.TryGetValue(device.Id, out var p)) continue;
-            var border = new Border
-            {
-                Width = p.Width, Height = p.Height, CornerRadius = new CornerRadius(12),
-                Background = new SolidColorBrush(Color.FromRgb(23, 28, 37)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(232, 121, 26)), BorderThickness = new Thickness(2),
-                Child = new StackPanel
-                {
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Children =
-                    {
-                        new TextBlock { Text = device.Name, FontSize = 16, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center },
-                        new TextBlock { Text = device.DeviceType, Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)), HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 5, 0, 0) }
-                    }
-                },
-                ToolTip = $"{device.Name}\n{device.DeviceType}\n{device.ConfigMode}"
-            };
-            Canvas.SetLeft(border, p.X); Canvas.SetTop(border, p.Y); _diagramCanvas.Children.Add(border);
+            if (!layout.TryGetValue(device.Id, out var position)) continue;
+            var border = CreateDiagramDeviceElement(device, position);
+            _diagramDeviceElements[device.Id] = border;
+            Canvas.SetLeft(border, position.X);
+            Canvas.SetTop(border, position.Y);
+            Panel.SetZIndex(border, 10);
+            _diagramCanvas.Children.Add(border);
         }
+        UpdateDiagramConnections();
+    }
+
+    private Border CreateDiagramDeviceElement(ProjectDeviceSnapshot device, NetworkDiagramService.DiagramPoint position)
+    {
+        var title = new TextBlock
+        {
+            Text = device.Name,
+            FontSize = 16,
+            FontWeight = FontWeights.Bold,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        };
+        var type = new TextBlock
+        {
+            Text = device.DeviceType,
+            Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0)
+        };
+        var mode = new TextBlock
+        {
+            Text = device.ConfigMode,
+            Foreground = new SolidColorBrush(Color.FromRgb(100, 116, 139)),
+            FontSize = 10,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 3, 0, 0)
+        };
+        var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        stack.Children.Add(title);
+        stack.Children.Add(type);
+        stack.Children.Add(mode);
+
+        var border = new Border
+        {
+            Width = position.Width,
+            Height = position.Height,
+            CornerRadius = new CornerRadius(12),
+            Background = new SolidColorBrush(Color.FromRgb(23, 28, 37)),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(232, 121, 26)),
+            BorderThickness = new Thickness(2),
+            Child = stack,
+            Cursor = Cursors.SizeAll,
+            ToolTip = $"{device.Name}\n{device.DeviceType}\n{device.ConfigMode}\n\nMit gedrückter linker Maustaste verschieben."
+        };
+        border.MouseLeftButtonDown += (_, e) => BeginDiagramDeviceDrag(device, border, e);
+        border.MouseMove += (_, e) => MoveDiagramDevice(device, border, e);
+        border.MouseLeftButtonUp += (_, e) => EndDiagramDeviceDrag(device, border, e);
+        border.LostMouseCapture += (_, _) =>
+        {
+            if (ReferenceEquals(_draggedDiagramElement, border))
+            {
+                _draggedDiagramDevice = null;
+                _draggedDiagramElement = null;
+            }
+        };
+        return border;
+    }
+
+    private void BeginDiagramDeviceDrag(ProjectDeviceSnapshot device, Border element, MouseButtonEventArgs e)
+    {
+        if (_diagramCanvas == null) return;
+        _draggedDiagramDevice = device;
+        _draggedDiagramElement = element;
+        var pointer = e.GetPosition(_diagramCanvas);
+        _diagramDragOffset = new Point(pointer.X - Canvas.GetLeft(element), pointer.Y - Canvas.GetTop(element));
+        element.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void MoveDiagramDevice(ProjectDeviceSnapshot device, Border element, MouseEventArgs e)
+    {
+        if (_diagramCanvas == null || e.LeftButton != MouseButtonState.Pressed ||
+            !ReferenceEquals(_draggedDiagramDevice, device) || !ReferenceEquals(_draggedDiagramElement, element)) return;
+
+        var pointer = e.GetPosition(_diagramCanvas);
+        var x = Math.Clamp(pointer.X - _diagramDragOffset.X, 5, Math.Max(5, _diagramCanvas.Width - element.Width - 5));
+        var y = Math.Clamp(pointer.Y - _diagramDragOffset.Y, 5, Math.Max(5, _diagramCanvas.Height - element.Height - 5));
+        Canvas.SetLeft(element, x);
+        Canvas.SetTop(element, y);
+        device.DiagramX = x;
+        device.DiagramY = y;
+        UpdateDiagramConnections();
+        e.Handled = true;
+    }
+
+    private void EndDiagramDeviceDrag(ProjectDeviceSnapshot device, Border element, MouseButtonEventArgs e)
+    {
+        if (!ReferenceEquals(_draggedDiagramDevice, device) || !ReferenceEquals(_draggedDiagramElement, element)) return;
+        element.ReleaseMouseCapture();
+        _draggedDiagramDevice = null;
+        _draggedDiagramElement = null;
+        ScheduleAutoSave();
+        e.Handled = true;
+    }
+
+    private void AddDiagramLinkVisual(ProjectLink link, NetworkDiagramService.DiagramPoint source, NetworkDiagramService.DiagramPoint target)
+    {
+        if (_diagramCanvas == null) return;
+        var color = ParseDiagramColor(NetworkDiagramService.GetLinkColor(link.LinkType));
+        var brush = new SolidColorBrush(color);
+        var line = new Line
+        {
+            X1 = source.X + source.Width / 2,
+            Y1 = source.Y + source.Height / 2,
+            X2 = target.X + target.Width / 2,
+            Y2 = target.Y + target.Height / 2,
+            Stroke = brush,
+            StrokeThickness = NetworkDiagramService.GetLinkThickness(link.LinkType),
+            SnapsToDevicePixels = true
+        };
+        var dash = NetworkDiagramService.GetLinkDashArray(link.LinkType);
+        if (!string.IsNullOrWhiteSpace(dash))
+            line.StrokeDashArray = new DoubleCollection(dash.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(double.Parse));
+
+        var label = new TextBlock
+        {
+            Text = BuildDiagramLinkLabel(link),
+            Foreground = brush,
+            FontSize = 11,
+            FontWeight = FontWeights.SemiBold,
+            TextWrapping = TextWrapping.Wrap,
+            TextAlignment = TextAlignment.Center,
+            MaxWidth = 250
+        };
+        var labelBorder = new Border
+        {
+            Child = label,
+            Background = new SolidColorBrush(Color.FromArgb(235, 11, 14, 19)),
+            BorderBrush = brush,
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Padding = new Thickness(6, 3, 6, 3),
+            ToolTip = BuildDiagramLinkToolTip(link)
+        };
+        var sourceEndpoint = new Ellipse { Width = 10, Height = 10, Fill = brush, Stroke = new SolidColorBrush(Color.FromRgb(11, 14, 19)), StrokeThickness = 1 };
+        var targetEndpoint = new Ellipse { Width = 10, Height = 10, Fill = brush, Stroke = new SolidColorBrush(Color.FromRgb(11, 14, 19)), StrokeThickness = 1 };
+        Panel.SetZIndex(line, 0);
+        Panel.SetZIndex(sourceEndpoint, 1);
+        Panel.SetZIndex(targetEndpoint, 1);
+        Panel.SetZIndex(labelBorder, 2);
+        _diagramCanvas.Children.Add(line);
+        _diagramCanvas.Children.Add(sourceEndpoint);
+        _diagramCanvas.Children.Add(targetEndpoint);
+        _diagramCanvas.Children.Add(labelBorder);
+        _diagramLinkElements.Add(new DiagramLinkVisual
+        {
+            Link = link,
+            Line = line,
+            Label = label,
+            LabelBorder = labelBorder,
+            SourceEndpoint = sourceEndpoint,
+            TargetEndpoint = targetEndpoint
+        });
+    }
+
+    private void UpdateDiagramConnections()
+    {
+        foreach (var visual in _diagramLinkElements)
+        {
+            if (!_diagramDeviceElements.TryGetValue(visual.Link.SourceDeviceId, out var source) ||
+                !_diagramDeviceElements.TryGetValue(visual.Link.TargetDeviceId, out var target)) continue;
+
+            var x1 = Canvas.GetLeft(source) + source.Width / 2;
+            var y1 = Canvas.GetTop(source) + source.Height / 2;
+            var x2 = Canvas.GetLeft(target) + target.Width / 2;
+            var y2 = Canvas.GetTop(target) + target.Height / 2;
+            visual.Line.X1 = x1;
+            visual.Line.Y1 = y1;
+            visual.Line.X2 = x2;
+            visual.Line.Y2 = y2;
+            Canvas.SetLeft(visual.SourceEndpoint, x1 - visual.SourceEndpoint.Width / 2);
+            Canvas.SetTop(visual.SourceEndpoint, y1 - visual.SourceEndpoint.Height / 2);
+            Canvas.SetLeft(visual.TargetEndpoint, x2 - visual.TargetEndpoint.Width / 2);
+            Canvas.SetTop(visual.TargetEndpoint, y2 - visual.TargetEndpoint.Height / 2);
+
+            visual.LabelBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var labelWidth = Math.Max(80, visual.LabelBorder.DesiredSize.Width);
+            var labelHeight = Math.Max(24, visual.LabelBorder.DesiredSize.Height);
+            Canvas.SetLeft(visual.LabelBorder, (x1 + x2) / 2 - labelWidth / 2);
+            Canvas.SetTop(visual.LabelBorder, (y1 + y2) / 2 - labelHeight - 8);
+        }
+    }
+
+    private string BuildDiagramLinkLabel(ProjectLink link)
+    {
+        var type = string.IsNullOrWhiteSpace(link.LinkType) ? "Ethernet" : link.LinkType.Trim();
+        var interfaces = $"{link.SourceInterface} ↔ {link.TargetInterface}";
+        return string.IsNullOrWhiteSpace(link.Description)
+            ? $"{type}\n{interfaces}"
+            : $"{type}: {link.Description.Trim()}\n{interfaces}";
+    }
+
+    private string BuildDiagramLinkToolTip(ProjectLink link)
+    {
+        var source = _currentProject.Devices.FirstOrDefault(x => x.Id == link.SourceDeviceId)?.Name ?? "Quelle";
+        var target = _currentProject.Devices.FirstOrDefault(x => x.Id == link.TargetDeviceId)?.Name ?? "Ziel";
+        return $"{link.LinkType}\n{source} {link.SourceInterface} ↔ {target} {link.TargetInterface}" +
+               (string.IsNullOrWhiteSpace(link.Description) ? string.Empty : $"\n{link.Description.Trim()}");
     }
 
     private void ExportNetworkDiagramSvg()

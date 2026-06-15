@@ -457,6 +457,71 @@ public static class ConfigurationCommandCatalog
                 R("QinQ", "L3-Switch Subinterface", "encapsulation dot1Q <Provider-VLAN> second-dot1q <Customer-VLAN>", "Konfiguriert äußeres S-VLAN und inneres C-VLAN."),
                 R("QinQ", "L3-Switch Subinterface", "ip address <IP> <Maske>", "Setzt optional eine Layer-3-Adresse auf dem QinQ-Subinterface.")
             }
+        },
+        new()
+        {
+            Name = "Konfig: Routing Policies / Tracking",
+            Rows = new List<CommandRow>
+            {
+                R("Prefix-List", "Global", "ip prefix-list <Name> seq <Sequenz> <permit|deny> <Präfix> [ge <Min>] [le <Max>]", "Erstellt eine sequenzierte IPv4-Prefix-List für Routing-Filter."),
+                R("Route-Map", "Global", "route-map <Name> <permit|deny> <Sequenz>", "Erstellt oder öffnet einen Route-Map-Eintrag."),
+                R("Route-Map", "Route-Map", "match ip address prefix-list <Prefix-List>", "Verknüpft eine Prefix-List mit einer Route-Map."),
+                R("Route-Map", "Route-Map", "match ip address <ACL>", "Verknüpft eine IPv4-ACL mit einer Route-Map."),
+                R("Route-Map", "Route-Map", "set metric <Metrik>", "Setzt eine Routingmetrik für gematchte Routen."),
+                R("Route-Map", "Route-Map", "set local-preference <Wert>", "Setzt die BGP Local Preference."),
+                R("Route-Map", "Route-Map", "set community <Community> [additive]", "Setzt oder ergänzt BGP Communities."),
+                R("Route-Map", "Route-Map", "set ip next-hop <IP>", "Setzt den IPv4-Next-Hop für Policy Based Routing oder Routing-Policies."),
+                R("Distribute-List", "Router", "distribute-list <ACL|Prefix-List> <in|out> [Interface]", "Filtert Routingupdates innerhalb eines Routingprozesses."),
+                R("IP SLA", "Global", "ip sla <ID>", "Erstellt oder öffnet eine IP-SLA-Operation."),
+                R("IP SLA", "IP-SLA", "icmp-echo <Ziel-IP> source-interface <Interface>", "Konfiguriert einen ICMP-Echo-Test mit festem Quellinterface."),
+                R("IP SLA", "IP-SLA", "frequency <Sekunden>", "Setzt das Messintervall einer IP-SLA-Operation."),
+                R("IP SLA", "Global", "ip sla schedule <ID> life forever start-time now", "Startet eine IP-SLA-Operation dauerhaft und sofort."),
+                R("Object Tracking", "Global", "track <ID> ip sla <SLA-ID> reachability", "Verknüpft ein Trackingobjekt mit der Erreichbarkeit einer IP-SLA-Operation."),
+                R("OSPF", "Router", "maximum-paths <Anzahl>", "Begrenzt die Anzahl gleichwertiger OSPF-Pfade."),
+                R("OSPF", "Router", "distance <Administrative-Distanz>", "Setzt die administrative Distanz für OSPF-Routen."),
+                R("OSPF", "Router", "timers throttle spf <Start> <Hold> <Max>", "Optimiert die OSPF-SPF-Berechnungstimer."),
+                R("OSPF", "Router", "timers throttle lsa all <Start> <Hold> <Max>", "Optimiert die Erzeugung von OSPF-LSAs."),
+                R("OSPF", "Interface", "ip ospf network point-to-point", "Setzt den OSPF-Netzwerktyp Point-to-Point."),
+                R("OSPF", "Router", "default-information originate always", "Inseriert unabhängig vom Vorhandensein einer lokalen Default Route eine OSPF-Default Route."),
+                R("BGP", "Router", "bgp log-neighbor-changes", "Protokolliert Zustandsänderungen von BGP-Nachbarn."),
+                R("BGP", "Router", "neighbor <IP> description <Text>", "Hinterlegt eine Beschreibung für einen BGP-Nachbarn."),
+                R("BGP", "Router", "neighbor <IP> route-map <Route-Map> <in|out>", "Wendet eine Route-Map auf einen BGP-Nachbarn an."),
+                R("BGP", "Router", "neighbor <IP> prefix-list <Prefix-List> <in|out>", "Wendet eine Prefix-List auf einen BGP-Nachbarn an."),
+                R("BGP", "Router", "neighbor <IP> timers <Keepalive> <Holdtime>", "Setzt Keepalive- und Hold-Timer für einen BGP-Nachbarn."),
+                R("BGP", "Router", "neighbor <IP> maximum-prefix <Anzahl>", "Begrenzt die maximale Anzahl empfangener BGP-Präfixe.")
+            }
+        },
+        new()
+        {
+            Name = "Betrieb: Prüfung / Wartung",
+            Rows = new List<CommandRow>
+            {
+                R("Konfiguration", "Privileged EXEC", "copy running-config startup-config", "Speichert die Running-Config als Startup-Config."),
+                R("Konfiguration", "Privileged EXEC", "show running-config | section <Abschnitt>", "Zeigt gezielt einen Konfigurationsabschnitt."),
+                R("Konfiguration", "Privileged EXEC", "show running-config | include <Muster>", "Filtert die laufende Konfiguration nach einem Muster."),
+                R("Routing", "Privileged EXEC", "show ip route <Präfix>", "Zeigt die Routingentscheidung für ein bestimmtes IPv4-Präfix."),
+                R("Routing", "Privileged EXEC", "show ipv6 route <Präfix>", "Zeigt die Routingentscheidung für ein bestimmtes IPv6-Präfix."),
+                R("OSPF", "Privileged EXEC", "show ip ospf interface brief", "Zeigt OSPF-aktivierte Interfaces kompakt."),
+                R("OSPF", "Privileged EXEC", "show ip ospf database", "Zeigt die OSPF Link-State Database."),
+                R("OSPF", "Privileged EXEC", "clear ip ospf process", "Startet den OSPF-Prozess nach Bestätigung neu."),
+                R("BGP", "Privileged EXEC", "show ip bgp summary", "Zeigt den Zustand aller IPv4-BGP-Nachbarn."),
+                R("BGP", "Privileged EXEC", "show bgp ipv6 unicast summary", "Zeigt den Zustand aller IPv6-BGP-Nachbarn."),
+                R("BGP", "Privileged EXEC", "clear ip bgp <Nachbar> soft <in|out>", "Lädt BGP-Richtlinien für einen Nachbarn ohne vollständigen Session-Neustart neu."),
+                R("IP SLA", "Privileged EXEC", "show ip sla statistics", "Zeigt Ergebnisse und Status der IP-SLA-Operationen."),
+                R("Tracking", "Privileged EXEC", "show track", "Zeigt den Zustand aller Trackingobjekte."),
+                R("NAT", "Privileged EXEC", "show ip nat translations", "Zeigt aktive NAT-Übersetzungen."),
+                R("NAT", "Privileged EXEC", "show ip nat statistics", "Zeigt NAT-Zähler und konfigurierte Inside-/Outside-Interfaces."),
+                R("ACL", "Privileged EXEC", "show access-lists", "Zeigt IPv4- und IPv6-ACLs einschließlich Trefferzählern."),
+                R("SSH", "Privileged EXEC", "show ip ssh", "Zeigt SSH-Version und Serverparameter."),
+                R("AAA", "Privileged EXEC", "test aaa group <Gruppe> <Benutzer> <Passwort> legacy", "Prüft die Erreichbarkeit und Authentifizierung einer AAA-Servergruppe."),
+                R("MPLS", "Privileged EXEC", "show mpls ldp neighbor", "Zeigt LDP-Nachbarschaften."),
+                R("MPLS", "Privileged EXEC", "show mpls forwarding-table", "Zeigt die MPLS Label Forwarding Information Base."),
+                R("VPN", "Privileged EXEC", "show crypto isakmp sa", "Zeigt IKEv1 Security Associations."),
+                R("VPN", "Privileged EXEC", "show crypto ipsec sa", "Zeigt IPsec Security Associations und Paketstatistiken."),
+                R("Tunnel", "Privileged EXEC", "show interfaces tunnel <ID>", "Zeigt Status und Zähler eines Tunnelinterfaces."),
+                R("Nachbarn", "Privileged EXEC", "show cdp neighbors detail", "Zeigt detaillierte Cisco-Nachbarinformationen."),
+                R("Nachbarn", "Privileged EXEC", "show lldp neighbors detail", "Zeigt detaillierte LLDP-Nachbarinformationen.")
+            }
         }
     };
 
