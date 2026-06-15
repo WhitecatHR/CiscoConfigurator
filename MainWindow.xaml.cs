@@ -97,6 +97,7 @@ public partial class MainWindow : Window
         BuildImportConfigTab();
         BuildCommandTab();
         BuildCheckTab();
+        BuildAdvancedFeatureTabs();
         if (MainTabs.Items.Count > 0) MainTabs.SelectedIndex = 0;
         HookButtons();
         ApplyFilters();
@@ -113,8 +114,9 @@ public partial class MainWindow : Window
         WriteMemCombo.ItemsSource = new[] { "Ja", "Nein" };
         WriteMemCombo.SelectedIndex = 0;
 
-        DeviceTypeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); };
-        ConfigModeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); };
+        DeviceTypeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); ScheduleAutoSave(); };
+        ConfigModeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); ScheduleAutoSave(); };
+        WriteMemCombo.SelectionChanged += (_, _) => ScheduleAutoSave();
 
         DeviceTypeCombo.ToolTip = TooltipBuilder.Create("Gerätetyp", "Zweck:\nFiltert Module passend zum Zielgerät.\n\nRouter:\nRouting, WAN, NAT, VPN, OSPF/BGP.\n\nL3-Switch:\nSwitching, SVIs, Routing.\n\nL2-Switch:\nSwitching, Management, ACL-Basis.");
         ConfigModeCombo.ToolTip = TooltipBuilder.Create("Konfigurationsmodus", "Ohne VRF:\nNormale globale IPv4/IPv6-Konfiguration.\n\nMit VRF:\nVRF-Definitionen, VRF-SVIs, VRF-Routen und VRF-Routingprotokolle werden eingeblendet; globale Routingmodule werden ausgeblendet.");
@@ -227,6 +229,11 @@ public partial class MainWindow : Window
         quick.Children.Add(CreateQuickNavigationButton("Routing", () => NavigateToTab("Routing")));
         quick.Children.Add(CreateQuickNavigationButton("Spanning Tree", () => OpenModule("Switching", "stpExtended")));
         quick.Children.Add(CreateQuickNavigationButton("Gegenstelle", () => NavigateToTab("Gegenstelle")));
+        quick.Children.Add(CreateQuickNavigationButton("Projekt", () => NavigateToTab("Projekt")));
+        quick.Children.Add(CreateQuickNavigationButton("IPAM / Ports", () => NavigateToTab("IPAM / Ports")));
+        quick.Children.Add(CreateQuickNavigationButton("Analyse", () => NavigateToTab("Analyse")));
+        quick.Children.Add(CreateQuickNavigationButton("Betrieb", () => NavigateToTab("Betrieb")));
+        quick.Children.Add(CreateQuickNavigationButton("Diagramm / Bericht", () => NavigateToTab("Diagramm / Bericht")));
         quick.Children.Add(CreateQuickNavigationButton("Import", () => NavigateToTab("Import")));
         quick.Children.Add(CreateQuickNavigationButton("Ausgabe", () => NavigateToTab("Ausgabe")));
         quickStack.Children.Add(quick);
@@ -648,6 +655,8 @@ public partial class MainWindow : Window
                 if (_moduleExpanders.TryGetValue(module.Name, out var expander)) expander.IsExpanded = true;
                 if (_moduleCards.TryGetValue(module.Name, out var card)) card.BringIntoView();
                 if (module.Name.Equals("stpExtended", StringComparison.OrdinalIgnoreCase)) RefreshStpPreview();
+                RefreshModuleLivePreview(module.Name);
+                ScheduleAutoSave();
             };
             check.Unchecked += (_, _) =>
             {
@@ -655,6 +664,8 @@ public partial class MainWindow : Window
                 ApplyFilters();
                 UpdateConditionalFieldVisibility();
                 if (module.Name.Equals("stpExtended", StringComparison.OrdinalIgnoreCase)) RefreshStpPreview();
+                RefreshModuleLivePreview(module.Name);
+                ScheduleAutoSave();
             };
 
             var fav = new Button
@@ -771,6 +782,7 @@ public partial class MainWindow : Window
         var panel = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
         foreach (var field in module.Fields)
             panel.Children.Add(CreateField(field));
+        panel.Children.Add(CreateModuleLivePreview(module));
         expander.Content = panel;
 
         Grid.SetColumn(expander, 1);
@@ -978,6 +990,9 @@ public partial class MainWindow : Window
         if (fieldName.StartsWith("stp", StringComparison.OrdinalIgnoreCase) ||
             fieldName.Equals("deviceType", StringComparison.OrdinalIgnoreCase))
             RefreshStpPreview();
+
+        RefreshModuleLivePreviewForField(fieldName);
+        ScheduleAutoSave();
     }
 
     private void UpdateConditionalFieldVisibility()
@@ -3118,7 +3133,7 @@ public partial class MainWindow : Window
                         ? -1
                         : Math.Clamp(field.Selected, 0, field.Items.Count - 1);
                 else if (control is CheckBox checkBox)
-                    checkBox.IsChecked = field.Value.Equals("Ja", StringComparison.OrdinalIgnoreCase);
+                    checkBox.IsChecked = string.Equals(field.Value, "Ja", StringComparison.OrdinalIgnoreCase);
             }
         }
 
