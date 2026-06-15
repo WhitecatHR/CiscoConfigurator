@@ -355,7 +355,8 @@ public partial class MainWindow : Window
                  {
                      "Gegenstelle",
                      "Import",
-                     "Betrieb"
+                     "Betrieb",
+                     "Ausgabe"
                  })
         {
             AddNavigationTab(tabName);
@@ -368,7 +369,6 @@ public partial class MainWindow : Window
                      "IPAM / Ports",
                      "Subnetting",
                      "Analyse",
-                     "Ausgabe",
                      "Befehlsregister",
                      "Diagramm / Bericht"
                  })
