@@ -1,0 +1,470 @@
+namespace CiscoConfigGuiWpf;
+
+public static class ConfigurationCommandCatalog
+{
+    public static IReadOnlyList<CommandGroup> All { get; } = new List<CommandGroup>
+    {
+        new()
+        {
+            Name = "Konfig: Basis",
+            Rows = new List<CommandRow>
+            {
+                R("Grunddaten", "Privileged EXEC", "enable", "Wechselt in den privilegierten EXEC-Modus."),
+                R("Grunddaten", "Global", "configure terminal", "Wechselt in den globalen Konfigurationsmodus."),
+                R("Grunddaten", "Global", "hostname <Hostname>", "Setzt den Gerätenamen."),
+                R("Grunddaten", "Global", "ip domain-name <Domain>", "Setzt den DNS-Domainnamen; wird auch für SSH/RSA-Schlüssel benötigt."),
+                R("Grunddaten", "Global", "enable secret <Secret>", "Setzt das verschlüsselte Enable-Passwort."),
+                R("Grunddaten", "Global", "no ip domain-lookup", "Verhindert DNS-Lookups bei falsch eingegebenen Befehlen."),
+                R("Grunddaten", "Global", "service password-encryption", "Verschlüsselt einfache Klartext-Passwörter in der Running-Config."),
+                R("Grunddaten", "Global", "security passwords min-length <Anzahl>", "Definiert eine Mindestlänge für lokale Passwörter."),
+                R("Clock", "Global", "clock timezone <Name> <Stunden> <Minuten>", "Setzt den Zeitzonennamen und die Abweichung gegenüber UTC."),
+                R("Clock", "Global", "clock summer-time <Name> recurring <Startregel> <Endregel>", "Konfiguriert eine wiederkehrende Sommerzeitregel."),
+                R("Banner", "Global", "banner motd ^<Text>^", "Erstellt einen Message-of-the-Day-Banner vor dem Login."),
+                R("Banner", "Global", "banner login ^<Text>^", "Erstellt einen Login-Banner vor der Authentifizierung."),
+                R("Abschluss", "Global", "end", "Verlässt die Konfigurationsebene."),
+                R("Abschluss", "Privileged EXEC", "write memory", "Speichert die laufende Konfiguration in die Startup-Config.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: SSH / AAA",
+            Rows = new List<CommandRow>
+            {
+                R("SSH", "Global", "crypto key generate rsa", "Startet die RSA-Schlüsselerzeugung für SSH."),
+                R("SSH", "RSA-Dialog", "modulus <Bits>", "Legt die RSA-Schlüssellänge fest, z. B. 2048."),
+                R("SSH", "Global", "ip ssh version 2", "Aktiviert SSH Version 2."),
+                R("SSH", "Global", "ip ssh time-out <Sekunden>", "Setzt den SSH-Authentifizierungs-Timeout."),
+                R("SSH", "Global", "ip ssh authentication-retries <Anzahl>", "Setzt die erlaubten SSH-Loginversuche."),
+                R("SSH", "Global", "ip ssh source-interface <Interface>", "Bindet SSH an ein Quellinterface."),
+                R("SSH", "Global", "ip ssh logging events", "Aktiviert SSH-Ereignislogging."),
+                R("SSH", "Global", "ip ssh server algorithm encryption <Algorithmus>", "Schränkt die erlaubten SSH-Verschlüsselungsalgorithmen ein."),
+                R("VTY", "Line", "line vty <Start> <Ende>", "Öffnet die VTY-Line-Konfiguration."),
+                R("VTY", "Line", "access-class <ACL> in", "Beschränkt eingehende VTY-Zugriffe über eine ACL."),
+                R("VTY", "Line", "login authentication default", "Nutzt die AAA-Login-Methode default."),
+                R("VTY", "Line", "password <Passwort>", "Setzt ein Line-Passwort, falls kein Login local/AAA genutzt wird."),
+                R("VTY", "Line", "login", "Aktiviert Login über das Line-Passwort."),
+                R("VTY", "Line", "login local", "Aktiviert lokale Benutzerkonten für den Login."),
+                R("VTY", "Line", "transport input ssh", "Erlaubt nur SSH auf den VTY-Lines."),
+                R("VTY", "Line", "exec-timeout <Minuten> <Sekunden>", "Setzt den Inaktivitäts-Timeout."),
+                R("VTY", "Line", "logging synchronous", "Verhindert, dass Logmeldungen die Eingabezeile zerreißen."),
+                R("VTY", "Line", "privilege level <Level>", "Setzt das Standard-Privilege-Level für diese Line."),
+                R("Console", "Line", "line console 0", "Öffnet die Konsolen-Line-Konfiguration."),
+                R("AAA", "Global", "aaa new-model", "Aktiviert das AAA-Framework."),
+                R("AAA", "Global", "aaa authentication login default local", "Nutzt lokale Benutzer für Login-Authentifizierung."),
+                R("AAA", "Global", "aaa authorization exec default local", "Autorisiert EXEC-Sitzungen lokal."),
+                R("RADIUS", "Global", "radius server <Name>", "Legt einen benannten RADIUS-Server an."),
+                R("RADIUS", "Radius-Server", "address ipv4 <IP> auth-port <Port> acct-port <Port>", "Setzt Adresse und Ports des RADIUS-Servers."),
+                R("RADIUS", "Radius-Server", "timeout <Sekunden>", "Setzt RADIUS-Timeout."),
+                R("RADIUS", "Radius-Server", "retransmit <Anzahl>", "Setzt Anzahl der RADIUS-Wiederholungen."),
+                R("RADIUS", "Radius-Server", "key <Shared-Secret>", "Setzt das RADIUS Shared Secret."),
+                R("TACACS+", "Global", "tacacs server <Name>", "Legt einen TACACS+-Server an."),
+                R("TACACS+", "Tacacs-Server", "address ipv4 <IP>", "Setzt die TACACS+-Serveradresse."),
+                R("TACACS+", "Tacacs-Server", "key <Shared-Secret>", "Setzt das TACACS+ Shared Secret."),
+                R("AAA", "Global", "aaa group server radius <Gruppe>", "Erstellt eine RADIUS-Servergruppe."),
+                R("AAA", "Servergruppe", "server name <Name>", "Ordnet der AAA-Gruppe einen benannten Server zu."),
+                R("AAA", "Global", "aaa authentication login default group <Gruppe> local", "Nutzt zuerst AAA-Gruppe, danach lokale Benutzer."),
+                R("AAA", "Global", "aaa authorization exec default group <Gruppe> local", "EXEC-Autorisierung über AAA-Gruppe mit lokalem Fallback."),
+                R("AAA", "Global", "aaa accounting exec default start-stop group <Gruppe>", "Aktiviert EXEC-Accounting über die AAA-Gruppe."),
+                R("RADIUS", "Global", "ip radius source-interface <Interface>", "Setzt das Quellinterface für RADIUS-Pakete.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: Monitoring",
+            Rows = new List<CommandRow>
+            {
+                R("NTP", "Global", "ntp server <IP> [prefer]", "Konfiguriert einen NTP-Server, optional bevorzugt."),
+                R("Syslog", "Global", "logging host <IP>", "Sendet Logs an einen Syslog-Server."),
+                R("Syslog", "Global", "logging trap <Level>", "Setzt die Syslog-Schweregradgrenze."),
+                R("Syslog", "Global", "logging buffered <Bytes>", "Setzt die Größe des lokalen Logpuffers."),
+                R("Syslog", "Global", "service timestamps debug datetime msec localtime show-timezone", "Erweitert Debug-Zeitstempel um Datum, Millisekunden und Zeitzone."),
+                R("Syslog", "Global", "service timestamps log datetime msec localtime show-timezone", "Erweitert Log-Zeitstempel um Datum, Millisekunden und Zeitzone."),
+                R("SNMP", "Global", "snmp-server group <Gruppe> v3 priv", "Erstellt eine SNMPv3-Gruppe mit Authentifizierung und Verschlüsselung."),
+                R("SNMP", "Global", "snmp-server user <User> <Gruppe> v3 auth <AuthAlgo> <AuthKey> priv <PrivAlgo> <PrivKey>", "Erstellt einen SNMPv3-Benutzer."),
+                R("Archive", "Global", "archive", "Öffnet den Archive-Konfigurationsmodus."),
+                R("Archive", "Archive", "log config", "Aktiviert das Konfigurationsänderungs-Logging."),
+                R("Archive", "Archive", "logging enable", "Schaltet Archive-Logging ein."),
+                R("Archive", "Archive", "notify syslog", "Sendet Archive-Änderungen an Syslog."),
+                R("Archive", "Archive", "hidekeys", "Blendet Schlüssel in Archive-Logs aus."),
+                R("Archive", "Archive", "path <Pfad>", "Setzt den Ablagepfad für Konfigurationsarchive."),
+                R("Archive", "Archive", "write-memory", "Archiviert bei write memory."),
+                R("Archive", "Archive", "time-period <Minuten>", "Archiviert zyklisch nach Zeitintervall."),
+                R("Login-Audit", "Global", "login on-failure log", "Loggt fehlgeschlagene Loginversuche."),
+                R("Login-Audit", "Global", "login on-success log", "Loggt erfolgreiche Loginversuche."),
+                R("Benutzer", "Global", "username <User> privilege <Level> secret <Secret>", "Erstellt einen lokalen Benutzer mit Privilege-Level."),
+                R("Parser View", "Global", "parser view <Name>", "Erstellt eine rollenbasierte CLI-Ansicht."),
+                R("Parser View", "Parser-View", "secret <Secret>", "Setzt das Parser-View-Passwort."),
+                R("Parser View", "Parser-View", "commands exec include <Befehl>", "Erlaubt einen EXEC-Befehl innerhalb der Parser View.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: Interfaces / VLAN",
+            Rows = new List<CommandRow>
+            {
+                R("Interface", "Global", "interface <Interface>", "Öffnet ein einzelnes Interface."),
+                R("Interface", "Global", "interface range <Interface-Range>", "Öffnet mehrere Interfaces gleichzeitig."),
+                R("Interface", "Interface", "description <Beschreibung>", "Setzt eine Interface-Beschreibung."),
+                R("Interface", "Interface", "no switchport", "Wandelt einen Switchport in ein L3-Routed-Port um."),
+                R("Interface", "Interface", "ip address <IP> <Maske>", "Setzt eine IPv4-Adresse."),
+                R("Interface", "Interface", "no shutdown", "Aktiviert das Interface administrativ."),
+                R("Interface", "Interface", "shutdown", "Deaktiviert das Interface administrativ."),
+                R("Switchport", "Interface", "switchport mode access", "Setzt den Port in den Access-Modus."),
+                R("Switchport", "Interface", "switchport access vlan <VLAN>", "Ordnet den Access-Port einem VLAN zu."),
+                R("Switchport", "Interface", "switchport voice vlan <VLAN>", "Setzt ein Voice-VLAN für IP-Telefone."),
+                R("Switchport", "Interface", "switchport mode trunk", "Setzt den Port in den Trunk-Modus."),
+                R("Switchport", "Interface", "switchport trunk allowed vlan <VLAN-Liste>", "Beschränkt die auf dem Trunk erlaubten VLANs."),
+                R("Switchport", "Interface", "switchport trunk native vlan <VLAN>", "Setzt das Native VLAN."),
+                R("Switchport", "Interface", "switchport nonegotiate", "Deaktiviert DTP-Aushandlung."),
+                R("STP", "Interface", "spanning-tree portfast", "Aktiviert PortFast am Interface."),
+                R("STP", "Interface", "spanning-tree portfast trunk", "Aktiviert PortFast für einen Trunk-Port."),
+                R("STP", "Interface", "spanning-tree bpduguard enable", "Aktiviert BPDU Guard am Interface."),
+                R("STP", "Interface", "spanning-tree bpdufilter enable", "Aktiviert BPDU Filter am Interface."),
+                R("STP", "Interface", "spanning-tree guard root", "Verhindert, dass der Port Root-Port wird."),
+                R("STP", "Interface", "spanning-tree guard loop", "Aktiviert Loop Guard am Interface."),
+                R("STP", "Interface", "spanning-tree link-type <point-to-point|shared>", "Setzt den STP-Linktyp des Interfaces."),
+                R("STP", "Interface", "spanning-tree port-priority <Priorität>", "Setzt die STP-Portpriorität."),
+                R("STP", "Interface", "spanning-tree cost <Kosten>", "Setzt die STP-Pfadkosten des Interfaces."),
+                R("Subinterface", "Global", "interface <Parent>.<VLAN>", "Erstellt ein Router-on-a-Stick-Subinterface."),
+                R("Subinterface", "Interface", "encapsulation dot1Q <VLAN> [native]", "Setzt 802.1Q-Kapselung auf einem Subinterface."),
+                R("VLAN", "Global", "vlan <VLAN-ID>", "Erstellt oder öffnet ein VLAN."),
+                R("VLAN", "VLAN", "name <VLAN-Name>", "Setzt den VLAN-Namen."),
+                R("SVI", "Global", "interface vlan <VLAN-ID>", "Erstellt oder öffnet ein SVI."),
+                R("SVI", "Interface", "ip helper-address <DHCP-Server-IP>", "Leitet DHCP-Anfragen an einen DHCP-Server weiter."),
+                R("Switch", "Global", "ip default-gateway <Gateway-IP>", "Setzt das Default-Gateway auf L2-Switches."),
+                R("EtherChannel", "Global", "port-channel load-balance <Methode>", "Setzt die Lastverteilung für EtherChannel."),
+                R("EtherChannel", "Interface-Range", "channel-group <ID> mode <active|passive|on|desirable|auto>", "Ordnet Ports einem EtherChannel zu."),
+                R("EtherChannel", "Global", "interface port-channel <ID>", "Öffnet das logische Port-Channel-Interface."),
+                R("Storm-Control", "Interface", "storm-control broadcast level <Wert>", "Begrenzt Broadcast-Stürme."),
+                R("Storm-Control", "Interface", "storm-control multicast level <Wert>", "Begrenzt Multicast-Stürme.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: Switching Security",
+            Rows = new List<CommandRow>
+            {
+                R("DHCP Snooping", "Global", "ip dhcp snooping", "Aktiviert DHCP Snooping global."),
+                R("DHCP Snooping", "Global", "ip dhcp snooping vlan <VLAN-Liste>", "Aktiviert DHCP Snooping für VLANs."),
+                R("DHCP Snooping", "Global", "no ip dhcp snooping information option", "Deaktiviert Option-82-Einfügung."),
+                R("DHCP Snooping", "Interface", "ip dhcp snooping trust", "Markiert ein Interface als vertrauenswürdig."),
+                R("DHCP Snooping", "Interface", "ip dhcp snooping limit rate <Rate>", "Begrenzt DHCP-Pakete pro Sekunde."),
+                R("DAI", "Global", "ip arp inspection vlan <VLAN-Liste>", "Aktiviert Dynamic ARP Inspection für VLANs."),
+                R("DAI", "Interface", "ip arp inspection trust", "Markiert ein Interface für DAI als vertrauenswürdig."),
+                R("IPSG", "Interface", "ip verify source", "Aktiviert IP Source Guard."),
+                R("Port-Security", "Interface", "switchport port-security", "Aktiviert Port-Security auf dem Interface."),
+                R("Port-Security", "Interface", "switchport port-security maximum <Anzahl>", "Setzt die maximale Anzahl erlaubter MAC-Adressen."),
+                R("Port-Security", "Interface", "switchport port-security mac-address sticky", "Lernt MAC-Adressen sticky in der Konfiguration."),
+                R("Port-Security", "Interface", "switchport port-security violation <protect|restrict|shutdown>", "Setzt die Reaktion bei Regelverletzung."),
+                R("Port-Security", "Interface", "switchport port-security aging time <Minuten>", "Setzt die Aging-Zeit für gelernte MAC-Adressen."),
+                R("Port-Security", "Interface", "switchport port-security aging type <absolute|inactivity>", "Setzt die Aging-Art."),
+                R("Errdisable", "Global", "errdisable recovery interval <Sekunden>", "Setzt das automatische Recovery-Intervall."),
+                R("Errdisable", "Global", "errdisable recovery cause <Ursache>", "Aktiviert Recovery für eine bestimmte Ursache."),
+                R("STP", "Global", "spanning-tree mode <pvst|rapid-pvst|mst>", "Setzt den globalen STP-Modus."),
+                R("STP", "Global", "spanning-tree extend system-id", "Erweitert die Bridge-ID um die VLAN- beziehungsweise Instanz-ID."),
+                R("STP", "Global", "spanning-tree pathcost method <short|long>", "Setzt die verwendete STP-Pfadkostenskala."),
+                R("STP", "Global", "spanning-tree vlan <VLAN> root <primary|secondary>", "Setzt den Switch als STP-Root für VLANs."),
+                R("STP", "Global", "spanning-tree vlan <VLAN> priority <Priorität>", "Setzt die Bridge-Priorität für ein VLAN."),
+                R("STP", "Global", "spanning-tree vlan <VLAN> hello-time <Sekunden>", "Setzt den STP-Hello-Timer für ein VLAN."),
+                R("STP", "Global", "spanning-tree vlan <VLAN> forward-time <Sekunden>", "Setzt den STP-Forward-Delay für ein VLAN."),
+                R("STP", "Global", "spanning-tree vlan <VLAN> max-age <Sekunden>", "Setzt das maximale Alter von STP-Informationen für ein VLAN."),
+                R("STP", "Global", "spanning-tree portfast default", "Aktiviert PortFast standardmäßig für Access-Ports."),
+                R("STP", "Global", "spanning-tree portfast bpduguard default", "Aktiviert BPDU Guard global für PortFast-Ports."),
+                R("STP", "Global", "spanning-tree portfast bpdufilter default", "Aktiviert BPDU Filter global für PortFast-Ports."),
+                R("STP", "Global", "spanning-tree loopguard default", "Aktiviert Loop Guard global."),
+                R("STP", "Global", "spanning-tree etherchannel guard misconfig", "Erkennt fehlerhaft konfigurierte EtherChannels."),
+                R("MST", "Global", "spanning-tree mst configuration", "Öffnet den MST-Region-Konfigurationsmodus."),
+                R("MST", "MST-Konfiguration", "name <Region>", "Setzt den MST-Regionsnamen."),
+                R("MST", "MST-Konfiguration", "revision <Revision>", "Setzt die MST-Revisionsnummer."),
+                R("MST", "MST-Konfiguration", "instance <Instanz> vlan <VLAN-Liste>", "Ordnet VLANs einer MST-Instanz zu."),
+                R("MST", "Global", "spanning-tree mst <Instanz> priority <Priorität>", "Setzt die Bridge-Priorität für eine MST-Instanz."),
+                R("MST", "Global", "spanning-tree mst <Instanz> root <primary|secondary>", "Setzt die Root-Rolle einer MST-Instanz."),
+                R("PVST", "Global", "spanning-tree uplinkfast", "Aktiviert die Legacy-PVST-UplinkFast-Optimierung."),
+                R("PVST", "Global", "spanning-tree backbonefast", "Aktiviert die Legacy-PVST-BackboneFast-Optimierung."),
+                R("STP", "Interface", "spanning-tree link-type <point-to-point|shared>", "Setzt den Link-Typ für Rapid-PVST oder MST."),
+                R("STP", "Interface", "spanning-tree port-priority <0-240>", "Setzt die STP-Port-Priorität in Schritten von 16."),
+                R("STP", "Interface", "spanning-tree cost <Kosten>", "Setzt die allgemeine STP-Pfadkostenmetrik."),
+                R("STP", "Interface", "spanning-tree vlan <VLAN> port-priority <0-240>", "Setzt die Port-Priorität für ein VLAN."),
+                R("STP", "Interface", "spanning-tree vlan <VLAN> cost <Kosten>", "Setzt die Pfadkosten für ein VLAN."),
+                R("MST", "Global", "spanning-tree mst max-hops <1-40>", "Setzt die maximale Hop-Anzahl innerhalb einer MST-Region."),
+                R("MST", "Interface", "spanning-tree mst <Instanz> port-priority <0-240>", "Setzt die Port-Priorität für eine MST-Instanz."),
+                R("MST", "Interface", "spanning-tree mst <Instanz> cost <Kosten>", "Setzt die Pfadkosten für eine MST-Instanz."),
+                R("STP", "Interface", "spanning-tree guard <root|loop>", "Aktiviert Root Guard oder Loop Guard."),
+                R("STP", "Interface", "spanning-tree portfast [trunk]", "Aktiviert PortFast auf Access- oder bewusst gewählten Trunk-Ports."),
+                R("STP", "Interface", "spanning-tree bpduguard enable", "Setzt das Interface bei unerwarteten BPDUs in err-disabled."),
+                R("STP", "Interface", "spanning-tree bpdufilter enable", "Filtert BPDUs am Interface; nur gezielt verwenden."),
+                R("STP Reset", "Global", "no spanning-tree vlan <VLAN> priority", "Setzt die VLAN-Bridge-Priorität auf den Plattformstandard zurück."),
+                R("STP Reset", "Interface", "no spanning-tree <portfast|guard|cost|port-priority>", "Entfernt eine STP-Interfaceoption."),
+                R("STP Diagnose", "EXEC", "show spanning-tree summary", "Zeigt Modus, Root-Status und globale STP-Funktionen."),
+                R("STP Diagnose", "EXEC", "show spanning-tree inconsistentports", "Zeigt durch Guard- oder Konsistenzmechanismen blockierte Ports."),
+                R("MST Diagnose", "EXEC", "show spanning-tree mst configuration", "Zeigt MST-Region, Revision, VLAN-Mapping und Digest.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: Routing IPv4",
+            Rows = new List<CommandRow>
+            {
+                R("Routing", "Global", "ip routing", "Aktiviert IPv4-Routing auf einem Layer-3-Switch."),
+                R("Routing", "Global", "no ip routing", "Deaktiviert IPv4-Routing auf einem Layer-3-Switch."),
+                R("Static Route", "Global", "ip route <Zielnetz> <Maske> <Next-Hop|Interface> [Distanz]", "Erstellt eine statische IPv4-Route."),
+                R("Tracked Route", "Global", "ip route <Zielnetz> <Maske> <Next-Hop> track <Track-ID>", "Erstellt eine statische Route mit Tracking."),
+                R("Backup Route", "Global", "ip route <Zielnetz> <Maske> <Next-Hop> <Administrative-Distanz>", "Erstellt eine Floating Static Route."),
+                R("OSPF", "Global", "router ospf <OSPF-Prozess>", "Öffnet den OSPFv2-Prozess."),
+                R("OSPF", "Router", "router-id <Router-ID>", "Setzt die OSPF-Router-ID."),
+                R("OSPF", "Router", "auto-cost reference-bandwidth <Mbit>", "Setzt die OSPF-Referenzbandbreite."),
+                R("OSPF", "Router", "log-adjacency-changes", "Protokolliert Änderungen von OSPF-Nachbarschaften."),
+                R("OSPF", "Router", "log-adjacency-changes detail", "Protokolliert detaillierte Änderungen von OSPF-Nachbarschaften."),
+                R("OSPF", "Router", "network <Netz> <Wildcard> area <Area>", "Aktiviert OSPF für passende Interfaces."),
+                R("OSPF", "Interface", "ip ospf <OSPF-Prozess> area <Area>", "Aktiviert OSPF direkt auf einem Interface und ordnet es einer Area zu."),
+                R("OSPF", "Router", "passive-interface default", "Setzt alle Interfaces standardmäßig passiv."),
+                R("OSPF", "Router", "no passive-interface <Interface>", "Aktiviert OSPF-Nachbarschaften auf einem Interface."),
+                R("OSPF", "Router", "default-information originate", "Inseriert eine Default Route in OSPF."),
+                R("OSPF", "Router", "area <Area> stub", "Setzt eine OSPF-Area als Stub Area."),
+                R("OSPF", "Router", "area <Area> stub no-summary", "Setzt eine Totally Stubby Area."),
+                R("OSPF", "Router", "area <Area> nssa", "Setzt eine NSSA Area."),
+                R("OSPF", "Router", "area <Area> nssa no-summary", "Setzt eine Totally NSSA Area."),
+                R("OSPF", "Router", "area <Area> range <Netz> <Maske>", "Fasst OSPF-Routen an Area-Grenzen zusammen."),
+                R("OSPF", "Interface", "ip ospf cost <Kosten>", "Setzt Interface-Kosten für OSPF."),
+                R("OSPF", "Interface", "ip ospf priority <Priorität>", "Setzt DR/BDR-Priorität."),
+                R("OSPF", "Interface", "ip ospf network <Typ>", "Setzt den OSPF-Netzwerktyp."),
+                R("OSPF", "Interface", "ip ospf authentication message-digest", "Aktiviert MD5-Authentifizierung auf dem Interface."),
+                R("OSPF", "Interface", "ip ospf message-digest-key 1 md5 <Key>", "Setzt den MD5-Schlüssel für OSPF."),
+                R("OSPF", "Interface", "ip ospf authentication", "Aktiviert einfache OSPF-Authentifizierung."),
+                R("OSPF", "Interface", "ip ospf authentication-key <Key>", "Setzt den einfachen OSPF-Authentifizierungsschlüssel."),
+                R("OSPF", "Interface", "ip ospf hello-interval <Sekunden>", "Setzt den OSPF-Hello-Timer."),
+                R("OSPF", "Interface", "ip ospf dead-interval <Sekunden>", "Setzt den OSPF-Dead-Timer."),
+                R("IS-IS", "Global", "router isis <Tag>", "Öffnet den IS-IS-Prozess."),
+                R("IS-IS", "Router", "net <NET-Adresse>", "Setzt die IS-IS NET-Adresse."),
+                R("IS-IS", "Interface", "ip router isis <Tag>", "Aktiviert IS-IS IPv4 auf dem Interface."),
+                R("BGP", "Global", "router bgp <AS>", "Öffnet den BGP-Prozess."),
+                R("BGP", "Router", "bgp router-id <Router-ID>", "Setzt die BGP-Router-ID."),
+                R("BGP", "Router", "neighbor <IP> remote-as <AS>", "Definiert einen BGP-Nachbarn."),
+                R("BGP", "Router", "neighbor <IP> update-source <Interface>", "Setzt die Quelladresse für BGP."),
+                R("BGP", "Router", "neighbor <IP> ebgp-multihop <Hops>", "Erlaubt eBGP über mehrere Hops."),
+                R("BGP", "Router", "neighbor <IP> next-hop-self", "Setzt den lokalen Router als Next-Hop."),
+                R("BGP", "Router", "neighbor <IP> password <Passwort>", "Setzt ein BGP-MD5-Passwort."),
+                R("BGP", "Router", "neighbor <IP> maximum-prefix <Anzahl>", "Begrenzt empfangene Prefixe."),
+                R("BGP", "Router", "neighbor <IP> soft-reconfiguration inbound", "Erlaubt inbound Soft-Reconfiguration."),
+                R("BGP", "Router", "neighbor <IP> default-originate", "Sendet eine Default Route an den Nachbarn."),
+                R("BGP", "Router", "network <Netz> mask <Maske>", "Inseriert ein IPv4-Netz in BGP."),
+                R("BGP", "Router", "neighbor <IP> route-map <Route-Map> in", "Wendet eine eingehende Route-Map an."),
+                R("BGP", "Router", "neighbor <IP> route-map <Route-Map> out", "Wendet eine ausgehende Route-Map an."),
+                R("BGP", "Router", "neighbor <IP> prefix-list <Prefix-List> in", "Wendet eine eingehende Prefix-List an."),
+                R("BGP", "Router", "neighbor <IP> prefix-list <Prefix-List> out", "Wendet eine ausgehende Prefix-List an."),
+                R("BGP", "Router", "neighbor <IP> timers <Keepalive> <Holdtime>", "Setzt BGP-Timer."),
+                R("FHRP", "Interface", "standby <Gruppe> ip <Virtuelle-IP>", "Konfiguriert HSRP Virtual IP."),
+                R("FHRP", "Interface", "standby <Gruppe> priority <Priorität>", "Setzt HSRP-Priorität."),
+                R("FHRP", "Interface", "standby <Gruppe> preempt", "Aktiviert HSRP Preemption.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: VRF",
+            Rows = new List<CommandRow>
+            {
+                R("VRF-Lite", "Global", "ip vrf <VRF-Name>", "Erstellt oder öffnet eine klassische VRF."),
+                R("VRF-Lite", "VRF", "rd <Route-Distinguisher>", "Setzt den Route Distinguisher."),
+                R("VRF-Lite", "VRF", "description <Beschreibung>", "Beschreibt die VRF."),
+                R("VRF Interface", "Interface", "ip vrf forwarding <VRF-Name>", "Ordnet ein Interface einer VRF zu; vorhandene IP-Adresse wird dabei entfernt."),
+                R("VRF Interface", "Interface", "ip address <IP> <Maske>", "Setzt die IPv4-Adresse nach der VRF-Zuordnung neu."),
+                R("VRF Route", "Global", "ip route vrf <VRF> <Zielnetz> <Maske> <Next-Hop>", "Erstellt eine statische IPv4-Route innerhalb einer VRF."),
+                R("VRF Route", "Global", "ipv6 route vrf <VRF> <IPv6-Präfix> <Next-Hop>", "Erstellt eine statische IPv6-Route innerhalb einer VRF."),
+                R("VRF OSPF", "Global", "router ospf <OSPF-Prozess> vrf <VRF>", "Öffnet OSPFv2 innerhalb einer VRF."),
+                R("VRF OSPF", "Router", "network <Netz> <Wildcard> area <Area>", "Aktiviert OSPFv2-Netze innerhalb einer VRF."),
+                R("VRF OSPFv3", "Global", "router ospfv3 <Prozess>", "Öffnet den OSPFv3-Prozess."),
+                R("VRF OSPFv3", "Router", "address-family ipv6 vrf <VRF>", "Öffnet die OSPFv3 IPv6 Address-Family einer VRF."),
+                R("VRF OSPFv3", "Address-Family", "router-id <Router-ID>", "Setzt die Router-ID für die OSPFv3 VRF Address-Family."),
+                R("VRF OSPFv3", "Interface", "ospfv3 <Prozess> ipv6 area <Area>", "Aktiviert OSPFv3 IPv6 auf einem Interface."),
+                R("VRF BGP", "Global", "router bgp <AS>", "Öffnet den BGP-Prozess für VRF Address-Families."),
+                R("VRF BGP", "Address-Family", "address-family ipv4 vrf <VRF>", "Öffnet die BGP IPv4 VRF Address-Family."),
+                R("VRF BGP", "Address-Family", "address-family ipv6 vrf <VRF>", "Öffnet die BGP IPv6 VRF Address-Family."),
+                R("VRF BGP", "Address-Family", "neighbor <IP> remote-as <AS>", "Definiert einen VRF-BGP-Nachbarn."),
+                R("VRF BGP", "Address-Family", "neighbor <IP> activate", "Aktiviert den Nachbarn in der Address-Family."),
+                R("VRF BGP", "Address-Family", "network <Netz> mask <Maske>", "Inseriert ein IPv4-Netz in die VRF-BGP-AF."),
+                R("VRF BGP", "Address-Family", "network <IPv6-Präfix>", "Inseriert ein IPv6-Präfix in die VRF-BGP-AF."),
+                R("VRF", "Address-Family", "exit-address-family", "Verlässt die aktuelle Address-Family.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: IPv6",
+            Rows = new List<CommandRow>
+            {
+                R("IPv6", "Global", "ipv6 unicast-routing", "Aktiviert IPv6-Routing global."),
+                R("IPv6", "Interface", "ipv6 address <IPv6-Adresse/Präfix>", "Setzt eine IPv6-Adresse."),
+                R("IPv6", "Interface", "ipv6 address <Link-Local-Adresse> link-local", "Setzt eine manuelle Link-Local-Adresse."),
+                R("IPv6", "Interface", "ipv6 enable", "Aktiviert IPv6 auf einem Interface ohne globale Adresse."),
+                R("IPv6 Route", "Global", "ipv6 route <Präfix> <Next-Hop|Interface>", "Erstellt eine statische IPv6-Route."),
+                R("IPv6 ACL", "Global", "ipv6 access-list <ACL-Name>", "Erstellt oder öffnet eine IPv6-ACL."),
+                R("IPv6 ACL", "IPv6-ACL", "<permit|deny> <Protokoll> <Quelle> <Ziel>", "Erstellt eine IPv6-ACL-Regel."),
+                R("IPv6 ACL", "Interface", "ipv6 traffic-filter <ACL-Name> <in|out>", "Wendet eine IPv6-ACL auf ein Interface an."),
+                R("IPv6 RA", "Interface", "ipv6 nd ra suppress all", "Unterdrückt Router Advertisements auf dem Interface."),
+                R("DHCPv6 Relay", "Interface", "ipv6 dhcp relay destination <IPv6-Adresse>", "Leitet DHCPv6-Anfragen weiter."),
+                R("OSPFv3", "Global", "router ospfv3 <Prozess>", "Öffnet den OSPFv3-Prozess."),
+                R("OSPFv3", "Router", "address-family ipv6 unicast", "Öffnet die OSPFv3 IPv6 Unicast Address-Family."),
+                R("OSPFv3", "Router", "router-id <Router-ID>", "Setzt die OSPFv3-Router-ID."),
+                R("OSPFv3", "Interface", "ospfv3 <Prozess> ipv6 area <Area>", "Aktiviert OSPFv3 IPv6 auf dem Interface."),
+                R("IPv6 BGP", "Router", "address-family ipv6 unicast", "Öffnet die BGP IPv6 Address-Family."),
+                R("IPv6 BGP", "Address-Family", "neighbor <IPv6> remote-as <AS>", "Definiert einen IPv6-BGP-Nachbarn."),
+                R("IPv6 BGP", "Address-Family", "neighbor <IPv6> activate", "Aktiviert den IPv6-BGP-Nachbarn."),
+                R("IPv6 BGP", "Address-Family", "network <IPv6-Präfix>", "Inseriert ein IPv6-Präfix in BGP."),
+                R("IPv6 EIGRP", "Global", "ipv6 router eigrp <AS>", "Öffnet den IPv6-EIGRP-Prozess."),
+                R("IPv6 EIGRP", "Router", "eigrp router-id <Router-ID>", "Setzt die EIGRP-Router-ID."),
+                R("IPv6 EIGRP", "Router", "no shutdown", "Aktiviert den EIGRP-Prozess."),
+                R("IPv6 EIGRP", "Interface", "ipv6 eigrp <AS>", "Aktiviert IPv6-EIGRP auf dem Interface."),
+                R("IPv6 IS-IS", "Router", "address-family ipv6", "Öffnet die IS-IS IPv6 Address-Family."),
+                R("IPv6 IS-IS", "Router", "multi-topology", "Aktiviert Multi-Topology für IPv6."),
+                R("IPv6 IS-IS", "Interface", "ipv6 router isis <Tag>", "Aktiviert IS-IS IPv6 auf dem Interface.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: DHCP / ACL / NAT",
+            Rows = new List<CommandRow>
+            {
+                R("DHCP", "Global", "ip dhcp pool <Pool-Name>", "Erstellt oder öffnet einen DHCP-Pool."),
+                R("DHCP", "DHCP-Pool", "network <Netz> <Maske>", "Setzt das DHCP-Netz."),
+                R("DHCP", "DHCP-Pool", "default-router <Gateway-IP>", "Setzt den Default Router für Clients."),
+                R("DHCP", "DHCP-Pool", "dns-server <DNS-IP>", "Setzt DNS-Server für Clients."),
+                R("DHCP", "DHCP-Pool", "domain-name <Domain>", "Setzt die DHCP-Domain."),
+                R("DHCP", "DHCP-Pool", "lease <Tage|Tage Stunden Minuten>", "Setzt die Lease-Dauer."),
+                R("DHCP", "DHCP-Pool", "option 150 ip <TFTP-IP>", "Setzt Option 150 für VoIP/TFTP."),
+                R("DHCP", "Global", "ip dhcp excluded-address <Start-IP> [End-IP]", "Schließt Adressen vom DHCP-Pool aus."),
+                R("ACL", "Global", "ip access-list extended <ACL-Name>", "Erstellt oder öffnet eine benannte Extended IPv4-ACL."),
+                R("ACL", "IPv4-ACL", "<permit|deny> <Protokoll> <Quelle> <Ziel> [eq <Port>]", "Erstellt eine Extended-ACL-Regel."),
+                R("ACL", "Global", "access-list <Nummer> <permit|deny> <Quelle>", "Erstellt eine klassische Standard-ACL."),
+                R("ACL", "Interface", "ip access-group <ACL-Name|Nummer> <in|out>", "Wendet eine IPv4-ACL am Interface an."),
+                R("NAT", "Interface", "ip nat inside", "Markiert ein Interface als NAT inside."),
+                R("NAT", "Interface", "ip nat outside", "Markiert ein Interface als NAT outside."),
+                R("NAT", "Global", "ip nat inside source list <ACL> interface <Interface> overload", "Konfiguriert PAT/Overload über ein Interface."),
+                R("NAT", "Global", "ip nat inside source static <Inside-IP> <Outside-IP>", "Konfiguriert statisches 1:1-NAT."),
+                R("NAT", "Global", "ip nat inside source static <Protokoll> <Inside-IP> <Inside-Port> <Outside-IP> <Outside-Port>", "Konfiguriert statisches Port-Forwarding."),
+                R("NAT", "Global", "ip nat pool <Name> <Start-IP> <End-IP> netmask <Maske>", "Erstellt einen NAT-Adresspool."),
+                R("NAT", "Global", "ip nat inside source list <ACL> pool <Pool-Name> overload", "Nutzt einen NAT-Pool mit Overload."),
+                R("NAT Exempt", "Global", "route-map <Name> permit 10", "Erstellt eine Route-Map für NAT-Ausnahmen oder Policy-NAT."),
+                R("NAT Exempt", "Route-Map", "match ip address <ACL>", "Matcht eine ACL innerhalb einer Route-Map."),
+                R("NAT Exempt", "Route-Map", "set interface <Interface>", "Setzt ein Interface als Route-Map-Aktion.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: VPN / Firewall / QoS",
+            Rows = new List<CommandRow>
+            {
+                R("GRE", "Global", "interface tunnel <ID>", "Erstellt oder öffnet ein Tunnelinterface."),
+                R("GRE", "Tunnel", "ip address <Tunnel-IP> <Maske>", "Setzt die Tunnel-IP-Adresse."),
+                R("GRE", "Tunnel", "tunnel source <Interface|IP>", "Setzt die Tunnelquelle."),
+                R("GRE", "Tunnel", "tunnel destination <Peer-IP>", "Setzt das Tunnelziel."),
+                R("GRE", "Tunnel", "tunnel mode gre ip", "Setzt GRE over IPv4."),
+                R("GRE", "Tunnel", "ip mtu 1400", "Reduziert die MTU für GRE/IPsec."),
+                R("GRE", "Tunnel", "ip tcp adjust-mss 1360", "Reduziert TCP MSS gegen Fragmentierung."),
+                R("IPsec", "Global", "crypto isakmp policy <Priorität>", "Erstellt eine IKEv1 Policy."),
+                R("IPsec", "ISAKMP-Policy", "encr aes 256", "Setzt AES-256 als Verschlüsselung."),
+                R("IPsec", "ISAKMP-Policy", "hash sha256", "Setzt SHA-256 als Hash."),
+                R("IPsec", "ISAKMP-Policy", "authentication pre-share", "Nutzt Pre-Shared-Key-Authentifizierung."),
+                R("IPsec", "ISAKMP-Policy", "group 14", "Setzt Diffie-Hellman-Gruppe 14."),
+                R("IPsec", "Global", "crypto isakmp key <PSK> address <Peer-IP>", "Setzt den IKEv1 Pre-Shared Key für den Peer."),
+                R("IPsec", "Global", "crypto ipsec transform-set <Name> esp-aes 256 esp-sha-hmac", "Erstellt ein IPsec Transform-Set."),
+                R("IPsec", "Transform-Set", "mode transport", "Setzt Transport Mode, typisch bei GRE over IPsec."),
+                R("IPsec", "Global", "crypto map <Name> 10 ipsec-isakmp", "Erstellt eine Crypto Map."),
+                R("IPsec", "Crypto-Map", "set peer <Peer-IP>", "Setzt den IPsec-Peer."),
+                R("IPsec", "Crypto-Map", "set transform-set <Transform-Set>", "Verknüpft ein Transform-Set."),
+                R("IPsec", "Crypto-Map", "match address <ACL>", "Definiert den interessanten Traffic."),
+                R("IPsec", "Interface", "crypto map <Name>", "Bindet die Crypto Map an ein Interface."),
+                R("Zone Firewall", "Global", "zone security <Zone>", "Erstellt eine Security Zone."),
+                R("Zone Firewall", "Interface", "zone-member security <Zone>", "Ordnet ein Interface einer Zone zu."),
+                R("Zone Firewall", "Global", "class-map type inspect match-any <Class-Map>", "Erstellt eine Inspect-Class-Map."),
+                R("Zone Firewall", "Class-Map", "match protocol <Protokoll>", "Matcht ein Protokoll in der Class-Map."),
+                R("Zone Firewall", "Global", "policy-map type inspect <Policy-Map>", "Erstellt eine Inspect-Policy."),
+                R("Zone Firewall", "Policy-Map", "class type inspect <Class-Map>", "Verknüpft Class-Map und Policy-Map."),
+                R("Zone Firewall", "Policy-Map", "<inspect|pass|drop>", "Setzt die Aktion für den gematchten Traffic."),
+                R("Zone Firewall", "Global", "zone-pair security <Name> source <Zone> destination <Zone>", "Erstellt ein Zone-Pair."),
+                R("Zone Firewall", "Zone-Pair", "service-policy type inspect <Policy-Map>", "Wendet eine Policy auf ein Zone-Pair an."),
+                R("DMZ", "IPv4-ACL", "permit tcp any host <Server-IP> eq 443", "Erlaubt HTTPS-Zugriff auf einen DMZ-Server."),
+                R("DMZ", "IPv4-ACL", "deny ip any any log", "Blockiert sonstigen Traffic und loggt Treffer."),
+                R("QoS", "Interface", "mls qos trust dscp", "Vertraut DSCP-Markierungen auf dem Interface."),
+                R("QoS", "Interface", "auto qos trust", "Aktiviert Auto-QoS Trust."),
+                R("QoS", "Global", "class-map match-any <Class-Map>", "Erstellt eine QoS-Class-Map."),
+                R("QoS", "Class-Map", "match dscp <DSCP-Wert>", "Matcht DSCP-Werte."),
+                R("QoS", "Global", "policy-map <Policy-Map>", "Erstellt eine QoS-Policy-Map."),
+                R("QoS", "Policy-Map", "class <Class-Map>", "Öffnet eine Klasse in der Policy."),
+                R("QoS", "Policy-Map", "priority percent <Prozent>", "Reserviert priorisierte Bandbreite."),
+                R("Eigene Befehle", "Global/Submode", "<Eigener Cisco-Befehl>", "Wird unverändert aus dem Modul Eigene Zusatzbefehle in die Konfiguration übernommen.")
+            }
+        },
+
+        new()
+        {
+            Name = "Konfig: MPLS / LDP / L3VPN",
+            Rows = new List<CommandRow>
+            {
+                R("MPLS", "Global", "ip cef", "Aktiviert Cisco Express Forwarding als Grundlage für MPLS Forwarding."),
+                R("MPLS", "Global", "mpls ip", "Aktiviert MPLS global auf dem Gerät."),
+                R("MPLS", "Global", "mpls label protocol ldp", "Setzt LDP als Label Distribution Protocol."),
+                R("MPLS", "Global", "mpls ldp router-id <Interface> [force]", "Setzt die stabile LDP Router-ID, typischerweise ein Loopback-Interface."),
+                R("MPLS", "Global", "mpls ldp neighbor <Neighbor-IP> password <Passwort>", "Setzt ein Passwort für einen LDP-Nachbarn."),
+                R("MPLS", "Interface", "interface <Interface>", "Öffnet das Core-/Transit-Interface."),
+                R("MPLS", "Interface", "mpls ip", "Aktiviert MPLS/LDP auf diesem Interface."),
+                R("MPLS", "Interface", "mpls mtu <Bytes>", "Setzt optional eine MPLS-MTU. Nicht pauschal 9000 setzen."),
+                R("MPLS", "Interface", "mpls ldp igp sync", "Synchronisiert LDP und IGP, um Blackholing zu vermeiden."),
+                R("MPLS", "VRF", "vrf definition <VRF>", "Erstellt eine VRF für MPLS L3VPN."),
+                R("MPLS", "VRF", "rd <RD>", "Setzt den Route Distinguisher."),
+                R("MPLS", "VRF", "route-target import <RT>", "Importiert VPN-Routen anhand dieses Route-Targets."),
+                R("MPLS", "VRF", "route-target export <RT>", "Exportiert VPN-Routen mit diesem Route-Target."),
+                R("MPLS", "BGP", "router bgp <AS>", "Öffnet den MP-BGP-Prozess für VPNv4."),
+                R("MPLS", "BGP", "neighbor <Peer-IP> remote-as <AS>", "Definiert den MP-BGP-Nachbarn."),
+                R("MPLS", "BGP", "neighbor <Peer-IP> update-source <Interface>", "Bindet die BGP-Session an ein Loopback-/Quellinterface."),
+                R("MPLS", "BGP VPNv4", "address-family vpnv4", "Öffnet die VPNv4 Address-Family."),
+                R("MPLS", "BGP VPNv4", "neighbor <Peer-IP> activate", "Aktiviert den Peer in VPNv4."),
+                R("MPLS", "BGP VPNv4", "neighbor <Peer-IP> send-community extended", "Sendet Extended Communities, notwendig für Route-Targets.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: VoIP / Voice VLAN",
+            Rows = new List<CommandRow>
+            {
+                R("VoIP", "Global", "vlan <Data-VLAN>", "Erstellt das Daten-VLAN für Clients hinter IP-Telefonen."),
+                R("VoIP", "Global", "vlan <Voice-VLAN>", "Erstellt das Voice-VLAN für IP-Telefone."),
+                R("VoIP", "Global", "cdp run", "Aktiviert CDP für Cisco-Telefonerkennung."),
+                R("VoIP", "Global", "lldp run", "Aktiviert LLDP für herstellerübergreifende Nachbarerkennung."),
+                R("VoIP", "Global", "lldp med-tlv-select network-policy", "Aktiviert LLDP-MED Network Policy TLVs, sofern unterstützt."),
+                R("VoIP", "Global", "mls qos", "Aktiviert QoS auf klassischen Catalyst-Plattformen."),
+                R("VoIP", "DHCP-Pool", "option 150 ip <TFTP-IP>", "Verteilt TFTP-/CallManager-Adresse an Cisco-IP-Telefone."),
+                R("VoIP", "Interface", "switchport mode access", "Setzt den Telefonport als Access-Port."),
+                R("VoIP", "Interface", "switchport access vlan <Data-VLAN>", "Setzt das Daten-VLAN für den PC-Port hinter dem Telefon."),
+                R("VoIP", "Interface", "switchport voice vlan <Voice-VLAN>", "Setzt das Voice-VLAN für IP-Telefone."),
+                R("VoIP", "Interface", "auto qos voip cisco-phone", "Aktiviert Cisco AutoQoS für Telefonports."),
+                R("VoIP", "Interface", "mls qos trust <dscp|cos>", "Vertraut DSCP- oder CoS-Markierungen auf dem Telefonport."),
+                R("VoIP", "Interface", "spanning-tree portfast", "Aktiviert schnellen Portstart für Endgeräte."),
+                R("VoIP", "Interface", "spanning-tree bpduguard enable", "Schützt Endgeräteports vor eingehenden BPDUs.")
+            }
+        },
+        new()
+        {
+            Name = "Konfig: QinQ / 802.1ad",
+            Rows = new List<CommandRow>
+            {
+                R("QinQ", "Global", "system mtu jumbo <Bytes>", "Optional. Plattformabhängige Jumbo-/System-MTU. Nicht pauschal 9000 setzen; nur verwenden, wenn das Transportnetz die Framegröße durchgehend unterstützt."),
+                R("QinQ", "Global", "vlan <Provider-VLAN>", "Erstellt das Provider-/Service-VLAN für QinQ."),
+                R("QinQ", "Global", "name <Prefix><Provider-VLAN>", "Benennt das Provider-/Service-VLAN nachvollziehbar."),
+                R("QinQ", "Interface", "switchport", "Aktiviert Layer-2-Switchport-Kontext, sofern die Plattform es benötigt."),
+                R("QinQ", "Interface", "switchport mode dot1q-tunnel", "Aktiviert portbasiertes QinQ auf einem Customer-facing Switchport."),
+                R("QinQ", "Interface", "switchport access vlan <Provider-VLAN>", "Ordnet den QinQ-Port dem äußeren Provider-/Service-VLAN zu."),
+                R("QinQ", "Interface", "l2protocol-tunnel <cdp|stp|vtp>", "Tunnelt ausgewählte Layer-2-Protokolle durch das Provider-Netz, sofern unterstützt."),
+                R("QinQ", "L3-Switch Subinterface", "interface <Parent>.<SubID>", "Erstellt ein routed Subinterface für Double-Tagged QinQ auf einem L3-Switch."),
+                R("QinQ", "L3-Switch Subinterface", "encapsulation dot1Q <Provider-VLAN> second-dot1q <Customer-VLAN>", "Konfiguriert äußeres S-VLAN und inneres C-VLAN."),
+                R("QinQ", "L3-Switch Subinterface", "ip address <IP> <Maske>", "Setzt optional eine Layer-3-Adresse auf dem QinQ-Subinterface.")
+            }
+        }
+    };
+
+    private static CommandRow R(string module, string mode, string command, string meaning) => new()
+    {
+        Module = module,
+        Mode = mode,
+        Command = command,
+        Meaning = meaning
+    };
+}
