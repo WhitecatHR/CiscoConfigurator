@@ -11,7 +11,9 @@ public static class SshDeviceService
         try
         {
             using var client = new TcpClient();
-            await client.ConnectAsync(settings.Host, settings.Port, cancellationToken);
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(settings.ConnectionTimeoutSeconds, 1, 600)));
+            await client.ConnectAsync(settings.Host, settings.Port, timeout.Token);
             return new(true, $"TCP-Verbindung zu {settings.Host}:{settings.Port} erfolgreich.", "", 0);
         }
         catch (Exception ex)
@@ -112,7 +114,7 @@ public static class SshDeviceService
             process.StandardInput.Close();
 
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(TimeSpan.FromMinutes(3));
+            timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(settings.CommandTimeoutSeconds, 10, 3600)));
             await process.WaitForExitAsync(timeout.Token);
             var output = await outputTask;
             var error = await errorTask;

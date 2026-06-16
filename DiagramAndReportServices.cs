@@ -101,70 +101,110 @@ public static class NetworkDiagramService
 
     public static string BuildSvg(NetworkProject project, int width = 1400, int height = 900)
     {
+        var settings = ApplicationSettingsService.Current;
         var layout = CalculateLayout(project, width, height);
         var sb = new StringBuilder();
-        sb.AppendLine($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{width}\" height=\"{height}\" viewBox=\"0 0 {width} {height}\">");
-        sb.AppendLine("<rect width=\"100%\" height=\"100%\" fill=\"#0b0e13\"/>");
+        sb.AppendLine($"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>");
+        sb.AppendLine("<rect width='100%' height='100%' fill='#0b0e13'/>");
 
-        var legendTypes = project.Links.Select(x => string.IsNullOrWhiteSpace(x.LinkType) ? "Ethernet" : x.LinkType.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        var legendX = 20.0;
-        foreach (var type in legendTypes)
+        if (settings.ShowConnectionTypes)
         {
-            var color = GetLinkColor(type);
-            var dash = GetLinkDashArray(type);
-            var dashAttribute = string.IsNullOrWhiteSpace(dash) ? string.Empty : $" stroke-dasharray=\"{dash}\"";
-            sb.AppendLine($"<line x1=\"{legendX:0}\" y1=\"20\" x2=\"{legendX + 34:0}\" y2=\"20\" stroke=\"{color}\" stroke-width=\"{GetLinkThickness(type):0}\"{dashAttribute}/>");
-            sb.AppendLine($"<text x=\"{legendX + 40:0}\" y=\"24\" fill=\"#cbd5e1\" font-family=\"Segoe UI\" font-size=\"12\">{SecurityElement.Escape(type)}</text>");
-            legendX += 65 + Math.Max(40, type.Length * 7);
+            var legendTypes = project.Links
+                .Select(x => string.IsNullOrWhiteSpace(x.LinkType) ? "Ethernet" : x.LinkType.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var legendX = 20.0;
+            foreach (var type in legendTypes)
+            {
+                var color = GetLinkColor(type);
+                var dash = GetLinkDashArray(type);
+                var dashAttribute = string.IsNullOrWhiteSpace(dash)
+                    ? string.Empty
+                    : $" stroke-dasharray='{dash}'";
+
+                sb.AppendLine($"<line x1='{legendX:0}' y1='20' x2='{legendX + 34:0}' y2='20' stroke='{color}' stroke-width='{GetLinkThickness(type):0}'{dashAttribute}/>");
+                sb.AppendLine($"<text x='{legendX + 40:0}' y='24' fill='#cbd5e1' font-family='Segoe UI' font-size='12'>{SecurityElement.Escape(type)}</text>");
+                legendX += 65 + Math.Max(40, type.Length * 7);
+            }
         }
 
         foreach (var link in project.Links)
         {
-            if (!layout.TryGetValue(link.SourceDeviceId, out var a) || !layout.TryGetValue(link.TargetDeviceId, out var b)) continue;
-            var x1 = a.X + a.Width / 2; var y1 = a.Y + a.Height / 2;
-            var x2 = b.X + b.Width / 2; var y2 = b.Y + b.Height / 2;
+            if (!layout.TryGetValue(link.SourceDeviceId, out var a) ||
+                !layout.TryGetValue(link.TargetDeviceId, out var b))
+            {
+                continue;
+            }
+
+            var x1 = a.X + a.Width / 2;
+            var y1 = a.Y + a.Height / 2;
+            var x2 = b.X + b.Width / 2;
+            var y2 = b.Y + b.Height / 2;
             var color = GetLinkColor(link.LinkType);
             var dash = GetLinkDashArray(link.LinkType);
-            var dashAttribute = string.IsNullOrWhiteSpace(dash) ? string.Empty : $" stroke-dasharray=\"{dash}\"";
-            sb.AppendLine($"<line x1=\"{x1:0}\" y1=\"{y1:0}\" x2=\"{x2:0}\" y2=\"{y2:0}\" stroke=\"{color}\" stroke-width=\"{GetLinkThickness(link.LinkType):0}\"{dashAttribute}/>");
-            sb.AppendLine($"<circle cx=\"{x1:0}\" cy=\"{y1:0}\" r=\"5\" fill=\"{color}\"/><circle cx=\"{x2:0}\" cy=\"{y2:0}\" r=\"5\" fill=\"{color}\"/>");
+            var dashAttribute = string.IsNullOrWhiteSpace(dash)
+                ? string.Empty
+                : $" stroke-dasharray='{dash}'";
+
+            sb.AppendLine($"<line x1='{x1:0}' y1='{y1:0}' x2='{x2:0}' y2='{y2:0}' stroke='{color}' stroke-width='{GetLinkThickness(link.LinkType):0}'{dashAttribute}/>");
+            sb.AppendLine($"<circle cx='{x1:0}' cy='{y1:0}' r='5' fill='{color}'/><circle cx='{x2:0}' cy='{y2:0}' r='5' fill='{color}'/>");
+
+            var labelParts = new List<string>();
             var type = string.IsNullOrWhiteSpace(link.LinkType) ? "Ethernet" : link.LinkType.Trim();
-            var description = string.IsNullOrWhiteSpace(link.Description) ? string.Empty : $" · {link.Description.Trim()}";
-            var label = SecurityElement.Escape($"{type}: {link.SourceInterface} ↔ {link.TargetInterface}{description}");
-            sb.AppendLine($"<rect x=\"{(x1 + x2) / 2 - 105:0}\" y=\"{(y1 + y2) / 2 - 22:0}\" width=\"210\" height=\"22\" rx=\"6\" fill=\"#0b0e13\" fill-opacity=\"0.92\" stroke=\"{color}\" stroke-width=\"1\"/>");
-            sb.AppendLine($"<text x=\"{(x1 + x2) / 2:0}\" y=\"{(y1 + y2) / 2 - 7:0}\" fill=\"{color}\" font-family=\"Segoe UI\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">{label}</text>");
+            if (settings.ShowConnectionTypes) labelParts.Add(type);
+            if (!string.IsNullOrWhiteSpace(link.Description)) labelParts.Add(link.Description.Trim());
+            if (settings.ShowInterfaceNames) labelParts.Add($"{link.SourceInterface} ↔ {link.TargetInterface}");
+
+            if (labelParts.Count > 0)
+            {
+                var label = SecurityElement.Escape(string.Join(" · ", labelParts));
+                var labelX = (x1 + x2) / 2;
+                var labelY = (y1 + y2) / 2;
+                sb.AppendLine($"<rect x='{labelX - 105:0}' y='{labelY - 22:0}' width='210' height='22' rx='6' fill='#0b0e13' fill-opacity='0.92' stroke='{color}' stroke-width='1'/>");
+                sb.AppendLine($"<text x='{labelX:0}' y='{labelY - 7:0}' fill='{color}' font-family='Segoe UI' font-size='12' font-weight='bold' text-anchor='middle'>{label}</text>");
+            }
         }
+
         foreach (var device in project.Devices)
         {
             if (!layout.TryGetValue(device.Id, out var p)) continue;
-            sb.AppendLine($"<rect x=\"{p.X:0}\" y=\"{p.Y:0}\" width=\"{p.Width:0}\" height=\"{p.Height:0}\" rx=\"12\" fill=\"#171c25\" stroke=\"#e8791a\" stroke-width=\"2\"/>");
-            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 34:0}\" fill=\"#ffffff\" font-family=\"Segoe UI\" font-size=\"16\" font-weight=\"bold\" text-anchor=\"middle\">{SecurityElement.Escape(device.Name)}</text>");
-            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 59:0}\" fill=\"#9ca6b5\" font-family=\"Segoe UI\" font-size=\"12\" text-anchor=\"middle\">{SecurityElement.Escape(device.DeviceType)}</text>");
-            sb.AppendLine($"<text x=\"{p.X + p.Width / 2:0}\" y=\"{p.Y + 77:0}\" fill=\"#64748b\" font-family=\"Segoe UI\" font-size=\"10\" text-anchor=\"middle\">{SecurityElement.Escape(device.ConfigMode)}</text>");
+
+            sb.AppendLine($"<rect x='{p.X:0}' y='{p.Y:0}' width='{p.Width:0}' height='{p.Height:0}' rx='12' fill='#171c25' stroke='#e8791a' stroke-width='2'/>");
+            sb.AppendLine($"<text x='{p.X + p.Width / 2:0}' y='{p.Y + 34:0}' fill='#ffffff' font-family='Segoe UI' font-size='16' font-weight='bold' text-anchor='middle'>{SecurityElement.Escape(device.Name)}</text>");
+            sb.AppendLine($"<text x='{p.X + p.Width / 2:0}' y='{p.Y + 59:0}' fill='#9ca6b5' font-family='Segoe UI' font-size='12' text-anchor='middle'>{SecurityElement.Escape(device.DeviceType)}</text>");
+            sb.AppendLine($"<text x='{p.X + p.Width / 2:0}' y='{p.Y + 77:0}' fill='#64748b' font-family='Segoe UI' font-size='10' text-anchor='middle'>{SecurityElement.Escape(device.ConfigMode)}</text>");
         }
+
         sb.AppendLine("</svg>");
         return sb.ToString();
     }
+
 }
 
 public static class ReportExportService
 {
     public static string BuildPlainText(NetworkProject project, IEnumerable<DependencyFinding> dependencies, IEnumerable<SecurityFinding> security)
     {
+        var settings = ApplicationSettingsService.Current;
+        var english = ResolveReportLanguage(settings.ReportLanguage).StartsWith("en", StringComparison.OrdinalIgnoreCase);
+        string R(string de, string en) => english ? en : de;
         var sb = new StringBuilder();
         sb.AppendLine(project.Name);
         sb.AppendLine(new string('=', Math.Max(10, project.Name.Length)));
-        sb.AppendLine($"Erstellt: {DateTime.Now:dd.MM.yyyy HH:mm}");
+        if (!string.IsNullOrWhiteSpace(settings.CompanyName)) sb.AppendLine($"{R("Firma", "Company")}: {settings.CompanyName}");
+        if (!string.IsNullOrWhiteSpace(settings.ProjectManager)) sb.AppendLine($"{R("Projektverantwortlicher", "Project manager")}: {settings.ProjectManager}");
+        if (!string.IsNullOrWhiteSpace(settings.ReportLogoPath)) sb.AppendLine($"{R("Berichtslogo", "Report logo")}: {settings.ReportLogoPath}");
+        sb.AppendLine($"{R("Erstellt", "Created")}: {DateTime.Now:yyyy-MM-dd HH:mm}");
         if (!string.IsNullOrWhiteSpace(project.Description)) sb.AppendLine(project.Description);
         sb.AppendLine();
-        sb.AppendLine("GERÄTEÜBERSICHT");
-        foreach (var d in project.Devices) sb.AppendLine($"- {d.Name} | {d.DeviceType} | {d.ConfigMode} | {d.Status}");
+        sb.AppendLine(R("GERÄTEÜBERSICHT", "DEVICE OVERVIEW"));
+        foreach (var d in project.Devices) sb.AppendLine($"- {d.Name} | {d.DeviceType} | {d.ConfigMode} | {(english ? LocalizationService.TranslateText(d.Status, "en-US") : d.Status)}");
         sb.AppendLine();
-        sb.AppendLine("IP-ADRESSPLAN");
+        sb.AppendLine(R("IP-ADRESSPLAN", "IP ADDRESS PLAN"));
         foreach (var i in project.IpamEntries) sb.AppendLine($"- {i.Network}/{i.PrefixLength} | VLAN {i.Vlan} | GW {i.Gateway} | {i.Device} {i.Interface} | {i.Description}");
         sb.AppendLine();
-        sb.AppendLine("VERBINDUNGEN");
+        sb.AppendLine(R("VERBINDUNGEN", "CONNECTIONS"));
         foreach (var l in project.Links)
         {
             var source = project.Devices.FirstOrDefault(x => x.Id == l.SourceDeviceId)?.Name ?? l.SourceDeviceId;
@@ -173,13 +213,13 @@ public static class ReportExportService
             sb.AppendLine($"- {source} {l.SourceInterface} ↔ {target} {l.TargetInterface} | {l.LinkType}{description}");
         }
         sb.AppendLine();
-        sb.AppendLine("ABHÄNGIGKEITEN");
-        foreach (var f in dependencies) sb.AppendLine($"- [{f.Severity}] {f.Area}: {f.Message}");
+        sb.AppendLine(R("ABHÄNGIGKEITEN", "DEPENDENCIES"));
+        foreach (var f in dependencies) sb.AppendLine($"- [{f.Severity}] {f.Area}: {(english ? LocalizationService.TranslateText(f.Message, "en-US") : f.Message)}");
         sb.AppendLine();
-        sb.AppendLine("SICHERHEITSPRÜFUNG");
-        foreach (var f in security) sb.AppendLine($"- [{f.Severity}] {f.Category}: {f.Message} Empfehlung: {f.Recommendation}");
+        sb.AppendLine(R("SICHERHEITSPRÜFUNG", "SECURITY AUDIT"));
+        foreach (var f in security) sb.AppendLine($"- [{f.Severity}] {f.Category}: {(english ? LocalizationService.TranslateText(f.Message, "en-US") : f.Message)} {R("Empfehlung", "Recommendation")}: {(english ? LocalizationService.TranslateText(f.Recommendation, "en-US") : f.Recommendation)}");
         sb.AppendLine();
-        sb.AppendLine("TESTPLAN");
+        sb.AppendLine(R("TESTPLAN", "TEST PLAN"));
         sb.AppendLine("- show ip interface brief");
         sb.AppendLine("- show vlan brief");
         sb.AppendLine("- show interfaces trunk");
@@ -191,14 +231,25 @@ public static class ReportExportService
         return sb.ToString();
     }
 
+    private static string ResolveReportLanguage(string? language)
+    {
+        var value = (language ?? "system").Trim();
+        if (value.Equals("system", StringComparison.OrdinalIgnoreCase))
+            return System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.OrdinalIgnoreCase) ? "en-US" : "de-DE";
+        return value;
+    }
+
     public static void ExportHtml(string path, NetworkProject project, IEnumerable<DependencyFinding> dependencies, IEnumerable<SecurityFinding> security)
     {
         var plain = BuildPlainText(project, dependencies, security);
         var svg = NetworkDiagramService.BuildSvg(project, 1200, 650);
+        var english = ResolveReportLanguage(ApplicationSettingsService.Current.ReportLanguage).StartsWith("en", StringComparison.OrdinalIgnoreCase);
+        var htmlLanguage = english ? "en" : "de";
+        var reportTitle = english ? "Project report" : "Projektbericht";
         var html = $$"""
-<!doctype html><html lang="de"><head><meta charset="utf-8"><title>{{Escape(project.Name)}}</title>
+<!doctype html><html lang="{{htmlLanguage}}"><head><meta charset="utf-8"><title>{{Escape(project.Name)}}</title>
 <style>body{font-family:Segoe UI,Arial;background:#0b0e13;color:#eef2f7;margin:32px}h1,h2{color:#f59e0b}pre{white-space:pre-wrap;background:#12161e;border:1px solid #303846;border-radius:10px;padding:18px}.diagram{overflow:auto;background:#0b0e13;border:1px solid #303846;border-radius:10px}</style></head>
-<body><h1>{{Escape(project.Name)}}</h1><div class="diagram">{{svg}}</div><h2>Projektbericht</h2><pre>{{Escape(plain)}}</pre></body></html>
+<body><h1>{{Escape(project.Name)}}</h1><div class="diagram">{{svg}}</div><h2>{{reportTitle}}</h2><pre>{{Escape(plain)}}</pre></body></html>
 """;
         File.WriteAllText(path, html, new UTF8Encoding(false));
     }
@@ -216,13 +267,28 @@ public static class ReportExportService
         var body = new StringBuilder();
         foreach (var line in (plainText ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
             body.Append("<w:p><w:r><w:t xml:space=\"preserve\">").Append(SecurityElement.Escape(line)).Append("</w:t></w:r></w:p>");
-        WriteEntry(zip, "word/document.xml", $"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body>{body}<w:sectPr><w:pgSz w:w=\"11906\" w:h=\"16838\"/><w:pgMar w:top=\"1134\" w:right=\"1134\" w:bottom=\"1134\" w:left=\"1134\"/></w:sectPr></w:body></w:document>");
+        var settings = ApplicationSettingsService.Current;
+        var letter = settings.PageSize.Equals("Letter", StringComparison.OrdinalIgnoreCase);
+        var landscape = settings.PageOrientation.Equals("Querformat", StringComparison.OrdinalIgnoreCase);
+        var pageW = letter ? 12240 : 11906;
+        var pageH = letter ? 15840 : 16838;
+        if (landscape) (pageW, pageH) = (pageH, pageW);
+        var orient = landscape ? " w:orient=\"landscape\"" : string.Empty;
+        WriteEntry(zip, "word/document.xml", $"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body>{body}<w:sectPr><w:pgSz w:w=\"{pageW}\" w:h=\"{pageH}\"{orient}/><w:pgMar w:top=\"1134\" w:right=\"1134\" w:bottom=\"1134\" w:left=\"1134\"/></w:sectPr></w:body></w:document>");
     }
 
     public static void ExportPdf(string path, string plainText)
     {
-        var lines = WrapLines(plainText, 92).Take(800).ToList();
-        var pages = lines.Chunk(52).ToList();
+        var settings = ApplicationSettingsService.Current;
+        var landscape = settings.PageOrientation.Equals("Querformat", StringComparison.OrdinalIgnoreCase);
+        var letter = settings.PageSize.Equals("Letter", StringComparison.OrdinalIgnoreCase);
+        var pageWidth = letter ? 612 : 595;
+        var pageHeight = letter ? 792 : 842;
+        if (landscape) (pageWidth, pageHeight) = (pageHeight, pageWidth);
+        var lineWidth = landscape ? 135 : 92;
+        var linesPerPage = landscape ? 42 : 52;
+        var lines = WrapLines(plainText, lineWidth).Take(1000).ToList();
+        var pages = lines.Chunk(linesPerPage).ToList();
         var objects = new List<string>();
         objects.Add("<< /Type /Catalog /Pages 2 0 R >>");
         var pageRefs = Enumerable.Range(0, pages.Count).Select(i => $"{3 + i * 2} 0 R").ToArray();
@@ -231,8 +297,8 @@ public static class ReportExportService
         {
             var pageObjectNumber = 3 + p * 2;
             var contentObjectNumber = pageObjectNumber + 1;
-            objects.Add($"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 {3 + pages.Count * 2} 0 R >> >> /Contents {contentObjectNumber} 0 R >>");
-            var stream = new StringBuilder("BT\n/F1 9 Tf\n42 805 Td\n12 TL\n");
+            objects.Add($"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {pageWidth} {pageHeight}] /Resources << /Font << /F1 {3 + pages.Count * 2} 0 R >> >> /Contents {contentObjectNumber} 0 R >>");
+            var stream = new StringBuilder($"BT\n/F1 9 Tf\n42 {pageHeight - 37} Td\n12 TL\n");
             foreach (var line in pages[p]) stream.Append('(').Append(EscapePdf(line)).Append(") Tj\nT*\n");
             stream.Append("ET\n");
             var bytes = Encoding.Latin1.GetBytes(stream.ToString());

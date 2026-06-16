@@ -1,9 +1,11 @@
 using Microsoft.Win32;
 using System.IO;
+using System.Globalization;
 using IOPath = System.IO.Path;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -431,11 +433,11 @@ public partial class MainWindow
         settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         _sshHostBox = AddAdvancedInlineField(settingsGrid, 0, 0, "Host", "192.168.1.1", 145);
-        _sshPortBox = AddAdvancedInlineField(settingsGrid, 0, 1, "Port", "22", 70);
+        _sshPortBox = AddAdvancedInlineField(settingsGrid, 0, 1, "Port", _appSettings.DefaultSshPort.ToString(CultureInfo.InvariantCulture), 70);
         _sshUserBox = AddAdvancedInlineField(settingsGrid, 0, 2, "Benutzer", "netadmin", 130);
-        _sshAuthModeCombo = new ComboBox { ItemsSource = new[] { "OpenSSH + Schlüssel", "Plink + Passwort" }, SelectedIndex = 0, Width = 170, Margin = new Thickness(6) };
+        _sshAuthModeCombo = new ComboBox { ItemsSource = new[] { "OpenSSH + Schlüssel", "Plink + Passwort" }, SelectedIndex = 0, Width = 170, Margin = new Thickness(6), ItemTemplate = LocalizationService.CreateLocalizedStringTemplate() };
         AddAdvancedInlineControl(settingsGrid, 0, 3, "Authentifizierung", _sshAuthModeCombo);
-        _sshDelayBox = AddAdvancedInlineField(settingsGrid, 0, 4, "Zeilen-Delay ms", "45", 90);
+        _sshDelayBox = AddAdvancedInlineField(settingsGrid, 0, 4, "Zeilen-Delay ms", _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture), 90);
         _sshSaveCheck = new CheckBox { Content = "Nach Übertragung speichern", IsChecked = true, Margin = new Thickness(10, 28, 0, 0), VerticalAlignment = VerticalAlignment.Top };
         Grid.SetRow(_sshSaveCheck, 0); Grid.SetColumn(_sshSaveCheck, 5); settingsGrid.Children.Add(_sshSaveCheck);
 
@@ -532,6 +534,7 @@ public partial class MainWindow
             Width = 135,
             ItemsSource = new[] { "Ethernet", "Access", "Trunk", "Port-Channel", "Routed Link", "WAN", "Tunnel", "Serial", "Fiber", "Wireless" },
             SelectedIndex = 0,
+            ItemTemplate = LocalizationService.CreateLocalizedStringTemplate(),
             ToolTip = "Verbindungstyp. Der Typ steuert Farbe und Linienart im Diagramm."
         };
         _linkDescriptionBox = new TextBox { Width = 170, ToolTip = "Optionale Bezeichnung, z. B. OSPF Transit, MPLS Core oder Internet-Uplink." };
@@ -751,14 +754,14 @@ public partial class MainWindow
         RefreshProjectDeviceBindings();
         RefreshNetworkDiagram();
         ScheduleAutoSave();
-        if (!silent) MessageBox.Show(this, $"{snapshot.Name} wurde in das Projekt übernommen.", "Projekt", MessageBoxButton.OK, MessageBoxImage.Information);
+        if (!silent) MessageBox.Show(this, LT($"{snapshot.Name} wurde in das Projekt übernommen.", $"{snapshot.Name} was added to the project."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private async Task UpdateSelectedProjectDeviceAsync()
     {
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot)
         {
-            MessageBox.Show(this, "Bitte zuerst ein Projektgerät auswählen.", "Projekt", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Bitte zuerst ein Projektgerät auswählen."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         snapshot.Name = GetFieldValue("hostname") is { Length: > 0 } hostname ? hostname : snapshot.Name;
@@ -823,7 +826,7 @@ public partial class MainWindow
         RefreshNetworkDiagram();
         ScheduleAutoSave();
         await Task.CompletedTask;
-        MessageBox.Show(this, "Der Gegenstellenentwurf wurde als Projektgerät angelegt. Platzhalter <...> müssen vor einer Übertragung geprüft werden.", "Gegenstelle", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, L("Der Gegenstellenentwurf wurde als Projektgerät angelegt. Platzhalter <...> müssen vor einer Übertragung geprüft werden."), L("Gegenstelle"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
 
@@ -831,7 +834,7 @@ public partial class MainWindow
     {
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot)
         {
-            MessageBox.Show(this, "Bitte zuerst ein Projektgerät auswählen.", "Projekt", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Bitte zuerst ein Projektgerät auswählen."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         SetConfigurationPreviewText(string.IsNullOrWhiteSpace(snapshot.GeneratedConfiguration)
@@ -844,12 +847,12 @@ public partial class MainWindow
     {
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot)
         {
-            MessageBox.Show(this, "Bitte zuerst ein Projektgerät auswählen.", "Projekt", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Bitte zuerst ein Projektgerät auswählen."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (string.IsNullOrWhiteSpace(snapshot.GeneratedConfiguration))
         {
-            MessageBox.Show(this, "Für dieses Projektgerät ist noch keine Konfiguration gespeichert.", "Projekt", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Für dieses Projektgerät ist noch keine Konfiguration gespeichert."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         var dialog = new SaveFileDialog
@@ -874,7 +877,7 @@ public partial class MainWindow
 
     private void NewNetworkProject()
     {
-        if (MessageBox.Show(this, "Aktuelles Projekt verwerfen und ein neues Projekt beginnen?", "Neues Projekt", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(this, L("Aktuelles Projekt verwerfen und ein neues Projekt beginnen?"), L("Neues Projekt"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         _currentProject = new NetworkProject();
         _currentProjectPath = string.Empty;
         RebindProjectCollections();
@@ -895,7 +898,7 @@ public partial class MainWindow
             RefreshProjectEditors();
             RefreshNetworkDiagram();
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Projekt konnte nicht geöffnet werden", MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, L("Projekt konnte nicht geöffnet werden"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private void SaveNetworkProject(bool saveAs)
@@ -910,9 +913,9 @@ public partial class MainWindow
         try
         {
             ProjectService.Save(_currentProject, _currentProjectPath);
-            MessageBox.Show(this, "Projekt wurde gespeichert.", "Projekt", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Projekt wurde gespeichert."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Speicherfehler", MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, L("Speicherfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private void SyncProjectEditors()
@@ -1010,7 +1013,7 @@ public partial class MainWindow
             added++;
         }
         ScheduleAutoSave();
-        MessageBox.Show(this, $"{added} neue IPAM-Einträge wurden übernommen.", "IPAM", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, LT($"{added} neue IPAM-Einträge wurden übernommen.", $"{added} new IPAM entries were added."), "IPAM", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void ShowIpamValidation()
@@ -1073,7 +1076,7 @@ public partial class MainWindow
         UpdateStatusBar();
         RefreshAdvancedDependencies();
         ScheduleAutoSave();
-        MessageBox.Show(this, $"{fixedCount} Korrekturen wurden angewendet. Platzhalter und sicherheitsrelevante Werte müssen geprüft werden.", "Auto-Korrektur", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, LT($"{fixedCount} Korrekturen wurden angewendet. Platzhalter und sicherheitsrelevante Werte müssen geprüft werden.", $"{fixedCount} fixes were applied. Placeholders and security-relevant values must be reviewed."), L("Auto-Korrektur"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private bool ApplyAdvancedFix(string fixKey)
@@ -1209,7 +1212,10 @@ public partial class MainWindow
             _sshKeyBox?.Text.Trim() ?? string.Empty,
             _sshPasswordBox?.Password ?? string.Empty,
             Math.Clamp(delay, 0, 5000),
-            _sshSaveCheck?.IsChecked == true);
+            _sshSaveCheck?.IsChecked == true,
+            Math.Clamp(_appSettings.ConnectionTimeoutSeconds, 1, 600),
+            Math.Clamp(_appSettings.CommandTimeoutSeconds, 10, 3600),
+            _appSettings.AbortTransferOnError);
     }
 
     private void BrowseSshKey()
@@ -1230,14 +1236,14 @@ public partial class MainWindow
         var settings = GetSshSettings();
         if (string.IsNullOrWhiteSpace(settings.Host) || string.IsNullOrWhiteSpace(settings.Username))
         {
-            MessageBox.Show(this, "Host und Benutzer müssen angegeben werden.", "SSH", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, L("Host und Benutzer müssen angegeben werden."), "SSH", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        if (MessageBox.Show(this, $"Konfiguration wirklich an {settings.Host}:{settings.Port} übertragen?", "SSH-Übertragung", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(this, LT($"Konfiguration wirklich an {settings.Host}:{settings.Port} übertragen?", $"Really transfer the configuration to {settings.Host}:{settings.Port}?"), L("SSH-Übertragung"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         if (_operationsOutputBox != null) _operationsOutputBox.Text = "Konfiguration wird übertragen ...";
         var result = await SshDeviceService.SendConfigurationAsync(settings, await GenerateConfigAsync());
         if (_operationsOutputBox != null) _operationsOutputBox.Text = result.Output + (string.IsNullOrWhiteSpace(result.Error) ? "" : "\nFEHLER:\n" + result.Error);
-        MessageBox.Show(this, result.Success ? "Übertragung abgeschlossen." : "Übertragung fehlgeschlagen. Ausgabe prüfen.", "SSH", MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+        MessageBox.Show(this, result.Success ? L("Übertragung abgeschlossen.") : L("Übertragung fehlgeschlagen. Ausgabe prüfen."), "SSH", MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
     }
 
     private async Task CreateSshBackupAsync(string backupType)
@@ -1310,12 +1316,12 @@ public partial class MainWindow
     {
         if (_linkSourceCombo?.SelectedItem is not ProjectDeviceSnapshot source || _linkTargetCombo?.SelectedItem is not ProjectDeviceSnapshot target)
         {
-            MessageBox.Show(this, "Quelle und Ziel müssen ausgewählt werden.", "Verbindung", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Quelle und Ziel müssen ausgewählt werden."), L("Verbindung"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (source.Id == target.Id)
         {
-            MessageBox.Show(this, "Quelle und Ziel dürfen nicht identisch sein.", "Verbindung", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, L("Quelle und Ziel dürfen nicht identisch sein."), L("Verbindung"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -1328,7 +1334,7 @@ public partial class MainWindow
                 x.SourceInterface.Equals(sourceInterface, StringComparison.OrdinalIgnoreCase) &&
                 x.TargetInterface.Equals(targetInterface, StringComparison.OrdinalIgnoreCase)))
         {
-            MessageBox.Show(this, "Diese Verbindung ist bereits im Projekt vorhanden.", "Verbindung", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Diese Verbindung ist bereits im Projekt vorhanden."), L("Verbindung"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -1419,6 +1425,20 @@ public partial class MainWindow
         stack.Children.Add(title);
         stack.Children.Add(type);
         stack.Children.Add(mode);
+        var extraDetails = BuildDeviceDiagramDetails(device);
+        if (!string.IsNullOrWhiteSpace(extraDetails))
+        {
+            stack.Children.Add(new TextBlock
+            {
+                Text = extraDetails,
+                Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)),
+                FontSize = 9,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                Margin = new Thickness(4, 3, 4, 0)
+            });
+        }
 
         var border = new Border
         {
@@ -1465,6 +1485,12 @@ public partial class MainWindow
         var pointer = e.GetPosition(_diagramCanvas);
         var x = Math.Clamp(pointer.X - _diagramDragOffset.X, 5, Math.Max(5, _diagramCanvas.Width - element.Width - 5));
         var y = Math.Clamp(pointer.Y - _diagramDragOffset.Y, 5, Math.Max(5, _diagramCanvas.Height - element.Height - 5));
+        if (_appSettings.SnapDiagramToGrid)
+        {
+            const double gridSize = 20;
+            x = Math.Round(x / gridSize) * gridSize;
+            y = Math.Round(y / gridSize) * gridSize;
+        }
         Canvas.SetLeft(element, x);
         Canvas.SetTop(element, y);
         device.DiagramX = x;
@@ -1573,11 +1599,38 @@ public partial class MainWindow
 
     private string BuildDiagramLinkLabel(ProjectLink link)
     {
+        var lines = new List<string>();
         var type = string.IsNullOrWhiteSpace(link.LinkType) ? "Ethernet" : link.LinkType.Trim();
-        var interfaces = $"{link.SourceInterface} ↔ {link.TargetInterface}";
-        return string.IsNullOrWhiteSpace(link.Description)
-            ? $"{type}\n{interfaces}"
-            : $"{type}: {link.Description.Trim()}\n{interfaces}";
+        if (_appSettings.ShowConnectionTypes)
+            lines.Add(string.IsNullOrWhiteSpace(link.Description) ? type : $"{type}: {link.Description.Trim()}");
+        else if (!string.IsNullOrWhiteSpace(link.Description))
+            lines.Add(link.Description.Trim());
+        if (_appSettings.ShowInterfaceNames)
+            lines.Add($"{link.SourceInterface} ↔ {link.TargetInterface}");
+        return lines.Count == 0 ? LocalizationService.TranslateText("Verbindung") : string.Join("\n", lines);
+    }
+
+    private string BuildDeviceDiagramDetails(ProjectDeviceSnapshot device)
+    {
+        var details = new List<string>();
+        var config = device.GeneratedConfiguration ?? string.Empty;
+        if (_appSettings.ShowIpAddresses)
+        {
+            var ip = Regex.Matches(config, @"(?im)^\s*(?:ip address|ipv6 address)\s+([^\s]+(?:\s+[^\s]+)?)")
+                .Select(x => x.Groups[1].Value.Trim())
+                .FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(ip)) details.Add(ip);
+        }
+        if (_appSettings.ShowVlans)
+        {
+            var vlans = Regex.Matches(config, @"(?im)^\s*vlan\s+([0-9,\-]+)")
+                .Select(x => x.Groups[1].Value)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(3)
+                .ToList();
+            if (vlans.Count > 0) details.Add("VLAN " + string.Join(",", vlans));
+        }
+        return string.Join(" · ", details);
     }
 
     private string BuildDiagramLinkToolTip(ProjectLink link)
@@ -1621,9 +1674,9 @@ public partial class MainWindow
             if (extension == "html") ReportExportService.ExportHtml(dialog.FileName, _currentProject, _advancedDependencyFindings, _advancedSecurityFindings);
             else if (extension == "docx") ReportExportService.ExportDocx(dialog.FileName, plain);
             else ReportExportService.ExportPdf(dialog.FileName, plain);
-            MessageBox.Show(this, "Bericht wurde exportiert.", "Bericht", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, L("Bericht wurde exportiert."), L("Bericht"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "Exportfehler", MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, L("Exportfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private async Task EnsureProjectContainsCurrentDeviceAsync()
@@ -1635,26 +1688,37 @@ public partial class MainWindow
 
     private void InitializeAutoSave()
     {
-        _autoSaveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(60) };
+        _autoSaveTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600))
+        };
         _autoSaveTimer.Tick += (_, _) => SaveAutoSaveState();
         Loaded += (_, _) =>
         {
-            TryRestoreAutoSaveState();
-            _autoSaveTimer?.Start();
+            if (_appSettings.LoadLastProject)
+                TryRestoreAutoSaveState(promptUser: false);
+            else if (_appSettings.RestoreAfterCrash)
+                TryRestoreAutoSaveState(promptUser: true);
+
+            if (_appSettings.AutoSaveEnabled) _autoSaveTimer?.Start();
         };
-        Closing += (_, _) => SaveAutoSaveState();
+        Closing += (_, _) =>
+        {
+            if (_appSettings.SaveProjectOnExit || _appSettings.AutoSaveEnabled) SaveAutoSaveState();
+        };
     }
 
     private void ScheduleAutoSave()
     {
-        if (_autoSaveTimer == null) return;
+        if (_autoSaveTimer == null || !_appSettings.AutoSaveEnabled) return;
         _autoSaveTimer.Stop();
-        _autoSaveTimer.Interval = TimeSpan.FromSeconds(20);
+        _autoSaveTimer.Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600));
         _autoSaveTimer.Start();
     }
 
     private void SaveAutoSaveState()
     {
+        if (!_appSettings.AutoSaveEnabled && !_appSettings.SaveProjectOnExit) return;
         try
         {
             SyncProjectEditors();
@@ -1671,7 +1735,7 @@ public partial class MainWindow
             var path = ProjectService.AutoSavePath;
             Directory.CreateDirectory(IOPath.GetDirectoryName(path)!);
             File.WriteAllText(path, JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true }), new UTF8Encoding(false));
-            if (_autoSaveTimer != null) _autoSaveTimer.Interval = TimeSpan.FromSeconds(60);
+            if (_autoSaveTimer != null) _autoSaveTimer.Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600));
         }
         catch
         {
@@ -1679,15 +1743,19 @@ public partial class MainWindow
         }
     }
 
-    private void TryRestoreAutoSaveState()
+    private void TryRestoreAutoSaveState(bool promptUser)
     {
+        if (!_appSettings.LoadLastProject && !_appSettings.RestoreAfterCrash) return;
         var path = ProjectService.AutoSavePath;
         if (!File.Exists(path)) return;
         try
         {
             var state = JsonSerializer.Deserialize<AutoSaveState>(File.ReadAllText(path, Encoding.UTF8), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (state == null || DateTime.UtcNow - state.SavedUtc > TimeSpan.FromDays(30)) return;
-            if (MessageBox.Show(this, $"Es wurde ein Autosave vom {state.SavedUtc.ToLocalTime():dd.MM.yyyy HH:mm} gefunden. Wiederherstellen?", "Autosave", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+            if (promptUser && MessageBox.Show(this,
+                    LocalizationService.TranslateText($"Es wurde ein Autosave vom {state.SavedUtc.ToLocalTime():dd.MM.yyyy HH:mm} gefunden. Wiederherstellen?"),
+                    "Autosave", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
             _currentProject = state.Project ?? new NetworkProject();
             NormalizeProjectCollections();
             RebindProjectCollections();

@@ -128,7 +128,10 @@ public sealed record SshConnectionSettings(
     string PrivateKeyPath,
     string Password,
     int LineDelayMs,
-    bool SaveAfterTransfer);
+    bool SaveAfterTransfer,
+    int ConnectionTimeoutSeconds = 15,
+    int CommandTimeoutSeconds = 180,
+    bool AbortOnError = true);
 
 public sealed record SshOperationResult(bool Success, string Output, string Error, int ExitCode);
 

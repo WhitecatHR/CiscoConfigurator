@@ -100,7 +100,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
+        InitializeApplicationSettings();
 
         InitTopBar();
         BuildDashboardTab();
@@ -111,23 +111,31 @@ public partial class MainWindow : Window
         BuildCommandTab();
         BuildCheckTab();
         BuildAdvancedFeatureTabs();
+        BuildSettingsTab();
         RebuildMainNavigation();
-        if (_tabsByName.TryGetValue("Übersicht", out var overviewTab))
+        var startPage = string.IsNullOrWhiteSpace(_appSettings.StartPage) ? "Übersicht" : _appSettings.StartPage;
+        if (_tabsByName.TryGetValue(startPage, out var startTab))
+            MainTabs.SelectedItem = startTab;
+        else if (_tabsByName.TryGetValue("Übersicht", out var overviewTab))
             MainTabs.SelectedItem = overviewTab;
         HookButtons();
         ApplyFilters();
         UpdateConditionalFieldVisibility();
         RefreshStpPreview();
+        ApplyRuntimeSettings();
     }
 
     private void InitTopBar()
     {
         DeviceTypeCombo.ItemsSource = new[] { "Router", "L3-Switch", "L2-Switch" };
-        DeviceTypeCombo.SelectedIndex = 0;
+        DeviceTypeCombo.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
+        DeviceTypeCombo.SelectedItem = DeviceTypeCombo.Items.Cast<object>().FirstOrDefault(x => string.Equals(x?.ToString(), _appSettings.DefaultDeviceType, StringComparison.OrdinalIgnoreCase)) ?? "Router";
         ConfigModeCombo.ItemsSource = new[] { "Ohne VRF", "Mit VRF" };
-        ConfigModeCombo.SelectedIndex = 0;
+        ConfigModeCombo.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
+        ConfigModeCombo.SelectedItem = ConfigModeCombo.Items.Cast<object>().FirstOrDefault(x => string.Equals(x?.ToString(), _appSettings.DefaultConfigMode, StringComparison.OrdinalIgnoreCase)) ?? "Ohne VRF";
         WriteMemCombo.ItemsSource = new[] { "Ja", "Nein" };
-        WriteMemCombo.SelectedIndex = 0;
+        WriteMemCombo.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
+        WriteMemCombo.SelectedItem = _appSettings.IncludeWriteMemory ? "Ja" : "Nein";
 
         DeviceTypeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); ScheduleAutoSave(); };
         ConfigModeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); ScheduleAutoSave(); };
@@ -375,6 +383,9 @@ public partial class MainWindow : Window
         {
             AddNavigationTab(tabName);
         }
+
+        AddNavigationGroupHeader("SYSTEM");
+        AddNavigationTab("Einstellungen");
     }
 
     private void AddNavigationTab(string tabName)
@@ -972,6 +983,7 @@ public partial class MainWindow : Window
         if (string.Equals(field.Type, "Combo", StringComparison.OrdinalIgnoreCase))
         {
             var combo = new ComboBox { ItemsSource = field.Items, HorizontalAlignment = HorizontalAlignment.Stretch };
+            combo.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
             combo.SelectedIndex = Math.Clamp(field.Selected, 0, Math.Max(0, field.Items.Count - 1));
             control = combo;
         }
@@ -2460,8 +2472,8 @@ public partial class MainWindow : Window
             (byte)Math.Min(255, color.R + 45),
             (byte)Math.Min(255, color.G + 45),
             (byte)Math.Min(255, color.B + 45)));
-        badge.ToolTip = tooltip;
-        text.Text = label;
+        badge.ToolTip = LocalizationService.TranslateText(tooltip);
+        text.Text = LocalizationService.TranslateText(label);
     }
 
     private IEnumerable<string> ValidateModule(ModuleDefinition module)
@@ -2579,7 +2591,7 @@ public partial class MainWindow : Window
         if (_duplicateCheckHasRun && _lastDuplicateConfigIssues.Count > 0)
             validationText += $" · Duplikate: {_lastDuplicateConfigIssues.Count}";
 
-        ValidationTextBlock.Text = validationText;
+        ValidationTextBlock.Text = LocalizationService.TranslateText(validationText);
         var statusOk = !hasWarnings && (!_duplicateCheckHasRun || _lastDuplicateConfigIssues.Count == 0);
         ValidationTextBlock.Foreground = statusOk
             ? new SolidColorBrush(Color.FromRgb(134, 239, 172))
@@ -2588,14 +2600,14 @@ public partial class MainWindow : Window
 
         var active = ModuleCatalog.All.Count(m => IsAllowed(m) && _moduleChecks.TryGetValue(m.Name, out var cb) && cb.IsChecked == true);
         var available = ModuleCatalog.All.Count(IsAllowed);
-        ModuleSummaryTextBlock.Text = $"{active} von {available} Modulen aktiv";
+        ModuleSummaryTextBlock.Text = LocalizationService.TranslateText($"{active} von {available} Modulen aktiv");
         if (_dashboardDeviceText != null)
-            _dashboardDeviceText.Text = $"{DeviceTypeCombo.SelectedItem ?? "Router"} · {ConfigModeCombo.SelectedItem ?? "Ohne VRF"}";
+            _dashboardDeviceText.Text = $"{LocalizationService.TranslateText(DeviceTypeCombo.SelectedItem?.ToString() ?? "Router")} · {LocalizationService.TranslateText(ConfigModeCombo.SelectedItem?.ToString() ?? "Ohne VRF")}";
         if (_dashboardActiveModulesText != null)
             _dashboardActiveModulesText.Text = $"{active} von {available}";
         if (_dashboardValidationText != null)
         {
-            _dashboardValidationText.Text = statusOk ? "Keine Warnungen" : $"{_currentValidationIssues.Count} Hinweis(e)";
+            _dashboardValidationText.Text = LocalizationService.TranslateText(statusOk ? "Keine Warnungen" : $"{_currentValidationIssues.Count} Hinweis(e)");
             _dashboardValidationText.Foreground = statusOk
                 ? new SolidColorBrush(Color.FromRgb(74, 222, 128))
                 : new SolidColorBrush(Color.FromRgb(251, 191, 36));
@@ -2989,6 +3001,7 @@ public partial class MainWindow : Window
     {
         var request = BuildRequest();
         var config = await NativeCiscoGenerator.GenerateAsync(request);
+        config = ApplyConfigurationOutputSettings(config);
         _lastDuplicateConfigIssues = FindDuplicateConfigIssues(config);
         _duplicateCheckHasRun = true;
         UpdateStatusBar();
@@ -3014,22 +3027,39 @@ public partial class MainWindow : Window
     {
         var dialog = new SaveFileDialog
         {
-            Title = "Cisco-Konfiguration speichern",
-            Filter = "Textdatei (*.txt)|*.txt|Alle Dateien (*.*)|*.*",
-            FileName = "cisco_config.txt"
+            Title = LocalizationService.TranslateText("Cisco-Konfiguration speichern"),
+            Filter = LocalizationService.IsEnglish
+                ? "Text file (*.txt)|*.txt|All files (*.*)|*.*"
+                : "Textdatei (*.txt)|*.txt|Alle Dateien (*.*)|*.*",
+            FileName = BuildExportFileName()
         };
+        if (!string.IsNullOrWhiteSpace(_appSettings.DefaultExportFolder) && Directory.Exists(_appSettings.DefaultExportFolder))
+            dialog.InitialDirectory = _appSettings.DefaultExportFolder;
         if (dialog.ShowDialog(this) != true) return;
 
         try
         {
             var config = await GenerateConfigAsync();
             File.WriteAllText(dialog.FileName, config ?? string.Empty, new UTF8Encoding(false));
-            ShowDuplicateWarningIfNeeded("exportiert");
-            MessageBox.Show(this, "Konfiguration wurde gespeichert.", "Export abgeschlossen", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            var directory = Path.GetDirectoryName(dialog.FileName) ?? Environment.CurrentDirectory;
+            var baseName = Path.GetFileNameWithoutExtension(dialog.FileName);
+            if (_appSettings.ExportPeerConfiguration)
+            {
+                var peer = PeerRequirementGenerator.Generate(BuildRequest());
+                File.WriteAllText(Path.Combine(directory, baseName + "_peer.txt"), peer, new UTF8Encoding(false));
+            }
+            if (_appSettings.GenerateRollbackFile && _rollbackBox != null && !string.IsNullOrWhiteSpace(_rollbackBox.Text))
+                File.WriteAllText(Path.Combine(directory, baseName + "_rollback.txt"), _rollbackBox.Text, new UTF8Encoding(false));
+            if (_appSettings.ExportReportsTogether && _reportPreviewBox != null && !string.IsNullOrWhiteSpace(_reportPreviewBox.Text))
+                File.WriteAllText(Path.Combine(directory, baseName + "_report.txt"), _reportPreviewBox.Text, new UTF8Encoding(false));
+
+            ShowDuplicateWarningIfNeeded(LocalizationService.IsEnglish ? "exported" : "exportiert");
+            MessageBox.Show(this, LocalizationService.TranslateText("Konfiguration wurde gespeichert."), LocalizationService.TranslateText("Export abgeschlossen"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Fehler beim Export", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, LocalizationService.TranslateText("Fehler beim Export"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -3193,17 +3223,20 @@ public partial class MainWindow : Window
 
     private void ResetAllInputs()
     {
-        var result = MessageBox.Show(
-            this,
-            "Sollen wirklich alle Eingaben, aktivierten Module, Importdaten und Vorschauen auf die Ausgangswerte zurückgesetzt werden?",
-            "Alles zurücksetzen",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes) return;
+        if (_appSettings.ConfirmReset)
+        {
+            var result = MessageBox.Show(
+                this,
+                LocalizationService.TranslateText("Sollen wirklich alle Eingaben, aktivierten Module, Importdaten und Vorschauen auf die Ausgangswerte zurückgesetzt werden?"),
+                LocalizationService.TranslateText("Alles zurücksetzen"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return;
+        }
 
-        DeviceTypeCombo.SelectedItem = "Router";
-        ConfigModeCombo.SelectedItem = "Ohne VRF";
-        WriteMemCombo.SelectedItem = "Ja";
+        DeviceTypeCombo.SelectedItem = _appSettings.DefaultDeviceType;
+        ConfigModeCombo.SelectedItem = _appSettings.DefaultConfigMode;
+        WriteMemCombo.SelectedItem = _appSettings.IncludeWriteMemory ? "Ja" : "Nein";
 
         foreach (var module in ModuleCatalog.All)
         {
