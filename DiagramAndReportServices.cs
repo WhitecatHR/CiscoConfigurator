@@ -47,10 +47,10 @@ public static class NetworkDiagramService
         var count = Math.Max(1, project.Devices.Count);
         var columns = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(count)));
         var rows = Math.Max(1, (int)Math.Ceiling(count / (double)columns));
-        var cellW = Math.Max(180, width / columns);
-        var cellH = Math.Max(130, height / rows);
-        const double nodeWidth = 170;
-        const double nodeHeight = 92;
+        var cellW = Math.Max(220, width / columns);
+        var cellH = Math.Max(175, height / rows);
+        const double nodeWidth = 190;
+        const double nodeHeight = 132;
 
         for (var i = 0; i < project.Devices.Count; i++)
         {
@@ -170,16 +170,49 @@ public static class NetworkDiagramService
         {
             if (!layout.TryGetValue(device.Id, out var p)) continue;
 
-            sb.AppendLine($"<rect x='{p.X:0}' y='{p.Y:0}' width='{p.Width:0}' height='{p.Height:0}' rx='12' fill='#171c25' stroke='#e8791a' stroke-width='2'/>");
-            sb.AppendLine($"<text x='{p.X + p.Width / 2:0}' y='{p.Y + 34:0}' fill='#ffffff' font-family='Segoe UI' font-size='16' font-weight='bold' text-anchor='middle'>{SecurityElement.Escape(device.Name)}</text>");
-            sb.AppendLine($"<text x='{p.X + p.Width / 2:0}' y='{p.Y + 59:0}' fill='#9ca6b5' font-family='Segoe UI' font-size='12' text-anchor='middle'>{SecurityElement.Escape(device.DeviceType)}</text>");
-            sb.AppendLine($"<text x='{p.X + p.Width / 2:0}' y='{p.Y + 77:0}' fill='#64748b' font-family='Segoe UI' font-size='10' text-anchor='middle'>{SecurityElement.Escape(device.ConfigMode)}</text>");
+            var style = GetSvgDeviceStyle(device.DeviceType);
+            var centerX = p.X + p.Width / 2;
+            sb.AppendLine($"<rect x='{p.X:0}' y='{p.Y:0}' width='{p.Width:0}' height='{p.Height:0}' rx='{style.Radius}' fill='{style.Fill}' stroke='{style.Stroke}' stroke-width='2'/>");
+            AppendSvgDeviceIcon(sb, style, centerX, p.Y + 10);
+            sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 64:0}' fill='#ffffff' font-family='Segoe UI' font-size='16' font-weight='bold' text-anchor='middle'>{SecurityElement.Escape(device.Name)}</text>");
+            sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 86:0}' fill='{style.Stroke}' font-family='Segoe UI' font-size='11' font-weight='bold' text-anchor='middle'>{SecurityElement.Escape(style.Label)} · {SecurityElement.Escape(device.DeviceType)}</text>");
+            sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 106:0}' fill='#64748b' font-family='Segoe UI' font-size='10' text-anchor='middle'>{SecurityElement.Escape(device.ConfigMode)}</text>");
         }
 
         sb.AppendLine("</svg>");
         return sb.ToString();
     }
 
+    private sealed record SvgDeviceStyle(string Label, string Fill, string Stroke, int Radius);
+
+    private static SvgDeviceStyle GetSvgDeviceStyle(string? deviceType)
+    {
+        var normalized = (deviceType ?? string.Empty).Trim();
+        if (normalized.Contains("L3", StringComparison.OrdinalIgnoreCase)) return new SvgDeviceStyle("L3SW", "#122224", "#2dd4bf", 12);
+        if (normalized.Contains("L2", StringComparison.OrdinalIgnoreCase)) return new SvgDeviceStyle("L2SW", "#132118", "#4ade80", 8);
+        return new SvgDeviceStyle("RT", "#24180f", "#e8791a", 28);
+    }
+
+    private static void AppendSvgDeviceIcon(StringBuilder sb, SvgDeviceStyle style, double centerX, double topY)
+    {
+        var left = centerX - 22;
+        if (style.Label == "RT")
+        {
+            sb.AppendLine($"<circle cx='{centerX:0}' cy='{topY + 18:0}' r='17' fill='none' stroke='{style.Stroke}' stroke-width='2'/>");
+            sb.AppendLine($"<path d='M {centerX - 13:0},{topY + 18:0} L {centerX + 13:0},{topY + 18:0} M {centerX + 8:0},{topY + 13:0} L {centerX + 13:0},{topY + 18:0} L {centerX + 8:0},{topY + 23:0} M {centerX - 8:0},{topY + 13:0} L {centerX - 13:0},{topY + 18:0} L {centerX - 8:0},{topY + 23:0} M {centerX:0},{topY + 5:0} L {centerX:0},{topY + 31:0} M {centerX - 5:0},{topY + 10:0} L {centerX:0},{topY + 5:0} L {centerX + 5:0},{topY + 10:0} M {centerX - 5:0},{topY + 26:0} L {centerX:0},{topY + 31:0} L {centerX + 5:0},{topY + 26:0}' fill='none' stroke='{style.Stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>");
+            return;
+        }
+
+        sb.AppendLine($"<rect x='{left:0}' y='{topY + 3:0}' width='44' height='30' rx='{(style.Label == "L3SW" ? 5 : 4)}' fill='none' stroke='{style.Stroke}' stroke-width='2'/>");
+        if (style.Label == "L3SW")
+        {
+            sb.AppendLine($"<path d='M {left + 6:0},{topY + 12:0} L {left + 38:0},{topY + 12:0} M {left + 33:0},{topY + 8:0} L {left + 38:0},{topY + 12:0} L {left + 33:0},{topY + 16:0} M {left + 11:0},{topY + 8:0} L {left + 6:0},{topY + 12:0} L {left + 11:0},{topY + 16:0} M {centerX:0},{topY + 7:0} L {centerX:0},{topY + 29:0} M {centerX - 4:0},{topY + 11:0} L {centerX:0},{topY + 7:0} L {centerX + 4:0},{topY + 11:0} M {centerX - 4:0},{topY + 25:0} L {centerX:0},{topY + 29:0} L {centerX + 4:0},{topY + 25:0}' fill='none' stroke='{style.Stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>");
+        }
+        else
+        {
+            sb.AppendLine($"<path d='M {left + 6:0},{topY + 12:0} L {left + 38:0},{topY + 12:0} M {left + 33:0},{topY + 8:0} L {left + 38:0},{topY + 12:0} L {left + 33:0},{topY + 16:0} M {left + 11:0},{topY + 8:0} L {left + 6:0},{topY + 12:0} L {left + 11:0},{topY + 16:0} M {left + 6:0},{topY + 24:0} L {left + 38:0},{topY + 24:0} M {left + 33:0},{topY + 20:0} L {left + 38:0},{topY + 24:0} L {left + 33:0},{topY + 28:0} M {left + 11:0},{topY + 20:0} L {left + 6:0},{topY + 24:0} L {left + 11:0},{topY + 28:0}' fill='none' stroke='{style.Stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>");
+        }
+    }
 }
 
 public static class ReportExportService
@@ -190,21 +223,45 @@ public static class ReportExportService
         var english = ResolveReportLanguage(settings.ReportLanguage).StartsWith("en", StringComparison.OrdinalIgnoreCase);
         string R(string de, string en) => english ? en : de;
         var sb = new StringBuilder();
-        sb.AppendLine(project.Name);
-        sb.AppendLine(new string('=', Math.Max(10, project.Name.Length)));
+        var info = project.ProjectInfo ?? new ProjectPlanInfo();
+
+        sb.AppendLine(R("NETZPLAN", "NETWORK PLAN"));
+        sb.AppendLine(new string('=', 72));
+        sb.AppendLine($"{R("Projekt", "Project")}: {project.Name}");
+        if (!string.IsNullOrWhiteSpace(info.ProjectNumber)) sb.AppendLine($"{R("Projektnummer", "Project number")}: {info.ProjectNumber}");
+        if (!string.IsNullOrWhiteSpace(info.Customer)) sb.AppendLine($"{R("Organisation / Kunde", "Organization / customer")}: {info.Customer}");
+        if (!string.IsNullOrWhiteSpace(info.Location)) sb.AppendLine($"{R("Standort", "Location")}: {info.Location}");
+        if (!string.IsNullOrWhiteSpace(info.ProjectManager)) sb.AppendLine($"{R("Projektleiter", "Project manager")}: {info.ProjectManager}");
+        if (!string.IsNullOrWhiteSpace(info.Author)) sb.AppendLine($"{R("Bearbeiter", "Author")}: {info.Author}");
+        if (!string.IsNullOrWhiteSpace(info.Version)) sb.AppendLine($"{R("Version", "Version")}: {info.Version}");
+        if (!string.IsNullOrWhiteSpace(info.Status)) sb.AppendLine($"{R("Status", "Status")}: {info.Status}");
         if (!string.IsNullOrWhiteSpace(settings.CompanyName)) sb.AppendLine($"{R("Firma", "Company")}: {settings.CompanyName}");
-        if (!string.IsNullOrWhiteSpace(settings.ProjectManager)) sb.AppendLine($"{R("Projektverantwortlicher", "Project manager")}: {settings.ProjectManager}");
-        if (!string.IsNullOrWhiteSpace(settings.ReportLogoPath)) sb.AppendLine($"{R("Berichtslogo", "Report logo")}: {settings.ReportLogoPath}");
         sb.AppendLine($"{R("Erstellt", "Created")}: {DateTime.Now:yyyy-MM-dd HH:mm}");
-        if (!string.IsNullOrWhiteSpace(project.Description)) sb.AppendLine(project.Description);
+        if (!string.IsNullOrWhiteSpace(project.Description))
+        {
+            sb.AppendLine();
+            sb.AppendLine(R("BESCHREIBUNG", "DESCRIPTION"));
+            sb.AppendLine(project.Description);
+        }
+
         sb.AppendLine();
         sb.AppendLine(R("GERÄTEÜBERSICHT", "DEVICE OVERVIEW"));
-        foreach (var d in project.Devices) sb.AppendLine($"- {d.Name} | {d.DeviceType} | {d.ConfigMode} | {(english ? LocalizationService.TranslateText(d.Status, "en-US") : d.Status)}");
-        sb.AppendLine();
-        sb.AppendLine(R("IP-ADRESSPLAN", "IP ADDRESS PLAN"));
-        foreach (var i in project.IpamEntries) sb.AppendLine($"- {i.Network}/{i.PrefixLength} | VLAN {i.Vlan} | GW {i.Gateway} | {i.Device} {i.Interface} | {i.Description}");
+        sb.AppendLine(new string('-', 72));
+        foreach (var d in project.Devices)
+        {
+            var label = DeviceLabel(d.DeviceType);
+            var protocols = string.Join(", ", ExtractRoutingProtocols(d.GeneratedConfiguration));
+            var vrfs = string.Join(", ", ExtractVrfs(d.GeneratedConfiguration));
+            var acls = string.Join(", ", ExtractAclBindings(d.GeneratedConfiguration).Select(x => x.Acl).Distinct(StringComparer.OrdinalIgnoreCase));
+            sb.AppendLine($"- {d.Name} | {label} | {d.DeviceType} | {d.ConfigMode}");
+            if (!string.IsNullOrWhiteSpace(protocols)) sb.AppendLine($"  {R("Routing", "Routing")}: {protocols}");
+            if (!string.IsNullOrWhiteSpace(vrfs)) sb.AppendLine($"  VRF: {vrfs}");
+            if (!string.IsNullOrWhiteSpace(acls)) sb.AppendLine($"  ACL: {acls}");
+        }
+
         sb.AppendLine();
         sb.AppendLine(R("VERBINDUNGEN", "CONNECTIONS"));
+        sb.AppendLine(new string('-', 72));
         foreach (var l in project.Links)
         {
             var source = project.Devices.FirstOrDefault(x => x.Id == l.SourceDeviceId)?.Name ?? l.SourceDeviceId;
@@ -212,22 +269,89 @@ public static class ReportExportService
             var description = string.IsNullOrWhiteSpace(l.Description) ? string.Empty : $" | {l.Description}";
             sb.AppendLine($"- {source} {l.SourceInterface} ↔ {target} {l.TargetInterface} | {l.LinkType}{description}");
         }
+
         sb.AppendLine();
-        sb.AppendLine(R("ABHÄNGIGKEITEN", "DEPENDENCIES"));
+        sb.AppendLine(R("IP-/VLAN-ÜBERSICHT", "IP/VLAN OVERVIEW"));
+        sb.AppendLine(new string('-', 72));
+        foreach (var i in project.IpamEntries.OrderBy(x => x.Network, StringComparer.OrdinalIgnoreCase))
+            sb.AppendLine($"- {i.Network}/{i.PrefixLength} | VLAN {i.Vlan} | GW {i.Gateway} | {i.Device} {i.Interface} | {i.Description}");
+        foreach (var d in project.Devices)
+        {
+            var vlans = string.Join(", ", ExtractVlans(d.GeneratedConfiguration));
+            if (!string.IsNullOrWhiteSpace(vlans)) sb.AppendLine($"- {d.Name}: {R("VLANs", "VLANs")} {vlans}");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine(R("INTERFACE- UND PORTPLAN", "INTERFACE AND PORT PLAN"));
+        sb.AppendLine(new string('-', 72));
+        foreach (var d in project.Devices)
+        {
+            var ports = PortPlanService.Parse(d.GeneratedConfiguration).Take(12).ToList();
+            if (ports.Count == 0) continue;
+            sb.AppendLine($"{d.Name}:");
+            foreach (var p in ports)
+            {
+                var mode = string.IsNullOrWhiteSpace(p.Mode) ? "-" : p.Mode;
+                var vlanText = string.Join(", ", new[]
+                {
+                    string.IsNullOrWhiteSpace(p.AccessVlan) ? string.Empty : $"Access {p.AccessVlan}",
+                    string.IsNullOrWhiteSpace(p.NativeVlan) ? string.Empty : $"Native {p.NativeVlan}",
+                    string.IsNullOrWhiteSpace(p.AllowedVlans) ? string.Empty : $"Allowed {p.AllowedVlans}"
+                }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                sb.AppendLine($"  - {p.Interface} | {mode} | {vlanText} | {p.IpAddress}");
+            }
+        }
+
+        sb.AppendLine();
+        sb.AppendLine(R("ROUTEN", "ROUTES"));
+        sb.AppendLine(new string('-', 72));
+        foreach (var d in project.Devices)
+        foreach (var route in ExtractStaticRoutes(d.GeneratedConfiguration))
+            sb.AppendLine($"- {d.Name} | {route.Vrf} | {route.Network} {route.Mask} -> {route.NextHop}");
+
+        sb.AppendLine();
+        sb.AppendLine(R("ACL-ZUORDNUNGEN", "ACL ASSIGNMENTS"));
+        sb.AppendLine(new string('-', 72));
+        foreach (var d in project.Devices)
+        foreach (var acl in ExtractAclBindings(d.GeneratedConfiguration))
+            sb.AppendLine($"- {d.Name} | {acl.Interface} | {acl.Acl} | {acl.Direction}");
+
+        sb.AppendLine();
+        sb.AppendLine(R("VRF- UND ROUTING-PROTOKOLLE", "VRF AND ROUTING PROTOCOLS"));
+        sb.AppendLine(new string('-', 72));
+        foreach (var d in project.Devices)
+        {
+            var vrfs = string.Join(", ", ExtractVrfs(d.GeneratedConfiguration));
+            var protocols = string.Join(", ", ExtractRoutingProtocols(d.GeneratedConfiguration));
+            sb.AppendLine($"- {d.Name} | VRF: {(string.IsNullOrWhiteSpace(vrfs) ? "-" : vrfs)} | {R("Protokolle", "Protocols")}: {(string.IsNullOrWhiteSpace(protocols) ? "-" : protocols)}");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine(R("PRÜFUNGEN", "VALIDATION"));
+        sb.AppendLine(new string('-', 72));
         foreach (var f in dependencies) sb.AppendLine($"- [{f.Severity}] {f.Area}: {(english ? LocalizationService.TranslateText(f.Message, "en-US") : f.Message)}");
+
         sb.AppendLine();
         sb.AppendLine(R("SICHERHEITSPRÜFUNG", "SECURITY AUDIT"));
+        sb.AppendLine(new string('-', 72));
         foreach (var f in security) sb.AppendLine($"- [{f.Severity}] {f.Category}: {(english ? LocalizationService.TranslateText(f.Message, "en-US") : f.Message)} {R("Empfehlung", "Recommendation")}: {(english ? LocalizationService.TranslateText(f.Recommendation, "en-US") : f.Recommendation)}");
+
         sb.AppendLine();
         sb.AppendLine(R("TESTPLAN", "TEST PLAN"));
-        sb.AppendLine("- show ip interface brief");
-        sb.AppendLine("- show vlan brief");
-        sb.AppendLine("- show interfaces trunk");
-        sb.AppendLine("- show spanning-tree summary");
-        sb.AppendLine("- show ip route");
-        sb.AppendLine("- show ip ospf neighbor");
-        sb.AppendLine("- show etherchannel summary");
-        sb.AppendLine("- show access-lists");
+        sb.AppendLine(new string('-', 72));
+        foreach (var cmd in new[]
+                 {
+                     "show ip interface brief",
+                     "show vlan brief",
+                     "show interfaces trunk",
+                     "show ip route",
+                     "show ip ospf neighbor",
+                     "show ip bgp summary",
+                     "show access-lists",
+                     "show vrf",
+                     "show etherchannel summary"
+                 })
+            sb.AppendLine($"- {cmd}");
         return sb.ToString();
     }
 
@@ -242,14 +366,24 @@ public static class ReportExportService
     public static void ExportHtml(string path, NetworkProject project, IEnumerable<DependencyFinding> dependencies, IEnumerable<SecurityFinding> security)
     {
         var plain = BuildPlainText(project, dependencies, security);
-        var svg = NetworkDiagramService.BuildSvg(project, 1200, 650);
-        var english = ResolveReportLanguage(ApplicationSettingsService.Current.ReportLanguage).StartsWith("en", StringComparison.OrdinalIgnoreCase);
-        var htmlLanguage = english ? "en" : "de";
-        var reportTitle = english ? "Project report" : "Projektbericht";
+        var svg = NetworkDiagramService.BuildSvg(project, 1400, 860);
+        var escapedLines = string.Join("", (plain ?? string.Empty)
+            .Replace("\r\n", "\n")
+            .Replace('\r', '\n')
+            .Split('\n')
+            .Select(line => $"<div>{Escape(line)}</div>"));
         var html = $$"""
-<!doctype html><html lang="{{htmlLanguage}}"><head><meta charset="utf-8"><title>{{Escape(project.Name)}}</title>
-<style>body{font-family:Segoe UI,Arial;background:#0b0e13;color:#eef2f7;margin:32px}h1,h2{color:#f59e0b}pre{white-space:pre-wrap;background:#12161e;border:1px solid #303846;border-radius:10px;padding:18px}.diagram{overflow:auto;background:#0b0e13;border:1px solid #303846;border-radius:10px}</style></head>
-<body><h1>{{Escape(project.Name)}}</h1><div class="diagram">{{svg}}</div><h2>{{reportTitle}}</h2><pre>{{Escape(plain)}}</pre></body></html>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><title>{{Escape(project.Name)}} - Netzplan</title>
+<style>
+body{font-family:Segoe UI,Arial;background:#0b0e13;color:#eef2f7;margin:32px}
+h1,h2{color:#f59e0b}.card{background:#12161e;border:1px solid #303846;border-radius:12px;padding:18px;margin:0 0 18px 0}
+.diagram{overflow:auto;background:#0b0e13;border:1px solid #303846;border-radius:10px;padding:12px}.mono{font-family:Consolas,monospace;font-size:13px;line-height:1.45}
+</style></head>
+<body>
+<h1>{{Escape(project.Name)}} – Netzplan</h1>
+<div class="card diagram">{{svg}}</div>
+<div class="card mono">{{escapedLines}}</div>
+</body></html>
 """;
         File.WriteAllText(path, html, new UTF8Encoding(false));
     }
@@ -319,6 +453,69 @@ public static class ReportExportService
         writer.Write($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
         foreach (var offset in offsets.Skip(1)) writer.Write($"{offset:0000000000} 00000 n \n");
         writer.Write($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF");
+    }
+
+    private sealed record StaticRouteRow(string Vrf, string Network, string Mask, string NextHop);
+    private sealed record AclBindingRow(string Interface, string Acl, string Direction);
+
+    private static string DeviceLabel(string? deviceType)
+    {
+        var normalized = (deviceType ?? string.Empty).Trim();
+        if (normalized.Contains("L3", StringComparison.OrdinalIgnoreCase)) return "L3SW";
+        if (normalized.Contains("L2", StringComparison.OrdinalIgnoreCase)) return "L2SW";
+        return "RT";
+    }
+
+    private static IEnumerable<string> ExtractVlans(string config) => Regex.Matches(config ?? string.Empty, @"(?im)^\s*vlan\s+(\d+)")
+        .Cast<Match>()
+        .Select(m => m.Groups[1].Value)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(x => int.TryParse(x, out var n) ? n : int.MaxValue)
+        .ThenBy(x => x, StringComparer.OrdinalIgnoreCase);
+
+    private static IEnumerable<string> ExtractVrfs(string config) => Regex.Matches(config ?? string.Empty, @"(?im)^\s*(?:vrf definition|ip vrf)\s+(\S+)")
+        .Cast<Match>()
+        .Select(m => m.Groups[1].Value)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
+
+    private static IEnumerable<string> ExtractRoutingProtocols(string config)
+    {
+        var result = new List<string>();
+        if (Regex.IsMatch(config ?? string.Empty, @"(?im)^\s*router\s+ospf\s+")) result.Add("OSPF");
+        if (Regex.IsMatch(config ?? string.Empty, @"(?im)^\s*router\s+eigrp\s+")) result.Add("EIGRP");
+        if (Regex.IsMatch(config ?? string.Empty, @"(?im)^\s*router\s+bgp\s+")) result.Add("BGP");
+        if (Regex.IsMatch(config ?? string.Empty, @"(?im)^\s*router\s+isis(?:\s|$)")) result.Add("IS-IS");
+        if (Regex.IsMatch(config ?? string.Empty, @"(?im)^\s*ipv6\s+router\s+ospf\s+")) result.Add("OSPFv3");
+        return result;
+    }
+
+    private static IEnumerable<StaticRouteRow> ExtractStaticRoutes(string config)
+    {
+        foreach (Match match in Regex.Matches(config ?? string.Empty, @"(?im)^\s*ip route(?: vrf (\S+))?\s+(\S+)\s+(\S+)\s+(\S+).*$"))
+            yield return new StaticRouteRow(string.IsNullOrWhiteSpace(match.Groups[1].Value) ? "Global" : match.Groups[1].Value, match.Groups[2].Value, match.Groups[3].Value, match.Groups[4].Value);
+    }
+
+    private static IEnumerable<AclBindingRow> ExtractAclBindings(string config)
+    {
+        string currentInterface = string.Empty;
+        foreach (var raw in (config ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+        {
+            var line = raw.Trim();
+            if (line.StartsWith("interface ", StringComparison.OrdinalIgnoreCase))
+            {
+                currentInterface = line[10..].Trim();
+                continue;
+            }
+            if (line == "!" || line.Equals("exit", StringComparison.OrdinalIgnoreCase))
+            {
+                currentInterface = string.Empty;
+                continue;
+            }
+            var match = Regex.Match(line, @"^ip access-group\s+(\S+)\s+(in|out)", RegexOptions.IgnoreCase);
+            if (match.Success)
+                yield return new AclBindingRow(string.IsNullOrWhiteSpace(currentInterface) ? "global" : currentInterface, match.Groups[1].Value, match.Groups[2].Value.ToUpperInvariant());
+        }
     }
 
     private static IEnumerable<string> WrapLines(string text, int width)

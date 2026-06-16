@@ -312,8 +312,10 @@ public static class LocalizationService
     {
         EnsureModuleTranslationIndex(language);
         if (ExactModuleTranslationCache.TryGetValue(language, out var moduleIndex) &&
-            moduleIndex.TryGetValue(value, out translated))
+            moduleIndex.TryGetValue(value, out var exactTranslation) &&
+            exactTranslation is not null)
         {
+            translated = exactTranslation;
             return true;
         }
 

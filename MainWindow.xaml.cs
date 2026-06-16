@@ -158,8 +158,6 @@ public partial class MainWindow : Window
 
     private void HookButtons()
     {
-        CopyButton.Click += async (_, _) => await CopyGeneratedConfigAsync();
-        SaveButton.Click += async (_, _) => await SaveTextExportAsync();
         SaveTemplateButton.Click += (_, _) => SaveTemplate();
         LoadTemplateButton.Click += (_, _) => LoadTemplate();
         ResetAllButton.Click += (_, _) => ResetAllInputs();
@@ -262,10 +260,10 @@ public partial class MainWindow : Window
         quick.Children.Add(CreateQuickNavigationButton("Spanning Tree", () => OpenModule("Switching", "stpExtended")));
         quick.Children.Add(CreateQuickNavigationButton("Gegenstelle", () => NavigateToTab("Gegenstelle")));
         quick.Children.Add(CreateQuickNavigationButton("Projekt", () => NavigateToTab("Projekt")));
-        quick.Children.Add(CreateQuickNavigationButton("IPAM / Ports", () => NavigateToTab("IPAM / Ports")));
+        quick.Children.Add(CreateQuickNavigationButton("IPAM", () => NavigateToTab("IPAM / Ports")));
         quick.Children.Add(CreateQuickNavigationButton("Analyse", () => NavigateToTab("Analyse")));
-        quick.Children.Add(CreateQuickNavigationButton("Betrieb", () => NavigateToTab("Betrieb")));
-        quick.Children.Add(CreateQuickNavigationButton("Diagramm / Bericht", () => NavigateToTab("Diagramm / Bericht")));
+        quick.Children.Add(CreateQuickNavigationButton("SSH", () => NavigateToTab("Betrieb")));
+        quick.Children.Add(CreateQuickNavigationButton("Diagramm", () => NavigateToTab("Diagramm / Bericht")));
         quick.Children.Add(CreateQuickNavigationButton("Import", () => NavigateToTab("Import")));
         quick.Children.Add(CreateQuickNavigationButton("Ausgabe", () => NavigateToTab("Ausgabe")));
         quickStack.Children.Add(quick);
@@ -370,9 +368,11 @@ public partial class MainWindow : Window
         AddNavigationGroupHeader(LocalizationService.Get("navigation.group.tools", "WERKZEUGE"));
         foreach (var tabName in new[]
                  {
-                     "Gegenstelle",
-                     "Import",
+                     "Subnetting",
+                     "Befehlsregister",
                      "Betrieb",
+                     "Import",
+                     "Gegenstelle",
                      "Ausgabe"
                  })
         {
@@ -384,9 +384,7 @@ public partial class MainWindow : Window
                  {
                      "Projekt",
                      "IPAM / Ports",
-                     "Subnetting",
                      "Analyse",
-                     "Befehlsregister",
                      "Diagramm / Bericht"
                  })
         {
@@ -399,8 +397,10 @@ public partial class MainWindow : Window
 
     private void AddNavigationTab(string tabName)
     {
-        if (_tabsByName.TryGetValue(tabName, out var tab))
-            MainTabs.Items.Add(tab);
+        if (!_tabsByName.TryGetValue(tabName, out var tab)) return;
+
+        tab.Header = $"{IconForTab(tabName)}  {DisplayNameForTab(tabName)}";
+        MainTabs.Items.Add(tab);
     }
 
     private void AddNavigationGroupHeader(string title)
@@ -2689,13 +2689,25 @@ public partial class MainWindow : Window
 
     private static string DisplayNameForTab(string tab) => tab switch
     {
+        "Übersicht" => LocalizationService.Get("navigation.overview", "Übersicht"),
         "Basis" => LocalizationService.Get("navigation.base", "Basis"),
-        "Management" => LocalizationService.Get("navigation.management_access", "Management & Zugriff"),
-        "Interfaces" => LocalizationService.Get("navigation.interfaces_ports", "Interfaces & Ports"),
+        "Management" => "Management",
+        "Interfaces" => "Interface / Ports",
         "Switching" => LocalizationService.Get("navigation.switching", "Switching"),
         "Routing" => LocalizationService.Get("navigation.routing", "Routing"),
         "IPv6/DHCP/ACL" => LocalizationService.Get("navigation.network_services", "Netzdienste"),
-        "Security/WAN" => LocalizationService.Get("navigation.security_wan", "Sicherheit & WAN"),
+        "Security/WAN" => "Security/WAN",
+        "Subnetting" => LocalizationService.Get("navigation.subnetting", "Subnetting"),
+        "Befehlsregister" => LocalizationService.Get("navigation.command_registry", "Befehlsregister"),
+        "Betrieb" => "SSH",
+        "Import" => LocalizationService.Get("navigation.import", "Import"),
+        "Gegenstelle" => LocalizationService.Get("navigation.peer", "Gegenstelle"),
+        "Ausgabe" => LocalizationService.Get("navigation.output", "Ausgabe"),
+        "Projekt" => LocalizationService.Get("navigation.project", "Projekt"),
+        "IPAM / Ports" => "IPAM",
+        "Analyse" => LocalizationService.Get("navigation.analysis", "Analyse"),
+        "Diagramm / Bericht" => "Diagramm",
+        "Einstellungen" => LocalizationService.Get("navigation.settings", "Einstellungen"),
         _ => tab
     };
 
@@ -2713,6 +2725,7 @@ public partial class MainWindow : Window
 
     private static string IconForTab(string tab) => tab switch
     {
+        "Übersicht" => "⌂",
         "Basis" => "◆",
         "Management" => "⚙",
         "Interfaces" => "↔",
@@ -2720,6 +2733,17 @@ public partial class MainWindow : Window
         "Routing" => "◇",
         "Security/WAN" => "▣",
         "IPv6/DHCP/ACL" => "◎",
+        "Subnetting" => "◫",
+        "Befehlsregister" => "≡",
+        "Betrieb" => "⌁",
+        "Import" => "⇩",
+        "Gegenstelle" => "⇆",
+        "Ausgabe" => "▤",
+        "Projekt" => "▰",
+        "IPAM / Ports" => "▦",
+        "Analyse" => "⌕",
+        "Diagramm / Bericht" => "▧",
+        "Einstellungen" => "⚙",
         _ => "▪"
     };
 

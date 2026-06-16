@@ -822,11 +822,6 @@
                     <Button x:Name="SaveTemplateButton" Content="{DynamicResource Loc.header.save_template}"
                             Style="{StaticResource GhostButtonStyle}"
                             ToolTip="{DynamicResource Loc.text.speichert_eingaben_und_aktive_module_als_json_vorlage}" />
-                    <Button x:Name="SaveButton" Content="{DynamicResource Loc.header.txt_export}"
-                            ToolTip="{DynamicResource Loc.text.erzeugt_die_konfiguration_und_speichert_sie_als_textdatei}" />
-                    <Button x:Name="CopyButton" Content="{DynamicResource Loc.common.copy}"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            ToolTip="{DynamicResource Loc.text.erzeugt_die_konfiguration_und_kopiert_sie_in_die_zwischenablage}" />
                 </StackPanel>
 
                 <ComboBox x:Name="WriteMemCombo" Width="0" Height="0" Visibility="Collapsed" />

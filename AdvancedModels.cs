@@ -13,6 +13,18 @@ public sealed class NetworkProject
     public ObservableCollection<IpamEntry> IpamEntries { get; set; } = new();
     public ObservableCollection<ProjectLink> Links { get; set; } = new();
     public ObservableCollection<BackupRecord> Backups { get; set; } = new();
+    public ProjectPlanInfo ProjectInfo { get; set; } = new();
+}
+
+public sealed class ProjectPlanInfo
+{
+    public string ProjectNumber { get; set; } = "";
+    public string Customer { get; set; } = "";
+    public string Location { get; set; } = "";
+    public string ProjectManager { get; set; } = "";
+    public string Author { get; set; } = "";
+    public string Version { get; set; } = "1.0";
+    public string Status { get; set; } = "Entwurf";
 }
 
 public sealed class ProjectDeviceSnapshot

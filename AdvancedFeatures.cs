@@ -22,6 +22,13 @@ public partial class MainWindow
     private string _currentProjectPath = string.Empty;
     private TextBox? _projectNameBox;
     private TextBox? _projectDescriptionBox;
+    private TextBox? _projectNumberBox;
+    private TextBox? _projectCustomerBox;
+    private TextBox? _projectLocationBox;
+    private TextBox? _projectManagerBox;
+    private TextBox? _projectAuthorBox;
+    private TextBox? _projectVersionBox;
+    private TextBox? _projectStatusBox;
     private DataGrid? _projectDeviceGrid;
     private DataGrid? _ipamGrid;
     private DataGrid? _portPlanGrid;
@@ -118,10 +125,25 @@ public partial class MainWindow
         var details = new StackPanel();
         details.Children.Add(AdvancedTitle("Projektinformationen"));
         _projectNameBox = AddAdvancedTextField(details, "Projektname", _currentProject.Name);
-        _projectDescriptionBox = AddAdvancedTextField(details, "Beschreibung", _currentProject.Description, true, 120);
+        _projectDescriptionBox = AddAdvancedTextField(details, "Beschreibung", _currentProject.Description, true, 100);
+        _currentProject.ProjectInfo ??= new ProjectPlanInfo();
+        _projectNumberBox = AddAdvancedTextField(details, "Projektnummer", _currentProject.ProjectInfo.ProjectNumber);
+        _projectCustomerBox = AddAdvancedTextField(details, "Organisation / Kunde", _currentProject.ProjectInfo.Customer);
+        _projectLocationBox = AddAdvancedTextField(details, "Standort", _currentProject.ProjectInfo.Location);
+        _projectManagerBox = AddAdvancedTextField(details, "Projektleiter", _currentProject.ProjectInfo.ProjectManager);
+        _projectAuthorBox = AddAdvancedTextField(details, "Bearbeiter", _currentProject.ProjectInfo.Author);
+        _projectVersionBox = AddAdvancedTextField(details, "Version", _currentProject.ProjectInfo.Version);
+        _projectStatusBox = AddAdvancedTextField(details, "Status", _currentProject.ProjectInfo.Status);
         _projectNameBox.TextChanged += (_, _) => ScheduleAutoSave();
         _projectDescriptionBox.TextChanged += (_, _) => ScheduleAutoSave();
-        details.Children.Add(AdvancedNote("Beim Speichern werden Geräte, IPAM, Verbindungen und Backups gemeinsam in einer .ciscoproject.json-Datei abgelegt."));
+        _projectNumberBox.TextChanged += (_, _) => ScheduleAutoSave();
+        _projectCustomerBox.TextChanged += (_, _) => ScheduleAutoSave();
+        _projectLocationBox.TextChanged += (_, _) => ScheduleAutoSave();
+        _projectManagerBox.TextChanged += (_, _) => ScheduleAutoSave();
+        _projectAuthorBox.TextChanged += (_, _) => ScheduleAutoSave();
+        _projectVersionBox.TextChanged += (_, _) => ScheduleAutoSave();
+        _projectStatusBox.TextChanged += (_, _) => ScheduleAutoSave();
+        details.Children.Add(AdvancedNote("Beim Speichern werden Geräte, IPAM, Verbindungen, Backups und Netzplan-Metadaten gemeinsam in einer .ciscoproject.json-Datei abgelegt."));
         detailsCard.Child = details;
         content.Children.Add(detailsCard);
 
@@ -174,7 +196,7 @@ public partial class MainWindow
 
     private void BuildIpamAndPortPlanTab()
     {
-        var tab = new TabItem { Header = LocalizationService.Get("tab.ipam_ports") };
+        var tab = new TabItem { Header = "IPAM" };
         var inner = new TabControl();
         inner.Items.Add(BuildIpamSubTab());
         inner.Items.Add(BuildPortPlanSubTab());
@@ -419,7 +441,7 @@ public partial class MainWindow
 
     private void BuildOperationsTab()
     {
-        var tab = new TabItem { Header = LocalizationService.Get("tab.operations") };
+        var tab = new TabItem { Header = "SSH" };
         var root = new Grid();
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -503,7 +525,7 @@ public partial class MainWindow
 
     private void BuildDiagramAndReportTab()
     {
-        var tab = new TabItem { Header = LocalizationService.Get("tab.diagram_report") };
+        var tab = new TabItem { Header = "Diagramm" };
         var inner = new TabControl();
         inner.Items.Add(BuildDiagramSubTab());
         inner.Items.Add(BuildReportSubTab());
@@ -633,12 +655,12 @@ public partial class MainWindow
 
     private TabItem BuildReportSubTab()
     {
-        var tab = new TabItem { Header = LocalizationService.Get("text.berichtsexport") };
+        var tab = new TabItem { Header = "Netzplan" };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-        root.Children.Add(CreateAdvancedHeader("Projektbericht", "Erzeugt Geräteübersicht, IP-Plan, Verbindungen, Prüfungen und Testplan als HTML, DOCX oder PDF."));
+        root.Children.Add(CreateAdvancedHeader("Netzplan", "Erzeugt einen exportierbaren Netzplan mit Projektinformationen, grafischer Topologie, Geräten, Verbindungen, VLANs, Subnetzen, Routen, ACLs, VRFs und Prüfungen als HTML, DOCX oder PDF."));
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
         var refresh = new Button { Content = LocalizationService.Get("text.vorschau_aktualisieren"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         var html = new Button { Content = LocalizationService.Get("text.html_export") };
@@ -945,6 +967,14 @@ public partial class MainWindow
     {
         if (_projectNameBox != null && !string.IsNullOrWhiteSpace(_projectNameBox.Text)) _currentProject.Name = _projectNameBox.Text.Trim();
         if (_projectDescriptionBox != null) _currentProject.Description = _projectDescriptionBox.Text;
+        _currentProject.ProjectInfo ??= new ProjectPlanInfo();
+        if (_projectNumberBox != null) _currentProject.ProjectInfo.ProjectNumber = _projectNumberBox.Text?.Trim() ?? string.Empty;
+        if (_projectCustomerBox != null) _currentProject.ProjectInfo.Customer = _projectCustomerBox.Text?.Trim() ?? string.Empty;
+        if (_projectLocationBox != null) _currentProject.ProjectInfo.Location = _projectLocationBox.Text?.Trim() ?? string.Empty;
+        if (_projectManagerBox != null) _currentProject.ProjectInfo.ProjectManager = _projectManagerBox.Text?.Trim() ?? string.Empty;
+        if (_projectAuthorBox != null) _currentProject.ProjectInfo.Author = _projectAuthorBox.Text?.Trim() ?? string.Empty;
+        if (_projectVersionBox != null) _currentProject.ProjectInfo.Version = string.IsNullOrWhiteSpace(_projectVersionBox.Text) ? "1.0" : _projectVersionBox.Text.Trim();
+        if (_projectStatusBox != null) _currentProject.ProjectInfo.Status = string.IsNullOrWhiteSpace(_projectStatusBox.Text) ? "Entwurf" : _projectStatusBox.Text.Trim();
         _currentProject.ModifiedUtc = DateTime.UtcNow;
     }
 
@@ -952,6 +982,14 @@ public partial class MainWindow
     {
         if (_projectNameBox != null) _projectNameBox.Text = _currentProject.Name;
         if (_projectDescriptionBox != null) _projectDescriptionBox.Text = _currentProject.Description;
+        _currentProject.ProjectInfo ??= new ProjectPlanInfo();
+        if (_projectNumberBox != null) _projectNumberBox.Text = _currentProject.ProjectInfo.ProjectNumber;
+        if (_projectCustomerBox != null) _projectCustomerBox.Text = _currentProject.ProjectInfo.Customer;
+        if (_projectLocationBox != null) _projectLocationBox.Text = _currentProject.ProjectInfo.Location;
+        if (_projectManagerBox != null) _projectManagerBox.Text = _currentProject.ProjectInfo.ProjectManager;
+        if (_projectAuthorBox != null) _projectAuthorBox.Text = _currentProject.ProjectInfo.Author;
+        if (_projectVersionBox != null) _projectVersionBox.Text = _currentProject.ProjectInfo.Version;
+        if (_projectStatusBox != null) _projectStatusBox.Text = _currentProject.ProjectInfo.Status;
     }
 
     private void NormalizeProjectCollections()
@@ -960,6 +998,7 @@ public partial class MainWindow
         _currentProject.IpamEntries ??= new();
         _currentProject.Links ??= new();
         _currentProject.Backups ??= new();
+        _currentProject.ProjectInfo ??= new ProjectPlanInfo();
     }
 
     private void RebindProjectCollections()
@@ -1421,6 +1460,7 @@ public partial class MainWindow
 
     private Border CreateDiagramDeviceElement(ProjectDeviceSnapshot device, NetworkDiagramService.DiagramPoint position)
     {
+        var (deviceLabel, borderColor, backgroundColor) = GetDiagramDeviceStyle(device.DeviceType);
         var title = new TextBlock
         {
             Text = device.Name,
@@ -1431,7 +1471,7 @@ public partial class MainWindow
         };
         var type = new TextBlock
         {
-            Text = device.DeviceType,
+            Text = $"{deviceLabel} · {device.DeviceType}",
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             HorizontalAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(0, 5, 0, 0)
@@ -1445,6 +1485,8 @@ public partial class MainWindow
             Margin = new Thickness(0, 3, 0, 0)
         };
         var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        stack.Children.Add(CreateDiagramDeviceIcon(device.DeviceType, borderColor));
+        title.Margin = new Thickness(0, 3, 0, 0);
         stack.Children.Add(title);
         stack.Children.Add(type);
         stack.Children.Add(mode);
@@ -1467,13 +1509,13 @@ public partial class MainWindow
         {
             Width = position.Width,
             Height = position.Height,
-            CornerRadius = new CornerRadius(12),
-            Background = new SolidColorBrush(Color.FromRgb(23, 28, 37)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(232, 121, 26)),
+            CornerRadius = new CornerRadius(deviceLabel == "RT" ? 28 : 12),
+            Background = new SolidColorBrush(backgroundColor),
+            BorderBrush = new SolidColorBrush(borderColor),
             BorderThickness = new Thickness(2),
             Child = stack,
             Cursor = Cursors.SizeAll,
-            ToolTip = $"{device.Name}\n{device.DeviceType}\n{device.ConfigMode}\n\nMit gedrückter linker Maustaste verschieben."
+            ToolTip = $"{device.Name}\n{deviceLabel} · {device.DeviceType}\n{device.ConfigMode}\n\nMit gedrückter linker Maustaste verschieben."
         };
         border.MouseLeftButtonDown += (_, e) => BeginDiagramDeviceDrag(device, border, e);
         border.MouseMove += (_, e) => MoveDiagramDevice(device, border, e);
@@ -1487,6 +1529,105 @@ public partial class MainWindow
             }
         };
         return border;
+    }
+
+    private static Viewbox CreateDiagramDeviceIcon(string? deviceType, Color accentColor)
+    {
+        var normalized = (deviceType ?? string.Empty).Trim();
+        var stroke = new SolidColorBrush(accentColor);
+        var canvas = new Canvas { Width = 48, Height = 36 };
+
+        if (normalized.Contains("L3", StringComparison.OrdinalIgnoreCase))
+        {
+            var body = new Rectangle
+            {
+                Width = 44,
+                Height = 30,
+                RadiusX = 5,
+                RadiusY = 5,
+                Stroke = stroke,
+                StrokeThickness = 2,
+                Fill = Brushes.Transparent
+            };
+            Canvas.SetLeft(body, 2);
+            Canvas.SetTop(body, 3);
+            canvas.Children.Add(body);
+
+            canvas.Children.Add(new System.Windows.Shapes.Path
+            {
+                Stroke = stroke,
+                StrokeThickness = 2,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                Data = Geometry.Parse("M 8,12 L 40,12 M 35,8 L 40,12 L 35,16 M 13,8 L 8,12 L 13,16 M 24,7 L 24,29 M 20,11 L 24,7 L 28,11 M 20,25 L 24,29 L 28,25")
+            });
+        }
+        else if (normalized.Contains("L2", StringComparison.OrdinalIgnoreCase))
+        {
+            var body = new Rectangle
+            {
+                Width = 44,
+                Height = 30,
+                RadiusX = 4,
+                RadiusY = 4,
+                Stroke = stroke,
+                StrokeThickness = 2,
+                Fill = Brushes.Transparent
+            };
+            Canvas.SetLeft(body, 2);
+            Canvas.SetTop(body, 3);
+            canvas.Children.Add(body);
+
+            canvas.Children.Add(new System.Windows.Shapes.Path
+            {
+                Stroke = stroke,
+                StrokeThickness = 2,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                Data = Geometry.Parse("M 8,12 L 40,12 M 35,8 L 40,12 L 35,16 M 13,8 L 8,12 L 13,16 M 8,24 L 40,24 M 35,20 L 40,24 L 35,28 M 13,20 L 8,24 L 13,28")
+            });
+        }
+        else
+        {
+            var body = new Ellipse
+            {
+                Width = 34,
+                Height = 34,
+                Stroke = stroke,
+                StrokeThickness = 2,
+                Fill = Brushes.Transparent
+            };
+            Canvas.SetLeft(body, 7);
+            Canvas.SetTop(body, 1);
+            canvas.Children.Add(body);
+
+            canvas.Children.Add(new System.Windows.Shapes.Path
+            {
+                Stroke = stroke,
+                StrokeThickness = 2,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                Data = Geometry.Parse("M 11,18 L 37,18 M 32,13 L 37,18 L 32,23 M 16,13 L 11,18 L 16,23 M 24,5 L 24,31 M 19,10 L 24,5 L 29,10 M 19,26 L 24,31 L 29,26")
+            });
+        }
+
+        return new Viewbox
+        {
+            Width = 40,
+            Height = 30,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Child = canvas
+        };
+    }
+
+    private static (string Label, Color BorderColor, Color BackgroundColor) GetDiagramDeviceStyle(string? deviceType)
+    {
+        var normalized = (deviceType ?? string.Empty).Trim();
+        if (normalized.Contains("L3", StringComparison.OrdinalIgnoreCase))
+            return ("L3SW", Color.FromRgb(45, 212, 191), Color.FromRgb(18, 34, 36));
+        if (normalized.Contains("L2", StringComparison.OrdinalIgnoreCase))
+            return ("L2SW", Color.FromRgb(74, 222, 128), Color.FromRgb(19, 33, 24));
+        return ("RT", Color.FromRgb(232, 121, 26), Color.FromRgb(36, 24, 15));
     }
 
     private void BeginDiagramDeviceDrag(ProjectDeviceSnapshot device, Border element, MouseButtonEventArgs e)
@@ -1689,7 +1830,7 @@ public partial class MainWindow
             "docx" => "Word-Dokument (*.docx)|*.docx",
             _ => "PDF (*.pdf)|*.pdf"
         };
-        var dialog = new SaveFileDialog { Title = LocalizationService.Get("text.projektbericht_exportieren"), Filter = filter, FileName = SanitizeFileName(_currentProject.Name) + "_Bericht." + extension };
+        var dialog = new SaveFileDialog { Title = "Netzplan exportieren", Filter = filter, FileName = SanitizeFileName(_currentProject.Name) + "_Netzplan." + extension };
         if (dialog.ShowDialog(this) != true) return;
         var plain = _reportPreviewBox?.Text ?? string.Empty;
         try
@@ -1697,7 +1838,7 @@ public partial class MainWindow
             if (extension == "html") ReportExportService.ExportHtml(dialog.FileName, _currentProject, _advancedDependencyFindings, _advancedSecurityFindings);
             else if (extension == "docx") ReportExportService.ExportDocx(dialog.FileName, plain);
             else ReportExportService.ExportPdf(dialog.FileName, plain);
-            MessageBox.Show(this, T("text.bericht_wurde_exportiert"), T("common.report"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "Netzplan wurde exportiert.", "Netzplan", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex) { MessageBox.Show(this, ex.Message, T("text.exportfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
