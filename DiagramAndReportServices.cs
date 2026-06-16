@@ -47,10 +47,10 @@ public static class NetworkDiagramService
         var count = Math.Max(1, project.Devices.Count);
         var columns = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(count)));
         var rows = Math.Max(1, (int)Math.Ceiling(count / (double)columns));
-        var cellW = Math.Max(220, width / columns);
-        var cellH = Math.Max(175, height / rows);
-        const double nodeWidth = 190;
-        const double nodeHeight = 132;
+        var cellW = Math.Max(250, width / columns);
+        var cellH = Math.Max(215, height / rows);
+        const double nodeWidth = 220;
+        const double nodeHeight = 170;
 
         for (var i = 0; i < project.Devices.Count; i++)
         {
@@ -99,9 +99,13 @@ public static class NetworkDiagramService
         _ => 3
     };
 
-    public static string BuildSvg(NetworkProject project, int width = 1400, int height = 900)
+    public static string BuildSvg(NetworkProject project, int width = 1400, int height = 1150)
     {
         var settings = ApplicationSettingsService.Current;
+        var requiredWidth = project.Devices.Where(device => device.DiagramX.HasValue).Select(device => device.DiagramX!.Value + 260).DefaultIfEmpty(width).Max();
+        var requiredHeight = project.Devices.Where(device => device.DiagramY.HasValue).Select(device => device.DiagramY!.Value + 210).DefaultIfEmpty(height).Max();
+        width = Math.Max(width, (int)Math.Ceiling(requiredWidth));
+        height = Math.Max(height, (int)Math.Ceiling(requiredHeight));
         var layout = CalculateLayout(project, width, height);
         var sb = new StringBuilder();
         sb.AppendLine($"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>");
@@ -155,6 +159,11 @@ public static class NetworkDiagramService
             if (settings.ShowConnectionTypes) labelParts.Add(type);
             if (!string.IsNullOrWhiteSpace(link.Description)) labelParts.Add(link.Description.Trim());
             if (settings.ShowInterfaceNames) labelParts.Add($"{link.SourceInterface} ↔ {link.TargetInterface}");
+            if (settings.ShowRoutingDetails)
+            {
+                var routing = RoutingVisualizationService.GetLinkSummary(project, link);
+                if (!string.IsNullOrWhiteSpace(routing)) labelParts.Add(routing);
+            }
 
             if (labelParts.Count > 0)
             {
@@ -177,6 +186,14 @@ public static class NetworkDiagramService
             sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 64:0}' fill='#ffffff' font-family='Segoe UI' font-size='16' font-weight='bold' text-anchor='middle'>{SecurityElement.Escape(device.Name)}</text>");
             sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 86:0}' fill='{style.Stroke}' font-family='Segoe UI' font-size='11' font-weight='bold' text-anchor='middle'>{SecurityElement.Escape(style.Label)} · {SecurityElement.Escape(device.DeviceType)}</text>");
             sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 106:0}' fill='#64748b' font-family='Segoe UI' font-size='10' text-anchor='middle'>{SecurityElement.Escape(device.ConfigMode)}</text>");
+            var roleSite = $"{TopologyPlanningService.InferRole(device)} · {TopologyPlanningService.InferSite(device)}";
+            sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 123:0}' fill='#94a3b8' font-family='Segoe UI' font-size='9' text-anchor='middle'>{SecurityElement.Escape(roleSite)}</text>");
+            if (settings.ShowRoutingDetails)
+            {
+                var routingLines = RoutingVisualizationService.GetDeviceDetails(device).Take(2).ToList();
+                for (var lineIndex = 0; lineIndex < routingLines.Count; lineIndex++)
+                    sb.AppendLine($"<text x='{centerX:0}' y='{p.Y + 141 + lineIndex * 15:0}' fill='{style.Stroke}' font-family='Segoe UI' font-size='9' text-anchor='middle'>{SecurityElement.Escape(routingLines[lineIndex])}</text>");
+            }
         }
 
         sb.AppendLine("</svg>");
@@ -253,7 +270,7 @@ public static class ReportExportService
             var protocols = string.Join(", ", ExtractRoutingProtocols(d.GeneratedConfiguration));
             var vrfs = string.Join(", ", ExtractVrfs(d.GeneratedConfiguration));
             var acls = string.Join(", ", ExtractAclBindings(d.GeneratedConfiguration).Select(x => x.Acl).Distinct(StringComparer.OrdinalIgnoreCase));
-            sb.AppendLine($"- {d.Name} | {label} | {d.DeviceType} | {d.ConfigMode}");
+            sb.AppendLine($"- {d.Name} | {label} | {d.DeviceType} | {d.ConfigMode} | {TopologyPlanningService.InferRole(d)} | {TopologyPlanningService.InferSite(d)}");
             if (!string.IsNullOrWhiteSpace(protocols)) sb.AppendLine($"  {R("Routing", "Routing")}: {protocols}");
             if (!string.IsNullOrWhiteSpace(vrfs)) sb.AppendLine($"  VRF: {vrfs}");
             if (!string.IsNullOrWhiteSpace(acls)) sb.AppendLine($"  ACL: {acls}");
@@ -305,16 +322,28 @@ public static class ReportExportService
         sb.AppendLine();
         sb.AppendLine(R("ROUTEN", "ROUTES"));
         sb.AppendLine(new string('-', 72));
-        foreach (var d in project.Devices)
-        foreach (var route in ExtractStaticRoutes(d.GeneratedConfiguration))
-            sb.AppendLine($"- {d.Name} | {route.Vrf} | {route.Network} {route.Mask} -> {route.NextHop}");
+        foreach (var route in RoutingVisualizationService.ExtractStaticRoutes(project))
+            sb.AppendLine($"- {route.Device} | {route.Vrf} | {route.Network} {route.MaskOrPrefix} -> {route.NextHop} | {route.AddressFamily}");
 
         sb.AppendLine();
         sb.AppendLine(R("ACL-ZUORDNUNGEN", "ACL ASSIGNMENTS"));
         sb.AppendLine(new string('-', 72));
-        foreach (var d in project.Devices)
-        foreach (var acl in ExtractAclBindings(d.GeneratedConfiguration))
-            sb.AppendLine($"- {d.Name} | {acl.Interface} | {acl.Acl} | {acl.Direction}");
+        var effectiveBindings = project.AclBindings.Count > 0
+            ? project.AclBindings
+            : new System.Collections.ObjectModel.ObservableCollection<ProjectAclBinding>(project.Devices.SelectMany(device => ExtractAclBindings(device.GeneratedConfiguration).Select(acl => new ProjectAclBinding { DeviceName = device.Name, Interface = acl.Interface, AclName = acl.Acl, Direction = acl.Direction })));
+        foreach (var acl in effectiveBindings)
+            sb.AppendLine($"- {acl.DeviceName} | {acl.Interface} | {acl.AclName} | {acl.Direction} | {acl.AddressFamily}");
+
+        if (project.AclRules.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine(R("ACL-REGELN UND ANALYSE", "ACL RULES AND ANALYSIS"));
+            sb.AppendLine(new string('-', 72));
+            foreach (var rule in project.AclRules.Where(rule => rule.Enabled).OrderBy(rule => rule.DeviceName).ThenBy(rule => rule.AclName).ThenBy(rule => rule.Sequence))
+                sb.AppendLine($"- {rule.DeviceName} | {rule.AclName} | {rule.Sequence} | {rule.Action} {rule.Protocol} {rule.Source} {rule.SourceWildcard} {rule.Destination} {rule.DestinationWildcard} {rule.Service}".TrimEnd());
+            foreach (var finding in AclWorkspaceService.Analyze(project.AclRules, effectiveBindings))
+                sb.AppendLine($"  [{finding.Severity}] {finding.DeviceName}/{finding.AclName}/{finding.Sequence}: {finding.Message}");
+        }
 
         sb.AppendLine();
         sb.AppendLine(R("VRF- UND ROUTING-PROTOKOLLE", "VRF AND ROUTING PROTOCOLS"));
@@ -366,7 +395,7 @@ public static class ReportExportService
     public static void ExportHtml(string path, NetworkProject project, IEnumerable<DependencyFinding> dependencies, IEnumerable<SecurityFinding> security)
     {
         var plain = BuildPlainText(project, dependencies, security);
-        var svg = NetworkDiagramService.BuildSvg(project, 1400, 860);
+        var svg = NetworkDiagramService.BuildSvg(project, 1400, 1100);
         var escapedLines = string.Join("", (plain ?? string.Empty)
             .Replace("\r\n", "\n")
             .Replace('\r', '\n')

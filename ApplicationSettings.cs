@@ -81,6 +81,7 @@ public sealed class ApplicationSettings
     public bool ShowInterfaceNames { get; set; } = true;
     public bool ShowIpAddresses { get; set; }
     public bool ShowVlans { get; set; }
+    public bool ShowRoutingDetails { get; set; } = true;
     public string DefaultReportFormat { get; set; } = "PDF";
     public string CompanyName { get; set; } = "";
     public string ProjectManager { get; set; } = "";

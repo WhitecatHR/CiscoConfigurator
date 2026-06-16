@@ -6,7 +6,7 @@
 
 Der Cisco Konfigurator ist eine C#-WPF-Anwendung für die strukturierte Erstellung, Verwaltung, Prüfung und Dokumentation von Cisco-IOS- und IOS-XE-Konfigurationen. Die Anwendung unterstützt Router, Layer-3-Switches und Layer-2-Switches und stellt die benötigten Funktionen über fachlich gegliederte Module bereit.
 
-Der Funktionsumfang geht über die reine Konfigurationserzeugung hinaus. Enthalten sind Mehrgeräte-Projekte, IPAM, Portplanung, Gegenstellenkonfigurationen, Konfigurationsanalyse, SSH-Übertragung, Backups, Netzwerkdiagramme und exportierbare Netzpläne.
+Der Funktionsumfang geht über die reine Konfigurationserzeugung hinaus. Enthalten sind Mehrgeräte-Projekte, IPAM, Portplanung, Gegenstellenkonfigurationen, Konfigurationsanalyse, SSH-Übertragung, Backups, intelligente Netzwerkdiagramme, ACL-Regelanalysen, Routing-Overlays, exportierbare Netzpläne und vollständige Projektpakete.
 
 
 ## Benutzung
@@ -71,9 +71,13 @@ Die sichtbaren Module und Eingabefelder werden passend zu Gerätetyp und Modus g
 2. Quellgerät, Quellinterface, Zielgerät und Zielinterface auswählen.
 3. Verbindungstyp und optionale Beschreibung festlegen.
 4. Die Verbindung zum Projekt hinzufügen.
-5. Geräte per Drag-and-drop positionieren oder automatisch anordnen lassen.
-6. Router, Layer-3-Switches und Layer-2-Switches werden durch eigene Vektorsymbole dargestellt.
-7. Das reine Netzwerkdiagramm kann als SVG exportiert werden.
+5. Für jedes Projektgerät optional Standort und Topologierolle festlegen.
+6. **Smart Layout** verwenden, um Geräte automatisch nach Standort sowie WAN, Core, Distribution und Access anzuordnen.
+7. CDP- oder LLDP-Nachbarausgaben importieren, um fehlende Verbindungen zwischen vorhandenen Projektgeräten automatisch zu ergänzen.
+8. Das **Routing-Overlay** aktivieren, um OSPF-Areas, BGP-AS, EIGRP, IS-IS, VRFs, HSRP und adressierte Routingverbindungen anzuzeigen.
+9. Geräte weiterhin per Drag-and-drop nachbearbeiten.
+10. Router, Layer-3-Switches und Layer-2-Switches werden durch eigene Vektorsymbole dargestellt.
+11. Das reine Netzwerkdiagramm kann als SVG exportiert werden.
 
 Verbindungen werden ausschließlich im Bereich **Diagramm** erstellt und gepflegt. Der Netzplan übernimmt diese Daten automatisch.
 
@@ -90,6 +94,15 @@ Im Bereich **Analyse** können unter anderem folgende Prüfungen ausgeführt wer
 - Erkennung unbekannter oder nicht zugeordneter Befehle
 
 Erkannte Warnungen und Fehler sollten vor Export oder Übertragung geprüft und behoben werden.
+
+### ACL-Editor und Regelanalyse verwenden
+
+1. Den Bereich **Analyse** öffnen und **ACL-Editor** auswählen.
+2. ACL-Regeln aus den gespeicherten Projektgeräten importieren oder manuell tabellarisch erfassen.
+3. Sequenznummer, Aktion, Protokoll, Quelle, Ziel, Wildcards und Dienste bearbeiten.
+4. Interface-Zuordnungen mit Richtung `IN` oder `OUT` ergänzen.
+5. Die Analyse auf Schattenregeln, redundante Regeln, doppelte Sequenzen, breite `permit any any`-Freigaben und ungenutzte ACLs ausführen.
+6. Den erzeugten ACL-Konfigurationsblock kopieren oder die Regeln als CSV exportieren.
 
 ### 9. Vorhandene Konfiguration importieren
 
@@ -131,6 +144,18 @@ Der Netzplan enthält abhängig vom vorhandenen Projektstand unter anderem:
 - VRFs
 - Routingprotokolle
 - Prüfungen und Testbefehle
+
+### Projektpaket exportieren
+
+Über **Projektpaket ZIP** kann der komplette Projektstand als Archiv ausgegeben werden. Das Paket enthält:
+
+- vollständige `.ciscoproject.json`-Projektdatei
+- einzelne Gerätekonfigurationen
+- HTML-Netzplan und SVG-Diagramm
+- IPAM-, Verbindungs-, ACL-, Routen- und Routingprotokolltabellen als CSV
+- Abhängigkeits-, Sicherheits- und ACL-Analysen
+- Rollback-Entwürfe und vorherige Konfigurationen, sofern Gerätebackups vorhanden sind
+- maschinenlesbares `manifest.json`
 
 ### 12. Projekt speichern und fortsetzen
 

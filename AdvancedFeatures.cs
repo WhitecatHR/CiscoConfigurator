@@ -37,6 +37,11 @@ public partial class MainWindow
     private DataGrid? _diffGrid;
     private DataGrid? _searchGrid;
     private DataGrid? _backupGrid;
+    private DataGrid? _aclGrid;
+    private DataGrid? _aclFindingsGrid;
+    private DataGrid? _aclBindingsGrid;
+    private TextBox? _aclPreviewBox;
+    private CheckBox? _routingOverlayCheck;
     private TextBox? _diffOldBox;
     private TextBox? _diffNewBox;
     private TextBox? _rollbackBox;
@@ -105,12 +110,15 @@ public partial class MainWindow
         var newButton = new Button { Content = LocalizationService.Get("text.neu") };
         var openButton = new Button { Content = LocalizationService.Get("text.offnen") };
         var saveButton = new Button { Content = LocalizationService.Get("text.speichern"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var packageButton = new Button { Content = "Projektpaket ZIP" };
         newButton.Click += (_, _) => NewNetworkProject();
         openButton.Click += (_, _) => OpenNetworkProject();
         saveButton.Click += (_, _) => SaveNetworkProject(false);
+        packageButton.Click += async (_, _) => await ExportProjectPackageAsync();
         headerActions.Children.Add(newButton);
         headerActions.Children.Add(openButton);
         headerActions.Children.Add(saveButton);
+        headerActions.Children.Add(packageButton);
         AddAdvancedHeaderActions(header, headerActions);
         root.Children.Add(header);
 
@@ -176,15 +184,18 @@ public partial class MainWindow
         _projectDeviceGrid = new DataGrid
         {
             ItemsSource = _currentProject.Devices,
-            IsReadOnly = true,
+            IsReadOnly = false,
             SelectionMode = DataGridSelectionMode.Single,
             AutoGenerateColumns = false
         };
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.device"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Name)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.typ"), Binding = new Binding(nameof(ProjectDeviceSnapshot.DeviceType)), Width = 115 });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.mode"), Binding = new Binding(nameof(ProjectDeviceSnapshot.ConfigMode)), Width = 120 });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.status"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Status)), Width = 165 });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.geandert"), Binding = new Binding(nameof(ProjectDeviceSnapshot.LastUpdatedUtc)) { StringFormat = "dd.MM.yyyy HH:mm" }, Width = 145 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.device"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Name)), Width = new DataGridLength(1, DataGridLengthUnitType.Star), IsReadOnly = true });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.typ"), Binding = new Binding(nameof(ProjectDeviceSnapshot.DeviceType)), Width = 115, IsReadOnly = true });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Standort", Binding = new Binding(nameof(ProjectDeviceSnapshot.Site)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _projectDeviceGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Topologierolle", SelectedItemBinding = new Binding(nameof(ProjectDeviceSnapshot.TopologyRole)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "Automatisch", "WAN", "Core", "Distribution", "Access", "Other" }, Width = 125 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.mode"), Binding = new Binding(nameof(ProjectDeviceSnapshot.ConfigMode)), Width = 110, IsReadOnly = true });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.status"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Status)), Width = 155, IsReadOnly = true });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.geandert"), Binding = new Binding(nameof(ProjectDeviceSnapshot.LastUpdatedUtc)) { StringFormat = "dd.MM.yyyy HH:mm" }, Width = 140, IsReadOnly = true });
+        _projectDeviceGrid.CellEditEnding += (_, _) => ScheduleAutoSave();
         _projectDeviceGrid.MouseDoubleClick += (_, _) => ApplySelectedProjectDevice();
         Grid.SetRow(_projectDeviceGrid, 1);
         deviceArea.Children.Add(_projectDeviceGrid);
@@ -288,6 +299,7 @@ public partial class MainWindow
         inner.Items.Add(BuildSecuritySubTab());
         inner.Items.Add(BuildDiffSubTab());
         inner.Items.Add(BuildGlobalSearchSubTab());
+        inner.Items.Add(BuildAclWorkspaceSubTab());
         inner.Items.Add(BuildCommandAnalysisSubTab());
         tab.Content = inner;
         _tabsByName["Analyse"] = tab;
@@ -413,6 +425,103 @@ public partial class MainWindow
         _searchGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.beschreibung"), Binding = new Binding(nameof(GlobalSearchResult.Detail)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         _searchGrid.MouseDoubleClick += (_, _) => NavigateToSelectedSearchResult();
         Grid.SetRow(_searchGrid, 2); root.Children.Add(_searchGrid);
+        tab.Content = root;
+        return tab;
+    }
+
+    private TabItem BuildAclWorkspaceSubTab()
+    {
+        var tab = new TabItem { Header = "ACL-Editor" };
+        var root = new Grid { Margin = new Thickness(6) };
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        root.Children.Add(CreateAdvancedHeader("ACL-Editor und Regelanalyse", "ACLs tabellarisch bearbeiten, aus Projektkonfigurationen importieren und auf Schattenregeln, Redundanzen, breite Freigaben sowie fehlende Interface-Zuordnungen prüfen."));
+
+        var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
+        var add = new Button { Content = "Regel hinzufügen", Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var remove = new Button { Content = "Regel entfernen" };
+        var addBinding = new Button { Content = "Zuordnung hinzufügen" };
+        var removeBinding = new Button { Content = "Zuordnung entfernen" };
+        var import = new Button { Content = "Aus Projekt importieren" };
+        var analyze = new Button { Content = "ACLs analysieren" };
+        var copy = new Button { Content = "Konfiguration kopieren" };
+        var export = new Button { Content = "CSV exportieren" };
+        add.Click += (_, _) => AddAclRule();
+        remove.Click += (_, _) => RemoveSelectedAclRule();
+        addBinding.Click += (_, _) => AddAclBinding();
+        removeBinding.Click += (_, _) => RemoveSelectedAclBinding();
+        import.Click += (_, _) => ImportAclWorkspaceFromProject();
+        analyze.Click += (_, _) => RefreshAclAnalysis();
+        copy.Click += (_, _) => CopyAclConfiguration();
+        export.Click += (_, _) => ExportAclCsv();
+        foreach (var button in new[] { add, remove, addBinding, removeBinding, import, analyze, copy, export }) actions.Children.Add(button);
+        Grid.SetRow(actions, 1);
+        root.Children.Add(actions);
+
+        var content = new Grid();
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) });
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
+        Grid.SetRow(content, 2);
+        root.Children.Add(content);
+
+        _aclGrid = new DataGrid
+        {
+            ItemsSource = _currentProject.AclRules,
+            AutoGenerateColumns = false,
+            IsReadOnly = false,
+            CanUserAddRows = true,
+            CanUserDeleteRows = true,
+            SelectionMode = DataGridSelectionMode.Single
+        };
+        _aclGrid.Columns.Add(new DataGridCheckBoxColumn { Header = "Aktiv", Binding = new Binding(nameof(ProjectAclRule.Enabled)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 55 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(ProjectAclRule.DeviceName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 110 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "ACL", Binding = new Binding(nameof(ProjectAclRule.AclName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 120 });
+        _aclGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Familie", SelectedItemBinding = new Binding(nameof(ProjectAclRule.AddressFamily)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "IPv4", "IPv6" }, Width = 70 });
+        _aclGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Typ", SelectedItemBinding = new Binding(nameof(ProjectAclRule.AclType)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "Standard", "Extended" }, Width = 80 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Seq", Binding = new Binding(nameof(ProjectAclRule.Sequence)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 55 });
+        _aclGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Aktion", SelectedItemBinding = new Binding(nameof(ProjectAclRule.Action)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "permit", "deny" }, Width = 70 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Protokoll", Binding = new Binding(nameof(ProjectAclRule.Protocol)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 75 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Quelle", Binding = new Binding(nameof(ProjectAclRule.Source)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 115 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Quell-Wildcard", Binding = new Binding(nameof(ProjectAclRule.SourceWildcard)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Ziel", Binding = new Binding(nameof(ProjectAclRule.Destination)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 115 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Ziel-Wildcard", Binding = new Binding(nameof(ProjectAclRule.DestinationWildcard)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Dienst / Ports", Binding = new Binding(nameof(ProjectAclRule.Service)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 120 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Bemerkung", Binding = new Binding(nameof(ProjectAclRule.Remark)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _aclGrid.CellEditEnding += (_, _) => { ScheduleAutoSave(); Dispatcher.BeginInvoke(new Action(RefreshAclAnalysis)); };
+        content.Children.Add(_aclGrid);
+
+        var right = new Grid();
+        right.RowDefinitions.Add(new RowDefinition { Height = new GridLength(3, GridUnitType.Star) });
+        right.RowDefinitions.Add(new RowDefinition { Height = new GridLength(8) });
+        right.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
+        right.RowDefinitions.Add(new RowDefinition { Height = new GridLength(8) });
+        right.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
+        Grid.SetColumn(right, 2);
+        content.Children.Add(right);
+
+        _aclFindingsGrid = new DataGrid { IsReadOnly = true, AutoGenerateColumns = false };
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Stufe", Binding = new Binding(nameof(AclFinding.Severity)), Width = 70 });
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "ACL", Binding = new Binding(nameof(AclFinding.AclName)), Width = 105 });
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Seq", Binding = new Binding(nameof(AclFinding.Sequence)), Width = 50 });
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Feststellung", Binding = new Binding(nameof(AclFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        right.Children.Add(_aclFindingsGrid);
+
+        _aclBindingsGrid = new DataGrid { ItemsSource = _currentProject.AclBindings, IsReadOnly = false, AutoGenerateColumns = false, CanUserAddRows = true, CanUserDeleteRows = true };
+        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(ProjectAclBinding.DeviceName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 100 });
+        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Interface", Binding = new Binding(nameof(ProjectAclBinding.Interface)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 110 });
+        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = "ACL", Binding = new Binding(nameof(ProjectAclBinding.AclName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _aclBindingsGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Richtung", SelectedItemBinding = new Binding(nameof(ProjectAclBinding.Direction)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "IN", "OUT" }, Width = 75 });
+        _aclBindingsGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Familie", SelectedItemBinding = new Binding(nameof(ProjectAclBinding.AddressFamily)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "IPv4", "IPv6" }, Width = 75 });
+        _aclBindingsGrid.CellEditEnding += (_, _) => { ScheduleAutoSave(); Dispatcher.BeginInvoke(new Action(RefreshAclAnalysis)); };
+        Grid.SetRow(_aclBindingsGrid, 2);
+        right.Children.Add(_aclBindingsGrid);
+
+        _aclPreviewBox = CreateCodeBox("ACL-Konfigurationsvorschau");
+        Grid.SetRow(_aclPreviewBox, 4);
+        right.Children.Add(_aclPreviewBox);
+
         tab.Content = root;
         return tab;
     }
@@ -563,12 +672,19 @@ public partial class MainWindow
         var addLink = new Button { Content = LocalizationService.Get("text.verbindung_hinzufugen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         var removeLink = new Button { Content = LocalizationService.Get("text.letzte_entfernen") };
         var refresh = new Button { Content = LocalizationService.Get("text.aktualisieren") };
-        var autoLayout = new Button { Content = LocalizationService.Get("text.automatisch_anordnen"), ToolTip = LocalizationService.Get("text.verwirft_manuelle_positionen_und_ordnet_alle_gerate_neu_an") };
+        var smartLayout = new Button { Content = "Smart Layout", ToolTip = "Ordnet Geräte nach Standort und den Rollen WAN, Core, Distribution und Access an." };
+        var gridLayout = new Button { Content = "Raster", ToolTip = LocalizationService.Get("text.verwirft_manuelle_positionen_und_ordnet_alle_gerate_neu_an") };
+        var discoveryImport = new Button { Content = "CDP/LLDP importieren", ToolTip = "Ergänzt Verbindungen aus der Ausgabe von show cdp neighbors detail oder show lldp neighbors detail." };
+        _routingOverlayCheck = new CheckBox { Content = "Routing-Overlay", IsChecked = _appSettings.ShowRoutingDetails, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 3, 8, 3) };
         var export = new Button { Content = LocalizationService.Get("text.svg_export") };
         addLink.Click += (_, _) => AddProjectLink();
         removeLink.Click += (_, _) => RemoveLastProjectLink();
         refresh.Click += (_, _) => RefreshNetworkDiagram();
-        autoLayout.Click += (_, _) => ResetDiagramLayout();
+        smartLayout.Click += (_, _) => ApplySmartDiagramLayout();
+        gridLayout.Click += (_, _) => ResetDiagramLayout();
+        discoveryImport.Click += (_, _) => ImportDiscoveryNeighbors();
+        _routingOverlayCheck.Checked += (_, _) => { _appSettings.ShowRoutingDetails = true; RefreshNetworkDiagram(); };
+        _routingOverlayCheck.Unchecked += (_, _) => { _appSettings.ShowRoutingDetails = false; RefreshNetworkDiagram(); };
         export.Click += (_, _) => ExportNetworkDiagramSvg();
         foreach (var element in new UIElement[]
                  {
@@ -576,7 +692,7 @@ public partial class MainWindow
                      AdvancedInlineLabel("Ziel"), _linkTargetCombo, _linkTargetIfBox,
                      AdvancedInlineLabel("Typ"), _linkTypeCombo,
                      AdvancedInlineLabel("Bezeichnung"), _linkDescriptionBox,
-                     addLink, removeLink, refresh, autoLayout, export
+                     addLink, removeLink, refresh, smartLayout, gridLayout, discoveryImport, _routingOverlayCheck, export
                  })
         {
             if (element is FrameworkElement fe) fe.Margin = new Thickness(3);
@@ -602,7 +718,7 @@ public partial class MainWindow
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         };
         scroll.SetResourceReference(Control.BackgroundProperty, "WindowBg");
-        _diagramCanvas = new Canvas { Width = 1400, Height = 900, ClipToBounds = true };
+        _diagramCanvas = new Canvas { Width = 1400, Height = 1150, ClipToBounds = true };
         _diagramCanvas.SetResourceReference(Panel.BackgroundProperty, "WindowBg");
         scroll.Content = _diagramCanvas;
         Grid.SetRow(scroll, 3); root.Children.Add(scroll);
@@ -666,11 +782,13 @@ public partial class MainWindow
         var html = new Button { Content = LocalizationService.Get("text.html_export") };
         var docx = new Button { Content = LocalizationService.Get("text.docx_export") };
         var pdf = new Button { Content = LocalizationService.Get("text.pdf_export") };
+        var package = new Button { Content = "Projektpaket ZIP" };
         refresh.Click += async (_, _) => await RefreshReportPreviewAsync();
         html.Click += async (_, _) => await ExportProjectReportAsync("html");
         docx.Click += async (_, _) => await ExportProjectReportAsync("docx");
         pdf.Click += async (_, _) => await ExportProjectReportAsync("pdf");
-        actions.Children.Add(refresh); actions.Children.Add(html); actions.Children.Add(docx); actions.Children.Add(pdf);
+        package.Click += async (_, _) => await ExportProjectPackageAsync();
+        actions.Children.Add(refresh); actions.Children.Add(html); actions.Children.Add(docx); actions.Children.Add(pdf); actions.Children.Add(package);
         Grid.SetRow(actions, 1); root.Children.Add(actions);
         _reportPreviewBox = CreateCodeBox("Berichtsvorschau");
         Grid.SetRow(_reportPreviewBox, 2); root.Children.Add(_reportPreviewBox);
@@ -839,6 +957,8 @@ public partial class MainWindow
             Values = new Dictionary<string, string>(source.Values, StringComparer.OrdinalIgnoreCase),
             Modules = new Dictionary<string, bool>(source.Modules, StringComparer.OrdinalIgnoreCase),
             GeneratedConfiguration = source.GeneratedConfiguration,
+            Site = source.Site,
+            TopologyRole = source.TopologyRole,
             DiagramX = source.DiagramX.HasValue ? source.DiagramX.Value + 35 : null,
             DiagramY = source.DiagramY.HasValue ? source.DiagramY.Value + 35 : null,
             LastUpdatedUtc = DateTime.UtcNow
@@ -915,6 +1035,8 @@ public partial class MainWindow
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot) return;
         _currentProject.Devices.Remove(snapshot);
         foreach (var link in _currentProject.Links.Where(x => x.SourceDeviceId == snapshot.Id || x.TargetDeviceId == snapshot.Id).ToList()) _currentProject.Links.Remove(link);
+        foreach (var rule in _currentProject.AclRules.Where(x => x.DeviceName.Equals(snapshot.Name, StringComparison.OrdinalIgnoreCase)).ToList()) _currentProject.AclRules.Remove(rule);
+        foreach (var binding in _currentProject.AclBindings.Where(x => x.DeviceName.Equals(snapshot.Name, StringComparison.OrdinalIgnoreCase)).ToList()) _currentProject.AclBindings.Remove(binding);
         RefreshProjectDeviceBindings();
         RefreshNetworkDiagram();
         ScheduleAutoSave();
@@ -998,6 +1120,8 @@ public partial class MainWindow
         _currentProject.IpamEntries ??= new();
         _currentProject.Links ??= new();
         _currentProject.Backups ??= new();
+        _currentProject.AclRules ??= new();
+        _currentProject.AclBindings ??= new();
         _currentProject.ProjectInfo ??= new ProjectPlanInfo();
     }
 
@@ -1006,6 +1130,9 @@ public partial class MainWindow
         if (_projectDeviceGrid != null) _projectDeviceGrid.ItemsSource = _currentProject.Devices;
         if (_ipamGrid != null) _ipamGrid.ItemsSource = _currentProject.IpamEntries;
         if (_backupGrid != null) _backupGrid.ItemsSource = _currentProject.Backups;
+        if (_aclGrid != null) _aclGrid.ItemsSource = _currentProject.AclRules;
+        if (_aclBindingsGrid != null) _aclBindingsGrid.ItemsSource = _currentProject.AclBindings;
+        RefreshAclAnalysis();
         RefreshProjectDeviceBindings();
     }
 
@@ -1374,6 +1501,223 @@ public partial class MainWindow
         ScheduleAutoSave();
     }
 
+    private void AddAclRule()
+    {
+        var deviceName = (_projectDeviceGrid?.SelectedItem as ProjectDeviceSnapshot)?.Name
+                         ?? _currentProject.Devices.FirstOrDefault()?.Name
+                         ?? string.Empty;
+        var nextSequence = _currentProject.AclRules
+            .Where(rule => rule.DeviceName.Equals(deviceName, StringComparison.OrdinalIgnoreCase) && rule.AclName.Equals("ACL-NAME", StringComparison.OrdinalIgnoreCase))
+            .Select(rule => rule.Sequence)
+            .DefaultIfEmpty(0)
+            .Max() + 10;
+        var rule = new ProjectAclRule { DeviceName = deviceName, Sequence = Math.Max(10, nextSequence) };
+        _currentProject.AclRules.Add(rule);
+        _aclGrid?.ScrollIntoView(rule);
+        RefreshAclAnalysis();
+        ScheduleAutoSave();
+    }
+
+    private void RemoveSelectedAclRule()
+    {
+        if (_aclGrid?.SelectedItem is not ProjectAclRule rule) return;
+        _currentProject.AclRules.Remove(rule);
+        RefreshAclAnalysis();
+        ScheduleAutoSave();
+    }
+
+    private void AddAclBinding()
+    {
+        var selectedRule = _aclGrid?.SelectedItem as ProjectAclRule;
+        var binding = new ProjectAclBinding
+        {
+            DeviceName = selectedRule?.DeviceName ?? _currentProject.Devices.FirstOrDefault()?.Name ?? string.Empty,
+            AclName = selectedRule?.AclName ?? string.Empty,
+            AddressFamily = selectedRule?.AddressFamily ?? "IPv4",
+            Direction = "IN"
+        };
+        _currentProject.AclBindings.Add(binding);
+        _aclBindingsGrid?.ScrollIntoView(binding);
+        RefreshAclAnalysis();
+        ScheduleAutoSave();
+    }
+
+    private void RemoveSelectedAclBinding()
+    {
+        if (_aclBindingsGrid?.SelectedItem is not ProjectAclBinding binding) return;
+        _currentProject.AclBindings.Remove(binding);
+        RefreshAclAnalysis();
+        ScheduleAutoSave();
+    }
+
+    private void ImportAclWorkspaceFromProject()
+    {
+        var imported = AclWorkspaceService.ImportFromProject(_currentProject);
+        _currentProject.AclRules.Clear();
+        foreach (var rule in imported.Rules) _currentProject.AclRules.Add(rule);
+        _currentProject.AclBindings.Clear();
+        foreach (var binding in imported.Bindings) _currentProject.AclBindings.Add(binding);
+        RefreshAclAnalysis();
+        ScheduleAutoSave();
+        MessageBox.Show(this, $"{imported.Rules.Count} ACL-Regeln und {imported.Bindings.Count} Interface-Zuordnungen wurden importiert.", "ACL-Import", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void RefreshAclAnalysis()
+    {
+        if (_aclFindingsGrid != null)
+            _aclFindingsGrid.ItemsSource = AclWorkspaceService.Analyze(_currentProject.AclRules, _currentProject.AclBindings);
+        if (_aclPreviewBox != null)
+            _aclPreviewBox.Text = AclWorkspaceService.BuildConfiguration(_currentProject.AclRules, _currentProject.AclBindings);
+    }
+
+    private void CopyAclConfiguration()
+    {
+        var configuration = AclWorkspaceService.BuildConfiguration(_currentProject.AclRules, _currentProject.AclBindings);
+        if (string.IsNullOrWhiteSpace(configuration))
+        {
+            MessageBox.Show(this, "Es sind keine aktiven ACL-Regeln vorhanden.", "ACL-Editor", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        Clipboard.SetText(configuration);
+        if (_aclPreviewBox != null) _aclPreviewBox.Text = configuration;
+    }
+
+    private void ExportAclCsv()
+    {
+        var dialog = new SaveFileDialog { Title = "ACL-Regeln exportieren", Filter = "CSV (*.csv)|*.csv", FileName = "acl-regeln.csv" };
+        if (dialog.ShowDialog(this) != true) return;
+        var lines = new List<string> { "Device;ACL;Family;Type;Sequence;Action;Protocol;Source;SourceWildcard;Destination;DestinationWildcard;Service;Remark;Enabled" };
+        lines.AddRange(_currentProject.AclRules.Select(rule => string.Join(";",
+            CsvValue(rule.DeviceName), CsvValue(rule.AclName), CsvValue(rule.AddressFamily), CsvValue(rule.AclType), rule.Sequence.ToString(CultureInfo.InvariantCulture),
+            CsvValue(rule.Action), CsvValue(rule.Protocol), CsvValue(rule.Source), CsvValue(rule.SourceWildcard),
+            CsvValue(rule.Destination), CsvValue(rule.DestinationWildcard), CsvValue(rule.Service), CsvValue(rule.Remark), rule.Enabled.ToString())));
+        File.WriteAllLines(dialog.FileName, lines, new UTF8Encoding(true));
+    }
+
+    private static string CsvValue(object? value) => '"' + (value?.ToString() ?? string.Empty).Replace("\"", "\"\"") + '"';
+
+    private void ApplySmartDiagramLayout()
+    {
+        if (_diagramCanvas == null) return;
+        var siteCount = Math.Max(1, _currentProject.Devices.Select(TopologyPlanningService.InferSite).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        var maxDevicesPerSiteRole = _currentProject.Devices
+            .GroupBy(device => $"{TopologyPlanningService.InferSite(device)}|{TopologyPlanningService.InferRole(device)}", StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.Count())
+            .DefaultIfEmpty(1)
+            .Max();
+        _diagramCanvas.Width = Math.Max(1400, siteCount * Math.Max(320, maxDevicesPerSiteRole * 250));
+        _diagramCanvas.Height = 1150;
+        TopologyPlanningService.ApplySmartLayout(_currentProject, _diagramCanvas.Width, _diagramCanvas.Height);
+        RefreshNetworkDiagram();
+        _projectDeviceGrid?.Items.Refresh();
+        ScheduleAutoSave();
+    }
+
+    private void ImportDiscoveryNeighbors()
+    {
+        if (_currentProject.Devices.Count == 0)
+        {
+            MessageBox.Show(this, "Zuerst müssen Projektgeräte vorhanden sein.", "CDP/LLDP-Import", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var dialog = new Window
+        {
+            Title = "CDP-/LLDP-Nachbarn importieren",
+            Owner = this,
+            Width = 760,
+            Height = 620,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = new SolidColorBrush(Color.FromRgb(11, 14, 19))
+        };
+        var root = new Grid { Margin = new Thickness(16) };
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+        root.Children.Add(new TextBlock
+        {
+            Text = "Quellgerät auswählen und die Ausgabe von 'show cdp neighbors detail' oder 'show lldp neighbors detail' einfügen.",
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
+        var sourceCombo = new ComboBox
+        {
+            ItemsSource = _currentProject.Devices,
+            DisplayMemberPath = nameof(ProjectDeviceSnapshot.Name),
+            SelectedIndex = 0,
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+        Grid.SetRow(sourceCombo, 1);
+        root.Children.Add(sourceCombo);
+
+        var input = new TextBox
+        {
+            AcceptsReturn = true,
+            AcceptsTab = true,
+            TextWrapping = TextWrapping.NoWrap,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            FontFamily = new FontFamily("Consolas")
+        };
+        Grid.SetRow(input, 2);
+        root.Children.Add(input);
+
+        var actions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 10, 0, 0) };
+        var cancel = new Button { Content = "Abbrechen" };
+        var import = new Button { Content = "Verbindungen importieren", Style = TryFindResource("PrimaryButtonStyle") as Style };
+        cancel.Click += (_, _) => dialog.DialogResult = false;
+        import.Click += (_, _) => dialog.DialogResult = true;
+        actions.Children.Add(cancel);
+        actions.Children.Add(import);
+        Grid.SetRow(actions, 3);
+        root.Children.Add(actions);
+        dialog.Content = root;
+
+        if (dialog.ShowDialog() != true || sourceCombo.SelectedItem is not ProjectDeviceSnapshot source) return;
+        var result = TopologyPlanningService.AddDiscoveredLinks(_currentProject, source, input.Text);
+        RefreshProjectDeviceBindings();
+        ApplySmartDiagramLayout();
+        var unresolved = result.UnresolvedDevices.Count == 0 ? "Keine." : string.Join(", ", result.UnresolvedDevices);
+        MessageBox.Show(this,
+            $"Neue Verbindungen: {result.AddedLinks}\nÜbersprungen: {result.SkippedLinks}\nNicht zugeordnete Geräte: {unresolved}",
+            "CDP/LLDP-Import", MessageBoxButton.OK,
+            result.UnresolvedDevices.Count == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
+    }
+
+    private async Task ExportProjectPackageAsync()
+    {
+        await EnsureProjectContainsCurrentDeviceAsync();
+        SyncProjectEditors();
+        _advancedDependencyFindings = DependencyValidationService.Analyze(BuildRequest());
+        _advancedSecurityFindings = SecurityAuditService.Analyze(await GenerateConfigAsync());
+        if (_currentProject.AclRules.Count == 0)
+        {
+            var imported = AclWorkspaceService.ImportFromProject(_currentProject);
+            _currentProject.AclBindings.Clear();
+            foreach (var rule in imported.Rules) _currentProject.AclRules.Add(rule);
+            foreach (var binding in imported.Bindings) _currentProject.AclBindings.Add(binding);
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            Title = "Projektpaket exportieren",
+            Filter = "ZIP-Archiv (*.zip)|*.zip",
+            FileName = SanitizeFileName(_currentProject.Name) + "_Projektpaket.zip"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        try
+        {
+            ProjectPackageExportService.Export(dialog.FileName, _currentProject, _advancedDependencyFindings, _advancedSecurityFindings);
+            MessageBox.Show(this, "Das Projektpaket wurde vollständig exportiert.", "Projektpaket", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Projektpaket konnte nicht exportiert werden", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void AddProjectLink()
     {
         if (_linkSourceCombo?.SelectedItem is not ProjectDeviceSnapshot source || _linkTargetCombo?.SelectedItem is not ProjectDeviceSnapshot target)
@@ -1490,6 +1834,14 @@ public partial class MainWindow
         stack.Children.Add(title);
         stack.Children.Add(type);
         stack.Children.Add(mode);
+        stack.Children.Add(new TextBlock
+        {
+            Text = $"{TopologyPlanningService.InferRole(device)} · {TopologyPlanningService.InferSite(device)}",
+            Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)),
+            FontSize = 9,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 2, 0, 0)
+        });
         var extraDetails = BuildDeviceDiagramDetails(device);
         if (!string.IsNullOrWhiteSpace(extraDetails))
         {
@@ -1771,6 +2123,11 @@ public partial class MainWindow
             lines.Add(link.Description.Trim());
         if (_appSettings.ShowInterfaceNames)
             lines.Add($"{link.SourceInterface} ↔ {link.TargetInterface}");
+        if (_appSettings.ShowRoutingDetails)
+        {
+            var routing = RoutingVisualizationService.GetLinkSummary(_currentProject, link);
+            if (!string.IsNullOrWhiteSpace(routing)) lines.Add(routing);
+        }
         return lines.Count == 0 ? LocalizationService.TranslateText("Verbindung") : string.Join("\n", lines);
     }
 
@@ -1794,15 +2151,19 @@ public partial class MainWindow
                 .ToList();
             if (vlans.Count > 0) details.Add("VLAN " + string.Join(",", vlans));
         }
-        return string.Join(" · ", details);
+        if (_appSettings.ShowRoutingDetails)
+            details.AddRange(RoutingVisualizationService.GetDeviceDetails(device).Take(3));
+        return string.Join("\n", details.Distinct(StringComparer.OrdinalIgnoreCase));
     }
 
     private string BuildDiagramLinkToolTip(ProjectLink link)
     {
         var source = _currentProject.Devices.FirstOrDefault(x => x.Id == link.SourceDeviceId)?.Name ?? "Quelle";
         var target = _currentProject.Devices.FirstOrDefault(x => x.Id == link.TargetDeviceId)?.Name ?? "Ziel";
+        var routing = _appSettings.ShowRoutingDetails ? RoutingVisualizationService.GetLinkSummary(_currentProject, link) : string.Empty;
         return $"{link.LinkType}\n{source} {link.SourceInterface} ↔ {target} {link.TargetInterface}" +
-               (string.IsNullOrWhiteSpace(link.Description) ? string.Empty : $"\n{link.Description.Trim()}");
+               (string.IsNullOrWhiteSpace(link.Description) ? string.Empty : $"\n{link.Description.Trim()}") +
+               (string.IsNullOrWhiteSpace(routing) ? string.Empty : $"\n{routing}");
     }
 
     private void ExportNetworkDiagramSvg()

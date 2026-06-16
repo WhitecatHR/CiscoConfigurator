@@ -6,7 +6,7 @@
 
 Cisco Configurator is a C# WPF application for structured creation, management, validation, and documentation of Cisco IOS and IOS-XE configurations. It supports routers, Layer 3 switches, and Layer 2 switches and provides the required functions through clearly separated technical modules.
 
-The application goes beyond basic configuration generation. It includes multi-device projects, IPAM, port planning, peer configuration generation, configuration analysis, SSH transfer, backups, network diagrams, and exportable network plans.
+The application goes beyond basic configuration generation. It includes multi-device projects, IPAM, port planning, peer configuration generation, configuration analysis, SSH transfer, backups, intelligent network diagrams, ACL rule analysis, routing overlays, exportable network plans, and complete project packages.
 
 
 ## Usage
@@ -71,9 +71,13 @@ Visible modules and input fields are filtered according to the selected device t
 2. Select the source device, source interface, target device, and target interface.
 3. Select the connection type and enter an optional description.
 4. Add the connection to the project.
-5. Position devices by drag and drop or use the automatic layout.
-6. Routers, Layer 3 switches, and Layer 2 switches use dedicated vector symbols.
-7. Export the standalone network diagram as SVG.
+5. Optionally define a site and topology role for each project device.
+6. Use **Smart Layout** to arrange devices automatically by site and by WAN, Core, Distribution, and Access roles.
+7. Import CDP or LLDP neighbor output to add missing connections between existing project devices automatically.
+8. Enable the **Routing Overlay** to display OSPF areas, BGP AS numbers, EIGRP, IS-IS, VRFs, HSRP, and addressed routed links.
+9. Continue adjusting devices through drag and drop.
+10. Routers, Layer 3 switches, and Layer 2 switches use dedicated vector symbols.
+11. Export the standalone network diagram as SVG.
 
 Connections are created and maintained only in the **Diagram** area. The network plan automatically reuses these connection records.
 
@@ -90,6 +94,15 @@ The **Analysis** area provides functions including:
 - detection of unknown or unassigned commands
 
 Review and resolve detected warnings and errors before export or transfer.
+
+### Use the ACL editor and rule analysis
+
+1. Open **Analysis** and select **ACL Editor**.
+2. Import ACL rules from stored project devices or enter them manually in the table.
+3. Edit sequence, action, protocol, source, destination, wildcards, and service values.
+4. Add interface assignments with `IN` or `OUT` direction.
+5. Run analysis for shadowed rules, redundant rules, duplicate sequences, broad `permit any any` rules, and unused ACLs.
+6. Copy the generated ACL configuration block or export the rule set as CSV.
 
 ### 9. Import an existing configuration
 
@@ -131,6 +144,18 @@ Depending on the available project data, the network plan includes:
 - VRFs
 - routing protocols
 - validation results and test commands
+
+### Export a project package
+
+Use **Project Package ZIP** to export the complete project state as one archive. The package contains:
+
+- the complete `.ciscoproject.json` project file
+- individual device configurations
+- HTML network plan and SVG diagram
+- IPAM, connection, ACL, route, and routing-protocol tables as CSV
+- dependency, security, and ACL analysis results
+- rollback drafts and previous configurations when device backups are available
+- a machine-readable `manifest.json`
 
 ### 12. Save and continue the project
 

@@ -13,6 +13,8 @@ public sealed class NetworkProject
     public ObservableCollection<IpamEntry> IpamEntries { get; set; } = new();
     public ObservableCollection<ProjectLink> Links { get; set; } = new();
     public ObservableCollection<BackupRecord> Backups { get; set; } = new();
+    public ObservableCollection<ProjectAclRule> AclRules { get; set; } = new();
+    public ObservableCollection<ProjectAclBinding> AclBindings { get; set; } = new();
     public ProjectPlanInfo ProjectInfo { get; set; } = new();
 }
 
@@ -36,6 +38,8 @@ public sealed class ProjectDeviceSnapshot
     public Dictionary<string, string> Values { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, bool> Modules { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string GeneratedConfiguration { get; set; } = "";
+    public string Site { get; set; } = "";
+    public string TopologyRole { get; set; } = "Automatisch";
     public double? DiagramX { get; set; }
     public double? DiagramY { get; set; }
     public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
@@ -66,7 +70,46 @@ public sealed class ProjectLink
     public string TargetInterface { get; set; } = "";
     public string LinkType { get; set; } = "Ethernet";
     public string Description { get; set; } = "";
+    public string DiscoverySource { get; set; } = "";
 }
+
+
+public sealed class ProjectAclRule
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string DeviceName { get; set; } = "";
+    public string AclName { get; set; } = "ACL-NAME";
+    public string AddressFamily { get; set; } = "IPv4";
+    public string AclType { get; set; } = "Extended";
+    public int Sequence { get; set; } = 10;
+    public string Action { get; set; } = "permit";
+    public string Protocol { get; set; } = "ip";
+    public string Source { get; set; } = "any";
+    public string SourceWildcard { get; set; } = "";
+    public string Destination { get; set; } = "any";
+    public string DestinationWildcard { get; set; } = "";
+    public string Service { get; set; } = "";
+    public string Remark { get; set; } = "";
+    public bool Enabled { get; set; } = true;
+}
+
+public sealed class ProjectAclBinding
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string DeviceName { get; set; } = "";
+    public string Interface { get; set; } = "";
+    public string AclName { get; set; } = "";
+    public string Direction { get; set; } = "IN";
+    public string AddressFamily { get; set; } = "IPv4";
+}
+
+public sealed record AclFinding(
+    string Severity,
+    string DeviceName,
+    string AclName,
+    int Sequence,
+    string Message,
+    string Recommendation);
 
 public sealed class BackupRecord
 {
