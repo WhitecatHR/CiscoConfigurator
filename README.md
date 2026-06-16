@@ -1,3 +1,100 @@
+ENGLISH / ENGLISCH
+
+# Cisco Configurator
+
+Cisco Configurator is a multilingual Windows application for creating, importing, validating, analyzing, comparing, documenting, and deploying Cisco IOS and IOS-XE configurations.
+
+The application supports routers, Layer 2 switches, and Layer 3 switches. Its modular WPF interface provides dedicated configuration areas for switching, routing, security, network services, device management, and documentation.
+
+## Languages
+
+The user interface supports:
+
+* German
+* English
+* automatic system language detection
+
+The language can be changed in the application settings. Cisco commands, protocol names, interface identifiers, and generated configurations remain unchanged.
+
+## Main Features
+
+* Modular Cisco configuration generation
+* Router, Layer 2 switch, and Layer 3 switch profiles
+* IPv4, IPv6, and dual-stack support
+* VLAN, trunk, EtherChannel, and Spanning Tree configuration
+* OSPF, OSPFv3, BGP, EIGRP, IS-IS, static routes, and VRF
+* DHCP, ACL, NAT, NTP, SNMP, Syslog, SSH, AAA, and RADIUS
+* HSRP, GRE, IPsec, MPLS, QoS, VoIP, and QinQ
+* Full configuration import and command recognition
+* Unknown-command detection
+* Dependency and conflict validation
+* Automatic correction suggestions
+* Peer-device and counterpart configuration generation
+* Multi-device project management
+* IPv4 and IPv6 IP address management
+* Interactive port planning
+* Configuration comparison and rollback generation
+* SSH deployment and device backup management
+* Command registry with explanations and diagnostic commands
+* Security analysis
+* Interactive network diagrams
+* HTML, DOCX, and PDF project reports
+* Automatic saving and crash recovery
+* Configurable themes, accent colors, font sizes, and export options
+
+## Interactive Network Diagram
+
+Devices can be positioned manually using drag and drop. Connections can display:
+
+* connection type
+* source and destination interfaces
+* descriptions
+* VLAN information
+* IP addressing
+* different colors and line styles
+
+Device positions and connection information are stored inside the project.
+
+## Settings
+
+The central settings area includes:
+
+* application language
+* report language
+* theme and accent color
+* font size and compact mode
+* default device and platform
+* IPv4, IPv6, or dual-stack defaults
+* configuration export options
+* automatic saving and backups
+* SSH connection settings
+* diagram and report preferences
+* JSON settings import and export
+
+Application settings are stored locally under:
+
+```text
+%AppData%\CiscoKonfigurator\settings.json
+```
+
+## Technology
+
+* C#
+* .NET 8
+* WPF
+* Windows
+* JSON-based project and settings storage
+
+## Disclaimer
+
+This project is an independent configuration and documentation tool. It is not affiliated with, endorsed by, or maintained by Cisco Systems, Inc.
+
+Generated configurations should always be validated in a lab or test environment before being deployed to production devices.
+
+___________________________________________________________________________________________________________
+
+DEUTSCH / GERMAN
+
 # Cisco Konfigurator
 
 ## Kurze Repository-Beschreibung
@@ -41,21 +138,6 @@ Das Projekt richtet sich an Netzwerkadministratoren, Auszubildende, Fachinformat
 - Native Windows-Anwendung
 - Veröffentlichung als selbst enthaltene Single-File-EXE für `win-x64`
 - `System.IO.Ports` für serielle Verbindungen
-
-## Voraussetzungen
-
-Für die Entwicklung und den Build wird das .NET 8 SDK unter Windows benötigt.
-
-```powershell
-dotnet restore
-dotnet build -c Release
-```
-
-Single-File-Veröffentlichung:
-
-```powershell
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish-output
-```
 
 ## Projektstatus
 
