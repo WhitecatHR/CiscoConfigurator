@@ -1,0 +1,3383 @@
+[
+  {
+    "tab": "Basis",
+    "name": "basic",
+    "title": "Grunddaten",
+    "devices": [
+      "All"
+    ],
+    "height": 1050,
+    "default": true,
+    "line": 2453,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Hostname",
+        "name": "hostname",
+        "value": "",
+        "help": "Der Hostname ist der eindeutige Gerätename im CLI-Prompt. Er erleichtert Dokumentation, Fehlersuche, Syslog-Auswertung und verhindert Verwechslungen bei mehreren Routern/Switches.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Domain",
+        "name": "domain",
+        "value": "",
+        "help": "Der Domain-Name wird unter Cisco IOS für die RSA-Schlüsselerzeugung benötigt, wenn SSH aktiviert werden soll. Beispiel: hoeferhome.local oder firma.local.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Enable Secret",
+        "name": "enableSecret",
+        "value": "",
+        "help": "Das enable secret schützt den privilegierten EXEC-Modus. Es sollte immer statt enable password verwendet werden, weil es sicherer gespeichert wird.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Passwort min.",
+        "name": "minPass",
+        "value": "",
+        "help": "Legt eine Mindestlänge für neue Passwörter fest. Sinnvoll für Hardening. Typische Werte sind 10, 12 oder höher.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "no domain lookup",
+        "name": "noDomainLookup",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Verhindert DNS-Lookups bei vertippten Befehlen. Ohne diesen Befehl versucht der Router Tippfehler als Hostnamen aufzulösen, was Wartezeiten verursacht.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "password encryption",
+        "name": "servicePass",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Verschlüsselt einfache Passwörter in der Konfiguration mit Typ 7. Das ist kein starker Schutz, verhindert aber Klartextanzeige bei einfachen Passwörtern.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Zeitzone",
+        "name": "clockTimezoneName",
+        "value": "",
+        "help": "Kurzname der Standardzeitzone für den Befehl clock timezone, z. B. CET. Der Wert ist nur die Bezeichnung; die UTC-Abweichung wird separat angegeben.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "UTC-Abweichung Stunden",
+        "name": "clockTimezoneHours",
+        "value": "",
+        "help": "Stundenabweichung der Standardzeit gegenüber UTC. Für Deutschland ist der Standardwert 1. Negative Werte sind möglich, z. B. -5.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "UTC-Abweichung Minuten",
+        "name": "clockTimezoneMinutes",
+        "value": "0",
+        "help": "Zusätzliche Minutenabweichung gegenüber UTC. Meist 0; für Zeitzonen mit halben Stunden beispielsweise 30.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Sommerzeit-Name",
+        "name": "clockSummerName",
+        "value": "",
+        "help": "Kurzname der Sommerzeit für clock summer-time, z. B. CEST. Leer lassen, wenn keine Sommerzeit konfiguriert werden soll.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Sommerzeit-Regel",
+        "name": "clockSummerRule",
+        "value": "",
+        "help": "Vollständiger Regelteil nach dem Sommerzeit-Namen. Beispiel: recurring last Sun Mar 2:00 last Sun Oct 3:00. Alternativ kann eine datumsbasierte IOS-Regel eingetragen werden.",
+        "w": 600
+      }
+    ]
+  },
+  {
+    "tab": "Basis",
+    "name": "banner",
+    "title": "Banner",
+    "devices": [
+      "All"
+    ],
+    "height": 740,
+    "default": false,
+    "line": 2461,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Firma",
+        "name": "company",
+        "value": "",
+        "help": "Variable {COMPANY}. Wird nur im Banner ersetzt, wenn du sie dort verwendest.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Standort",
+        "name": "location",
+        "value": "",
+        "help": "Variable {LOCATION}. Sinnvoll bei mehreren Standorten oder Laboren.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Admin/Kontakt",
+        "name": "admin",
+        "value": "",
+        "help": "Variable {ADMIN}. Hier kann eine Mailadresse, Rufnummer oder Betriebsstelle stehen.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "MOTD Banner",
+        "name": "motd",
+        "value": "Unauthorized access prohibited.\nDevice: {HOSTNAME}\nLocation: {LOCATION}",
+        "help": "MOTD erscheint vor oder beim Login. Nutze ihn für rechtliche Hinweise, Warnungen und Kontaktinformationen. Variablen: {HOSTNAME}, {DATE}, {TIME}, {DEVICE_TYPE}, {LOCATION}, {ADMIN}, {COMPANY}.",
+        "w": 500,
+        "h": 85
+      },
+      {
+        "type": "Multi",
+        "label": "Login Banner",
+        "name": "loginBanner",
+        "value": "Login to {HOSTNAME}\nContact: {ADMIN}",
+        "help": "Login-Banner wird beim Zugriff auf Console/VTY angezeigt. Sinnvoll für klare Warnhinweise und Zuständigkeit.",
+        "w": 500,
+        "h": 85
+      }
+    ]
+  },
+  {
+    "tab": "Management",
+    "name": "ssh",
+    "title": "SSH / Line VTY",
+    "devices": [
+      "All"
+    ],
+    "height": 740,
+    "default": true,
+    "line": 2470,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "RSA Bits",
+        "name": "rsaModulus",
+        "items": [
+          "1024",
+          "2048",
+          "3072",
+          "4096"
+        ],
+        "selected": 1,
+        "help": "RSA-Schlüssellänge für SSH. 2048 ist Standard. Packet Tracer nimmt oft 1024/2048. Auf echten Geräten 2048 oder höher nutzen.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "SSH Timeout Sek.",
+        "name": "sshTimeout",
+        "value": "60",
+        "help": "Zeit in Sekunden, wie lange eine SSH-Authentifizierung offen bleiben darf.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "SSH Retries",
+        "name": "sshRetries",
+        "items": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "selected": 2,
+        "help": "Maximale Anzahl Authentifizierungsversuche pro SSH-Verbindung.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "SSH Source If",
+        "name": "sshSourceIf",
+        "value": "",
+        "help": "Optionales Quellinterface für SSH, z. B. Vlan99 oder Loopback0.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "SSH Logging Events",
+        "name": "sshLogEvents",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Aktiviert SSH-Event-Logging, falls vom IOS unterstützt.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "SSH Algorithm",
+        "name": "sshAlgorithm",
+        "items": [
+          "Standard",
+          "aes256-ctr aes192-ctr aes128-ctr",
+          "aes256-cbc aes192-cbc aes128-cbc"
+        ],
+        "selected": 0,
+        "help": "Optional. Nur setzen, wenn dein IOS diesen Befehl unterstützt.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "VTY Start",
+        "name": "vtyStart",
+        "items": [
+          "0",
+          "5"
+        ],
+        "selected": 0,
+        "help": "Startnummer der VTY-Line. Meist 0.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "VTY Ende",
+        "name": "vtyEnd",
+        "items": [
+          "4",
+          "15"
+        ],
+        "selected": 0,
+        "help": "Endnummer der VTY-Line. Klassisch 0 4, auf vielen Geräten 0 15.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "VTY Login",
+        "name": "vtyLoginMode",
+        "items": [
+          "login local",
+          "login authentication default",
+          "password login"
+        ],
+        "selected": 0,
+        "help": "login local nutzt lokale username-Accounts. login authentication default nutzt AAA. password login nutzt ein Line-Passwort.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "VTY Passwort",
+        "name": "vtyPassword",
+        "value": "",
+        "help": "Nur bei password login relevant. Sonst leer lassen.",
+        "w": 300,
+        "dependsOnField": "vtyLoginMode",
+        "visibleForValues": [
+          "password login"
+        ],
+        "enabledForValues": [
+          "password login"
+        ]
+      },
+      {
+        "type": "Text",
+        "label": "VTY ACL",
+        "name": "vtyAclSsh",
+        "value": "",
+        "help": "Optional: access-class für SSH-Quellnetze, z. B. 10 oder MGMT-SSH.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Exec Timeout",
+        "name": "vtyExecTimeout",
+        "value": "10 0",
+        "help": "Automatische Abmeldung in Minuten Sekunden, z. B. 10 0.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Logging Sync",
+        "name": "vtyLoggingSync",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "logging synchronous verhindert, dass Konsolenmeldungen die Eingabe zerreißen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Privilege",
+        "name": "vtyPrivilege",
+        "items": [
+          "",
+          "1",
+          "5",
+          "15"
+        ],
+        "selected": 0,
+        "help": "Optionales privilege level auf der VTY-Line. Meist leer lassen und Rechte über Benutzer/AAA steuern.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Management",
+    "name": "aaa",
+    "title": "AAA / Console",
+    "devices": [
+      "All"
+    ],
+    "height": 470,
+    "default": true,
+    "line": 2485,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "AAA local",
+        "name": "aaaLocal",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Aktiviert aaa new-model mit lokaler Authentifizierung, wenn kein RADIUS/TACACS-Modul aktiv ist. Bei RADIUS/TACACS wird die Default-Methode dort zentral erzeugt, damit keine widersprüchlichen aaa authentication login default Befehle entstehen.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Console Timeout",
+        "name": "execTimeout",
+        "value": "10 0",
+        "help": "Automatische Abmeldung auf der Console in Minuten Sekunden. Beispiel 10 0 = nach 10 Minuten Inaktivität wird die Session getrennt.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Console Logging Sync",
+        "name": "consoleLoggingSync",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "logging synchronous verhindert, dass Konsolenmeldungen die Eingabe zerreißen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Console Login",
+        "name": "consoleLogin",
+        "items": [
+          "keine Änderung",
+          "login local"
+        ],
+        "selected": 0,
+        "help": "Optional. login local auf Console setzt lokale Benutzer voraus. VTY/SSH wird ausschließlich im SSH-Modul konfiguriert.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Management",
+    "name": "radiusTacacs",
+    "title": "RADIUS / TACACS+ / AAA Server",
+    "devices": [
+      "All"
+    ],
+    "height": 710,
+    "default": false,
+    "line": 2490,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "RADIUS: Name|IP|Auth-Port|Acct-Port|Key|Timeout|Retransmit",
+        "name": "radiusList",
+        "value": "RAD1|192.168.99.10|1812|1813|radiusSecret|5|3",
+        "help": "Mehrere RADIUS-Server möglich. Auth-Port meist 1812, Accounting 1813. Timeout/Retransmit optional. Beispiel: RAD1|192.168.99.10|1812|1813|Secret|5|3",
+        "w": 1030,
+        "h": 72
+      },
+      {
+        "type": "Multi",
+        "label": "TACACS+: Name|IP|Key",
+        "name": "tacacsList",
+        "value": "",
+        "help": "Mehrere TACACS+-Server möglich. TACACS+ trennt Authentifizierung, Autorisierung und Accounting besonders gut für Adminzugriffe.",
+        "w": 1080,
+        "h": 50
+      },
+      {
+        "type": "Text",
+        "label": "AAA Radius Gruppe",
+        "name": "aaaRadiusGroup",
+        "value": "RAD-GRP",
+        "help": "Erzeugt aaa group server radius und bindet die RADIUS-Server in diese Gruppe ein.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "AAA Radius nutzen",
+        "name": "aaaUseRadius",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Wenn Ja, wird AAA Login/Authorization/Accounting gegen RADIUS mit lokalem Fallback erzeugt.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Source Interface",
+        "name": "radiusSourceIf",
+        "value": "",
+        "help": "Optional: Quellinterface für RADIUS-Pakete, z. B. Loopback0 oder Vlan99. Hilft bei Firewalls und stabiler Serverkommunikation.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Management",
+    "name": "monitoringBase",
+    "title": "NTP / Syslog / SNMP / Logging",
+    "devices": [
+      "All"
+    ],
+    "height": 1160,
+    "default": false,
+    "line": 2497,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "NTP: server|prefer",
+        "name": "ntpList",
+        "value": "192.168.99.1|prefer",
+        "help": "NTP synchronisiert die Uhrzeit. Wichtig für Syslog, Zertifikate, Fehlersuche und Ereigniskorrelation. Format: Server-IP|prefer optional.",
+        "w": 315,
+        "h": 82
+      },
+      {
+        "type": "Multi",
+        "label": "Syslog: server|level",
+        "name": "syslogList",
+        "value": "192.168.99.50|informational",
+        "help": "Syslog sendet Logs an einen zentralen Server. Level: emergencies, alerts, critical, errors, warnings, notifications, informational, debugging.",
+        "w": 315,
+        "h": 82
+      },
+      {
+        "type": "Multi",
+        "label": "SNMPv3: group|user|auth|authpass|priv|privpass",
+        "name": "snmpList",
+        "value": "",
+        "help": "SNMPv3 ist für Monitoring deutlich sicherer als SNMPv2, da Authentifizierung und Verschlüsselung möglich sind. Beispiel: MON|snmpuser|sha|authpass|aes|privpass.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Combo",
+        "label": "Timestamps",
+        "name": "logTimestamps",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Aktiviert detaillierte Zeitstempel für Logs und Debugs.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Buffered Größe",
+        "name": "logBuffered",
+        "value": "64000",
+        "help": "Größe des lokalen Logpuffers.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Trap Level",
+        "name": "logTrap",
+        "value": "informational",
+        "help": "Syslog Trap-Level.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Archive Log Config",
+        "name": "archiveLog",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Protokolliert Konfigurationsänderungen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Login Audit",
+        "name": "loginAudit",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Loggt erfolgreiche und fehlgeschlagene Logins.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Archive Path",
+        "name": "archivePath",
+        "value": "flash:/archive-$h",
+        "help": "Optionaler Speicherort für Konfigurationsarchive, z. B. flash:/archive-$h oder scp://user:pass@server/path. Nutzt denselben archive-Konfigurationsmodus wie Config-Logging, deshalb ist es hier zusammengeführt.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Archive write-memory",
+        "name": "archiveWriteMemory",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Archiviert die Konfiguration bei write memory, falls vom IOS unterstützt.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Archive time-period",
+        "name": "archiveTimePeriod",
+        "value": "",
+        "help": "Optionales Archivintervall in Minuten. Leer lassen, wenn nur manuell gespeichert werden soll.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Management",
+    "name": "userRights",
+    "title": "Benutzer / Rechte",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 670,
+    "default": false,
+    "line": 2516,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Benutzer|Privilege|Secret",
+        "name": "privUserList",
+        "value": "admin|15|MeinPasswort\nreadonly|5|ReadSecret",
+        "help": "Zentrale lokale Benutzerverwaltung. Diese Liste ersetzt das alte separate Benutzer-Modul, damit username-Befehle nicht doppelt entstehen. Privilege 15 ist Vollzugriff; niedrigere Level sind eingeschränkt.",
+        "w": 1080,
+        "h": 110
+      },
+      {
+        "type": "Multi",
+        "label": "ParserView|Secret|Command",
+        "name": "parserViewList",
+        "value": "VIEW-SHOW|ViewSecret|show",
+        "help": "Optionale Parser Views für eingeschränkte CLI-Rechte. Das ist IOS-abhängig und wird genutzt, wenn Benutzer nicht volle Adminrechte erhalten sollen.",
+        "w": 1080,
+        "h": 80
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "interfaces",
+    "title": "Einzelinterfaces",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 415,
+    "default": false,
+    "line": 2523,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|Beschreibung|routed/access/trunk|IP/VLAN/Allowed|Maske",
+        "name": "interfacesList",
+        "value": "GigabitEthernet0/0|WAN|routed|192.168.1.2|255.255.255.0",
+        "help": "routed = Layer-3-Port mit IP-Adresse. access = Endgeräteport in genau einem VLAN. trunk = Verbindung zwischen Switches oder zu Router/Firewall mit mehreren VLANs.",
+        "w": 1080,
+        "h": 85
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "ranges",
+    "title": "Interface-Ranges",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 415,
+    "default": false,
+    "line": 2525,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Range|Beschreibung|access/trunk|VLANs|PortFast|BPDU Guard|PortSecurity",
+        "name": "rangesList",
+        "value": "GigabitEthernet0/1-12|Clients|access|10|ja|ja|ja",
+        "help": "Konfiguriert viele Ports gleichzeitig. PortFast nur für Endgeräteports. BPDU Guard schaltet Ports ab, wenn dort unerwartet ein Switch/BPDU auftaucht. PortSecurity begrenzt MAC-Adressen.",
+        "w": 1080,
+        "h": 85
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "subinterfaces",
+    "title": "Subinterfaces",
+    "devices": [
+      "Router"
+    ],
+    "height": 405,
+    "default": false,
+    "line": 2527,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|Sub-ID|VLAN-ID|IP|Maske",
+        "name": "subifList",
+        "value": "GigabitEthernet0/0|10|10|192.168.10.1|255.255.255.0",
+        "help": "Router-on-a-Stick: ein physisches Interface verarbeitet mehrere VLANs über 802.1Q Tags. Sub-ID entspricht meist der VLAN-ID, muss aber technisch nicht identisch sein.",
+        "w": 1080,
+        "h": 75
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "routerStick",
+    "title": "Router-on-a-Stick Assistent",
+    "devices": [
+      "Router"
+    ],
+    "height": 615,
+    "default": false,
+    "line": 2530,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Parent Interface",
+        "name": "rosParentIf",
+        "value": "GigabitEthernet0/0",
+        "help": "Physisches Router-Interface, das als Trunk zum Switch genutzt wird. Auf dem Switch muss der Port als Trunk konfiguriert sein.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Native VLAN optional",
+        "name": "rosNativeVlan",
+        "value": "",
+        "help": "Optionales Native VLAN. Nur eintragen, wenn du bewusst ein Native VLAN ohne Tagging nutzen willst. Meist leer lassen oder unbenutztes VLAN verwenden.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Parent no shutdown",
+        "name": "rosParentNoShutdown",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Setzt no shutdown auf dem physischen Parent-Interface. Die IP-Adressen liegen auf den Subinterfaces.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "VLANs/Subinterfaces: VLAN-ID|Name|Gateway-IP|Maske",
+        "name": "rosVlanList",
+        "value": "10|CLIENTS|192.168.10.1|255.255.255.0\n20|SERVER|192.168.20.1|255.255.255.0\n99|MGMT|192.168.99.1|255.255.255.0",
+        "help": "Eine Zeile pro VLAN/Subinterface. Es werden nur Router-Subinterfaces erzeugt: interface Parent.VLAN, encapsulation dot1Q, ip address, no shutdown. VLANs selbst müssen auf dem Switch existieren.",
+        "w": 1030,
+        "h": 90
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "qosBasic",
+    "title": "QoS Basic",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 580,
+    "default": false,
+    "line": 2538,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Trust Interfaces",
+        "name": "qosTrustInterfaces",
+        "value": "Gi0/1\nGi0/2",
+        "help": "Aktiviert DSCP Trust / Auto-QoS Trust auf Interfaces. Plattformabhängig.",
+        "w": 1080,
+        "h": 85
+      },
+      {
+        "type": "Multi",
+        "label": "Class|DSCP|Policy|PriorityPercent",
+        "name": "qosPolicyList",
+        "value": "VOICE|ef|WAN-QOS|30",
+        "help": "Erzeugt einfache class-map/policy-map Struktur.",
+        "w": 1080,
+        "h": 80
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "interfaceProfiles",
+    "title": "Interface-Profile",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 640,
+    "default": false,
+    "line": 2544,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|Profil|Beschreibung|Wert1|Wert2",
+        "name": "interfaceProfileList",
+        "value": "Gi0/1|access|Client Port|10|\nGi0/2|voice|Telefon + Client|10|30\nGi0/48|trunk|Uplink|10,20,30,99|999\nGi0/10|unused|Nicht genutzt|999|",
+        "help": "Profile: access, voice, trunk, uplink, server, ap, unused, routed. Wert1/Wert2 je nach Profil VLANs, Native VLAN oder IP/Maske.",
+        "w": 1080,
+        "h": 170
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "trunkUplink",
+    "title": "Trunk / Uplink",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 580,
+    "default": false,
+    "line": 2547,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|Allowed VLANs|Native VLAN|Beschreibung|Guard(root/loop)",
+        "name": "trunkUplinkList",
+        "value": "Gi0/48|10,20,30,99|999|Uplink zum Core|root",
+        "help": "Erzeugt saubere Trunk/Uplink-Konfiguration mit nonegotiate und optional Root/Loop Guard.",
+        "w": 1080,
+        "h": 130
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "qinq",
+    "title": "QinQ / 802.1ad",
+    "devices": [
+      "L2-Switch",
+      "L3-Switch"
+    ],
+    "height": 760,
+    "default": false,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Provider VLAN Name Prefix",
+        "name": "qinqVlanPrefix",
+        "value": "QINQ_SVLAN_",
+        "help": "Namenspräfix für automatisch erzeugte Provider-/Service-VLANs. Beispiel: QINQ_SVLAN_200.\n\nBefehlsteile:\nvlan <Provider-VLAN> = erstellt das äußere Service-VLAN.\nname <Prefix><Provider-VLAN> = benennt das S-VLAN eindeutig.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "System MTU optional",
+        "name": "qinqSystemMtu",
+        "value": "",
+        "help": "Optional und plattformabhängig. QinQ fügt pro zusätzlichem 802.1Q-Tag 4 Byte Overhead hinzu. Deshalb ist nicht pauschal 9000 nötig.\n\nPraxis:\nLeer lassen = keine MTU-Konfiguration erzeugen.\n1522/1526 = häufig ausreichend für normales Ethernet plus VLAN/QinQ-Overhead, je nach Plattform.\n9216 = Jumbo-/Provider-Core-Szenario, nur wenn durchgehend unterstützt.\n9000 ist ein Host-Jumbo-Wert und wird nicht mehr als Standardwert gesetzt.\n\nBefehl, falls bewusst gesetzt:\nsystem mtu jumbo <Bytes>\n\nHinweis: Auf vielen Catalyst-Plattformen ist danach ein Reload nötig.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Global dot1q tunneling",
+        "name": "qinqGlobalDot1q",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Optionaler Hinweis-Schalter. Klassische Catalyst-Konfiguration nutzt meistens pro Port switchport mode dot1q-tunnel. Globale dot1q-/Ethertype-Optionen sind stark IOS-/IOS-XE-/Plattformabhängig und werden deshalb nicht pauschal als Befehl erzeugt.\n\nRelevante Syntax je nach Plattform prüfen, z. B. dot1q tunneling ethertype <0x8100|0x88A8>.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|Provider-VLAN|Beschreibung|L2ProtocolTunnel",
+        "name": "qinqTunnelList",
+        "value": "Gi0/10|200|Kunde A QinQ|cdp,stp,vtp\nGi0/11|201|Kunde B QinQ|stp",
+        "help": "Portbasiertes QinQ für Customer-facing Switchports. Der Port wird einem Provider-/Service-VLAN zugeordnet und als dot1q-tunnel betrieben.\n\nBefehlsteile:\ninterface <Interface> = Customer-Port am Provider-/Switch-Rand.\ndescription <Beschreibung> = Portdokumentation.\nswitchport mode dot1q-tunnel = aktiviert QinQ-Tunnelmodus.\nswitchport access vlan <Provider-VLAN> = äußeres S-VLAN/Provider-VLAN.\nl2protocol-tunnel <cdp|stp|vtp> = tunnelt ausgewählte Layer-2-Protokolle, sofern Plattform/IOS das unterstützt.\n\nKeine Interface-MTU mehr im Standard: MTU wird bewusst global über System MTU optional gepflegt, weil mtu <Bytes> auf L2-Switchports häufig plattformabhängig oder ungültig ist.\n\nFormat: Interface|Provider-VLAN|Beschreibung|L2ProtocolTunnel.\nL2ProtocolTunnel kann cdp, stp, vtp oder all enthalten.",
+        "w": 700,
+        "h": 130
+      },
+      {
+        "type": "Multi",
+        "label": "Nur L3-Switch: Parent|SubID|Provider-VLAN|Customer-VLAN|IP optional|Maske optional|Beschreibung",
+        "name": "qinqSubifList",
+        "value": "Gi0/0|200100|200|100|10.200.100.1|255.255.255.252|QinQ L3 Kunde A\nGi0/0|201110|201|110|||QinQ Subinterface ohne IP",
+        "help": "Double-Tagged Layer-3-Subinterfaces. Diese Zeilen werden nur beim Gerätetyp L3-Switch erzeugt. Beim L2-Switch werden sie bewusst übersprungen. Router wird für das QinQ-Modul nicht mehr angeboten.\n\nBefehlsteile:\ninterface <Parent>.<SubID> = Subinterface auf routed Parent-Interface.\nencapsulation dot1Q <Provider-VLAN> second-dot1q <Customer-VLAN> = äußeres S-VLAN und inneres C-VLAN.\nip address <IP> <Maske> = optional, wenn das Subinterface Layer-3-Abschluss ist.\n\nFormat: Parent|SubID|Provider-VLAN|Customer-VLAN|IP optional|Maske optional|Beschreibung.",
+        "w": 700,
+        "h": 130
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "etherChannelExt",
+    "title": "EtherChannel",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 640,
+    "default": false,
+    "line": 2550,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Load-Balance",
+        "name": "etherLoadBalance",
+        "value": "src-dst-ip",
+        "help": "Optional: port-channel load-balance, abhängig von Plattform.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "PortChannel|Interfaces|Mode|access/trunk|VLANs|Beschreibung|Native VLAN",
+        "name": "etherExtList",
+        "value": "1|Gi0/1-2|active|trunk|10,20,99|Uplink Bundle|999",
+        "help": "LACP active/passive, PAgP desirable/auto oder on. Erzeugt Interface-Range und Port-Channel.",
+        "w": 1080,
+        "h": 150
+      }
+    ]
+  },
+  {
+    "tab": "Interfaces",
+    "name": "interfaceRoles",
+    "title": "Interface-Rollenmodell",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 560,
+    "default": false,
+    "line": 2555,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|Rolle|Beschreibung|Access-VLAN|Voice-VLAN|Allowed VLANs|Native VLAN|PortChannel|IP|Maske|VRF",
+        "name": "interfaceRoleList",
+        "value": "Gi0/1|access|Client|10||||||\nGi0/2|voice|Telefon|10|30|||||\nGi0/48|uplink|Uplink Core|||10,20,30,99|999||||\nGi1/0/1|pc-member|Bundle Member|||||1|||\nGi0/10|unused|Nicht genutzt|999||||||",
+        "help": "Zweck: Zentrales Rollenmodell für Ports.\n\nBefehlsteile:\naccess erzeugt switchport mode access, access vlan, spanning-tree portfast und bpduguard.\nvoice erzeugt zusätzlich switchport voice vlan.\ntrunk erzeugt mode trunk, allowed VLANs, native VLAN und nonegotiate.\nuplink ergänzt root guard.\nap erzeugt portfast trunk.\npc-member erzeugt channel-group <ID> mode active.\nrouted erzeugt no switchport, optional ip vrf forwarding und ip address.\nunused setzt shutdown.\n\nFormat: Interface|Rolle|Beschreibung|Access-VLAN|Voice-VLAN|Allowed VLANs|Native VLAN|PortChannel|IP|Maske|VRF.",
+        "w": 1080,
+        "h": 330
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "vlans",
+    "title": "VLANs und SVIs",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 660,
+    "default": false,
+    "line": 2562,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "VLANs: VLAN-ID|Name",
+        "name": "vlanList",
+        "value": "10|CLIENTS\n20|SERVER\n99|MGMT",
+        "help": "VLANs trennen Layer-2-Broadcast-Domänen. VLAN 1 sollte nicht als Produktiv- oder Management-VLAN genutzt werden.",
+        "w": 330,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "SVIs: VLAN-ID|IP|Maske",
+        "name": "sviList",
+        "value": "99|192.168.99.10|255.255.255.0",
+        "help": "SVI = Switch Virtual Interface. Auf L2-Switch für Management-IP. Auf L3-Switch als Default-Gateway für Clients im VLAN.",
+        "w": 330,
+        "h": 90
+      },
+      {
+        "type": "Text",
+        "label": "Default Gateway L2",
+        "name": "defaultGateway",
+        "value": "",
+        "help": "Nur für Layer-2-Switches relevant. Damit der Switch sein Management-Netz verlassen kann, z. B. für SSH aus anderen Netzen.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "voip",
+    "title": "VoIP / Voice VLAN",
+    "devices": [
+      "L2-Switch",
+      "L3-Switch"
+    ],
+    "height": 780,
+    "default": false,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Data VLAN",
+        "name": "voipDataVlan",
+        "value": "10",
+        "help": "Daten-VLAN für Clients hinter einem IP-Telefon. Wird als normales VLAN angelegt und auf Telefonports als switchport access vlan gesetzt.\n\nBefehlsteile:\nswitchport access vlan <VLAN-ID> = VLAN für PC-/Datenverkehr.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Data VLAN Name",
+        "name": "voipDataVlanName",
+        "value": "DATA",
+        "help": "Name des Daten-VLANs. Dient der Lesbarkeit in show vlan brief und in der Dokumentation.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Voice VLAN",
+        "name": "voipVoiceVlan",
+        "value": "30",
+        "help": "Voice-VLAN für IP-Telefone. Wird als VLAN angelegt und auf Telefonports mit switchport voice vlan gesetzt.\n\nBefehl:\nswitchport voice vlan <VLAN-ID>",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Voice VLAN Name",
+        "name": "voipVoiceVlanName",
+        "value": "VOICE",
+        "help": "Name des Voice-VLANs. Empfehlung: kurz und eindeutig, z. B. VOICE, VOIP oder TELEFONIE.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "CDP aktivieren",
+        "name": "voipCdp",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "CDP hilft Cisco-IP-Telefonen, das Voice-VLAN automatisch zu erkennen.\n\nBefehl:\ncdp run",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "LLDP aktivieren",
+        "name": "voipLldp",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 1,
+        "help": "LLDP ist herstellerübergreifend. Viele Telefone nutzen LLDP-MED für Voice-VLAN-Erkennung.\n\nBefehle:\nlldp run\nlldp med-tlv-select network-policy",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "QoS Modus",
+        "name": "voipQosMode",
+        "items": [
+          "Nein",
+          "mls qos trust dscp",
+          "mls qos trust cos",
+          "auto qos voip cisco-phone"
+        ],
+        "selected": 3,
+        "help": "QoS-Behandlung für Telefonports.\n\nauto qos voip cisco-phone = Cisco-AutoQoS für Telefonports.\nmls qos trust dscp = vertraut DSCP-Markierungen.\nmls qos trust cos = vertraut CoS-Markierungen auf 802.1Q Frames.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "DHCP Pool Name",
+        "name": "voipDhcpPool",
+        "value": "VOICE",
+        "help": "Name des DHCP-Pools für Telefone. Der Pool wird nur erzeugt, wenn Netzwerk, Maske und Gateway gefüllt sind.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Voice Netz",
+        "name": "voipNetwork",
+        "value": "192.168.30.0",
+        "help": "Netzadresse des Voice-VLANs für den DHCP-Pool.\n\nBefehl:\nnetwork <Netz> <Maske>",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Voice Maske",
+        "name": "voipMask",
+        "value": "255.255.255.0",
+        "help": "Subnetzmaske des Voice-Netzes für den DHCP-Pool.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Voice Gateway",
+        "name": "voipGateway",
+        "value": "192.168.30.1",
+        "help": "Default Gateway für Telefone. In der Regel die SVI-/Router-Adresse des Voice-VLANs.\n\nBefehl:\ndefault-router <Gateway-IP>",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "DNS Server optional",
+        "name": "voipDns",
+        "value": "192.168.30.1",
+        "help": "Optionaler DNS-Server für Telefone. Leer lassen, wenn kein DNS per DHCP verteilt werden soll.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "TFTP/CUCM optional",
+        "name": "voipTftp",
+        "value": "192.168.30.10",
+        "help": "Optionaler TFTP-/CallManager-Server für Telefone. Cisco-Telefone nutzen häufig DHCP Option 150.\n\nBefehl:\noption 150 ip <TFTP-IP>",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Excluded optional",
+        "name": "voipExcluded",
+        "value": "192.168.30.1 192.168.30.20",
+        "help": "Optionaler DHCP-Ausschlussbereich. Format: Start-IP End-IP oder nur eine einzelne IP. Leer lassen, wenn nichts ausgeschlossen werden soll.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|Beschreibung|Access-VLAN|Voice-VLAN|PortFast|BPDU Guard|QoS|PortSecurity",
+        "name": "voipInterfaceList",
+        "value": "Gi0/2|Telefon + Client|10|30|Ja|Ja|auto qos voip cisco-phone|Nein\nGi0/3|Telefon Büro|10|30|Ja|Ja|mls qos trust dscp|Ja",
+        "help": "Eine Zeile pro Telefonport.\n\nBefehlsteile:\ninterface <Interface> = Zielport.\ndescription <Beschreibung> = Dokumentation am Port.\nswitchport mode access = Access-Port für Telefon/PC.\nswitchport access vlan <Access-VLAN> = Daten-VLAN.\nswitchport voice vlan <Voice-VLAN> = Voice-VLAN.\nspanning-tree portfast = schneller Portstart für Endgeräte.\nspanning-tree bpduguard enable = Schutz gegen Switches am Endgeräteport.\nauto qos voip cisco-phone oder mls qos trust ... = QoS-Vertrauen/AutoQoS.\nPortSecurity Ja = sticky MAC + restrict.\n\nFormat: Interface|Beschreibung|Access-VLAN|Voice-VLAN|PortFast|BPDU Guard|QoS|PortSecurity.\n\nGerätefilter: Dieses Modul wird nur für L2- und L3-Switches angeboten, weil switchport voice vlan keine Router-Port-Konfiguration ist.",
+        "w": 700,
+        "h": 150
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "switchSec",
+    "title": "Switch Security",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 410,
+    "default": false,
+    "line": 2566,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "DHCP Snooping VLANs",
+        "name": "dhcpSnoopVlans",
+        "value": "",
+        "help": "DHCP Snooping schützt vor fremden DHCP-Servern. Trage VLANs ein, in denen Clients DHCP nutzen, z. B. 10,20,99.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "DAI VLANs",
+        "name": "daiVlans",
+        "value": "",
+        "help": "Dynamic ARP Inspection schützt gegen ARP-Spoofing. Benötigt eine verlässliche DHCP-Snooping-Binding-Tabelle oder statische Bindings.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "accessBaseline",
+    "title": "Access-Switch",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 610,
+    "default": false,
+    "line": 2572,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Range|Beschreibung|Access-VLAN|Voice-VLAN|PortFast|BPDU Guard|PortSecurity|Storm-Level|Shutdown|Nonegotiate",
+        "name": "accessBaseList",
+        "value": "Gi0/1-24|CLIENT-PORTS|10||ja|ja|ja|1.00|nein|ja\nGi0/25-48|UNUSED|999||nein|ja|nein||ja|ja",
+        "help": "Erzeugt typische Access-Port-Konfiguration PortFast, BPDU Guard, Port-Security, Storm-Control und Shutdown für ungenutzte Ports.",
+        "w": 1080,
+        "h": 160
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "errdisableRecovery",
+    "title": "Errdisable",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 470,
+    "default": false,
+    "line": 2576,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Intervall Sekunden",
+        "name": "errdisableInterval",
+        "value": "300",
+        "help": "Zeit bis zur automatischen Wiederaktivierung.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Causes, eine pro Zeile",
+        "name": "errdisableCauseList",
+        "value": "bpduguard\npsecure-violation\nudld\nlink-flap",
+        "help": "Typische Ursachen: bpduguard, psecure-violation, udld, link-flap, storm-control.",
+        "w": 1080,
+        "h": 85
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "stpExtended",
+    "title": "Spanning Tree (dynamisch)",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 3650,
+    "default": false,
+    "line": 2583,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "Spanning-Tree-Modus",
+        "name": "stpGlobalMode",
+        "items": [
+          "rapid-pvst",
+          "pvst",
+          "mst"
+        ],
+        "selected": 0,
+        "help": "Wählt das aktive Spanning-Tree-Protokoll. Die Oberfläche blendet automatisch nur die zum Modus passenden Optionen ein.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Plattformprofil",
+        "name": "stpPlatformProfile",
+        "items": [
+          "Automatisch",
+          "Catalyst IOS-XE",
+          "Catalyst IOS",
+          "Packet Tracer"
+        ],
+        "selected": 1,
+        "help": "Steuert Kompatibilitätswarnungen. Das Tool erzeugt Cisco-IOS-/IOS-XE-Syntax; Packet Tracer kann fortgeschrittene Befehle nur teilweise unterstützen.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Switch-Modell optional",
+        "name": "stpSwitchModel",
+        "value": "",
+        "help": "Optionales Modell für Dokumentation und Kompatibilitätsprüfung, z. B. C9200L-24P-4G.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "IOS-/IOS-XE-Version optional",
+        "name": "stpIosVersion",
+        "value": "",
+        "help": "Optionale Versionsangabe, z. B. 17.12.4. Sie wird für Hinweise genutzt, verändert aber nicht eigenständig die Zielplattform.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Strikte Kompatibilität",
+        "name": "stpStrictCompatibility",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Bei Ja werden protokollfremde Optionen nicht exportiert und als Warnung gemeldet.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "System-ID erweitern",
+        "name": "stpExtendSystemId",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Erzeugt spanning-tree extend system-id.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Path-Cost-Methode",
+        "name": "stpPathcostMethod",
+        "items": [
+          "",
+          "short",
+          "long"
+        ],
+        "selected": 0,
+        "help": "Wählt die kurze oder lange STP-Pfadkostenskala.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "PortFast default",
+        "name": "stpPortfastDefault",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Aktiviert PortFast global für geeignete Access-Ports.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "BPDU Guard default",
+        "name": "stpBpduguardDefault",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Aktiviert BPDU Guard global für PortFast-Ports.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "BPDU Filter default",
+        "name": "stpBpdufilterDefault",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Aktiviert BPDU Filter global. Nur gezielt verwenden, da BPDUs dadurch unterdrückt werden können.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Loop Guard default",
+        "name": "stpLoopguardDefault",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Aktiviert Loop Guard global.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "EtherChannel Guard",
+        "name": "stpEtherchannelGuard",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Erkennt fehlerhaft konfigurierte EtherChannels.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "UplinkFast (Legacy PVST)",
+        "name": "stpUplinkFast",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Legacy-PVST-Konvergenzoptimierung. Nicht für Rapid-PVST oder MST exportieren.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst"
+        ]
+      },
+      {
+        "type": "Combo",
+        "label": "BackboneFast (Legacy PVST)",
+        "name": "stpBackboneFast",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Legacy-PVST-Optimierung für indirekte Linkfehler. Nicht für Rapid-PVST oder MST exportieren.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst"
+        ]
+      },
+      {
+        "type": "Text",
+        "label": "VLAN/Range für Assistent",
+        "name": "stpVlanTarget",
+        "value": "",
+        "help": "Ein VLAN oder Bereich, z. B. 10 oder 10,20,30-40.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Combo",
+        "label": "Root-Rolle",
+        "name": "stpVlanRootRole",
+        "items": [
+          "",
+          "primary",
+          "secondary",
+          "Manuelle Priorität"
+        ],
+        "selected": 0,
+        "help": "Schnellassistent für Root Primary, Root Secondary oder eine manuelle Bridge-Priorität.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Combo",
+        "label": "Bridge-Priorität",
+        "name": "stpVlanPriorityValue",
+        "items": [
+          "",
+          "0",
+          "4096",
+          "8192",
+          "12288",
+          "16384",
+          "20480",
+          "24576",
+          "28672",
+          "32768",
+          "36864",
+          "40960",
+          "45056",
+          "49152",
+          "53248",
+          "57344",
+          "61440"
+        ],
+        "selected": 0,
+        "help": "Nur gültige Cisco-Werte in Schritten von 4096 sind auswählbar.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "Mehrere Root-Rollen: VLAN|primary/secondary",
+        "name": "stpRootList",
+        "value": "",
+        "help": "Beispiel: 10|primary. Pro Zeile wird eine Root-Rolle erzeugt.",
+        "w": 1080,
+        "h": 70,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "Mehrere VLAN-Prioritäten: VLAN|Priority",
+        "name": "stpVlanPriorityList",
+        "value": "",
+        "help": "Beispiel: 20|8192. Erlaubt sind 0 bis 61440 in Schritten von 4096.",
+        "w": 1080,
+        "h": 70,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "VLAN-Timer: VLAN|Hello|Forward|MaxAge",
+        "name": "stpVlanTimersList",
+        "value": "",
+        "help": "Leere Spalten werden ausgelassen. Beispiel: 10|2|15|20.",
+        "w": 1080,
+        "h": 75,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "VLAN-Interfaceparameter: Interface|VLANs|PortPriority|Cost",
+        "name": "stpVlanInterfaceList",
+        "value": "",
+        "help": "Beispiel: Gi1/0/1|10|64|10000. Port-Priority: 0 bis 240 in Schritten von 16.",
+        "w": 1080,
+        "h": 85,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "pvst",
+          "rapid-pvst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "Interfaceprofile: Interface|Profil|VLANs|Native VLAN",
+        "name": "stpInterfaceProfileList",
+        "value": "",
+        "help": "Profile: Client, Server, Access-Point, Switch-Uplink, Port-Channel, Provider-Uplink. VLAN-Spalten dienen der Dokumentation und Plausibilitätsprüfung.",
+        "w": 1080,
+        "h": 100
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|PortFast|BPDU Guard|BPDU Filter|Guard|LinkType|PortPriority|Cost",
+        "name": "stpInterfaceList",
+        "value": "",
+        "help": "PortFast: Ja, Trunk oder Nein. Guard: root, loop oder leer. LinkType wird nur bei Rapid-PVST/MST exportiert.",
+        "w": 1080,
+        "h": 115
+      },
+      {
+        "type": "Multi",
+        "label": "Root Guard Interfaces",
+        "name": "stpRootGuardIfs",
+        "value": "",
+        "help": "Ein Interface pro Zeile. Root Guard verhindert, dass über diesen Port eine bessere Root Bridge gewählt wird.",
+        "w": 1080,
+        "h": 60
+      },
+      {
+        "type": "Multi",
+        "label": "Loop Guard Interfaces",
+        "name": "stpLoopGuardIfs",
+        "value": "",
+        "help": "Ein Interface pro Zeile. Loop Guard schützt gegen unidirektionale STP-Probleme.",
+        "w": 1080,
+        "h": 60
+      },
+      {
+        "type": "Text",
+        "label": "MST Regionsname",
+        "name": "stpMstName",
+        "value": "",
+        "help": "Muss auf allen Switches derselben MST-Region exakt identisch sein.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Text",
+        "label": "MST Revision",
+        "name": "stpMstRevision",
+        "value": "0",
+        "help": "Revisionsnummer 0 bis 65535. Sie muss innerhalb einer Region identisch sein.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Text",
+        "label": "MST Max Hops",
+        "name": "stpMstMaxHops",
+        "value": "20",
+        "help": "Erzeugt spanning-tree mst max-hops. Gültiger Bereich üblicherweise 1 bis 40.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Text",
+        "label": "MST-Instanz für Assistent",
+        "name": "stpMstTargetInstance",
+        "value": "",
+        "help": "Instanz 1 bis 4094. Instanz 0 ist die IST/CIST und wird nicht für ein eigenes VLAN-Mapping verwendet.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Combo",
+        "label": "MST Root-Rolle",
+        "name": "stpMstRootRole",
+        "items": [
+          "",
+          "primary",
+          "secondary",
+          "Manuelle Priorität"
+        ],
+        "selected": 0,
+        "help": "Schnellassistent für Root-Rolle oder manuelle Instanz-Priorität.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Combo",
+        "label": "MST Bridge-Priorität",
+        "name": "stpMstPriorityValue",
+        "items": [
+          "",
+          "0",
+          "4096",
+          "8192",
+          "12288",
+          "16384",
+          "20480",
+          "24576",
+          "28672",
+          "32768",
+          "36864",
+          "40960",
+          "45056",
+          "49152",
+          "53248",
+          "57344",
+          "61440"
+        ],
+        "selected": 0,
+        "help": "Nur gültige Werte in Schritten von 4096.",
+        "w": 300,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "MST: Instanz|VLANs|Priority|Root",
+        "name": "stpMstInstanceList",
+        "value": "",
+        "help": "Beispiel: 1|10,20|4096| oder 2|30-40||primary.",
+        "w": 1080,
+        "h": 105,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "MST-Interfaceparameter: Interface|Instanz|PortPriority|Cost",
+        "name": "stpMstInterfaceList",
+        "value": "",
+        "help": "Beispiel: Port-channel1|1|64|20000.",
+        "w": 1080,
+        "h": 85,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Multi",
+        "label": "MST-Regionsvergleich: Switch|Name|Revision|Instanz:VLANs;...|Digest optional",
+        "name": "stpMstPeerRegionList",
+        "value": "",
+        "help": "Vergleicht andere Switches mit der lokalen Region. Beispiel: SW2|FIRMA|1|1:10,20;2:30-40|ABCD.",
+        "w": 1080,
+        "h": 100,
+        "dependsOnField": "stpGlobalMode",
+        "visibleForValues": [
+          "mst"
+        ]
+      },
+      {
+        "type": "Combo",
+        "label": "BPDU-Guard Errdisable Recovery",
+        "name": "stpErrdisableBpduguard",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Erzeugt errdisable recovery cause bpduguard.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Errdisable-Intervall Sekunden",
+        "name": "stpErrdisableInterval",
+        "value": "300",
+        "help": "Wird zusammen mit BPDU-Guard Recovery ausgegeben. Typischer Wert: 300 Sekunden.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Rücksetzen: Scope|Target|Parameter",
+        "name": "stpResetList",
+        "value": "",
+        "help": "Scopes: global, vlan, mst, interface. Beispiele: vlan|10|priority oder interface|Gi1/0/1|portfast.",
+        "w": 1080,
+        "h": 95
+      },
+      {
+        "type": "Preview",
+        "label": "Live-STP-Vorschau",
+        "name": "stpLivePreview",
+        "value": "",
+        "help": "Zeigt ausschließlich den aktuell erzeugten STP-Konfigurationsabschnitt. Ausgeblendete Felder werden je nach Modus nicht exportiert.",
+        "w": 1080,
+        "h": 260,
+        "readOnly": true
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "switchSecExt",
+    "title": "DHCP Snooping / DAI / IP Source Guard",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 710,
+    "default": false,
+    "line": 2591,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "DHCP Snooping VLANs",
+        "name": "sseDhcpVlans",
+        "value": "10,20,99",
+        "help": "VLANs für DHCP Snooping.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "DAI VLANs",
+        "name": "sseDaiVlans",
+        "value": "10,20,99",
+        "help": "VLANs für Dynamic ARP Inspection.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Trusted Interfaces",
+        "name": "sseTrustedIfs",
+        "value": "Gi0/48\nPo1",
+        "help": "Uplinks/DHCP-Server-Ports, denen DHCP/ARP vertraut wird.",
+        "w": 1080,
+        "h": 60
+      },
+      {
+        "type": "Multi",
+        "label": "RateLimit: Interface|Rate",
+        "name": "sseRateLimitIfs",
+        "value": "Gi0/1|15",
+        "help": "DHCP Snooping Rate Limit pro Interface.",
+        "w": 1080,
+        "h": 55
+      },
+      {
+        "type": "Multi",
+        "label": "IP Source Guard Interfaces",
+        "name": "sseSourceGuardIfs",
+        "value": "Gi0/1\nGi0/2",
+        "help": "Aktiviert ip verify source pro Interface.",
+        "w": 1080,
+        "h": 50
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "portSecurityExt",
+    "title": "Port-Security",
+    "devices": [
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 590,
+    "default": false,
+    "line": 2598,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|Maximum|Sticky ja/nein|Violation|AgingTime|AgingType",
+        "name": "portSecExtList",
+        "value": "Gi0/1|2|ja|restrict|60|inactivity\nGi0/2|1|ja|shutdown||",
+        "help": "Erweiterte Port-Security je Interface.",
+        "w": 1080,
+        "h": 150
+      }
+    ]
+  },
+  {
+    "tab": "Switching",
+    "name": "vlanIpPlan",
+    "title": "VLAN-/IP-Plan",
+    "devices": [
+      "L3-Switch"
+    ],
+    "height": 620,
+    "default": false,
+    "line": 2602,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "VLAN|Name|IPv4-Netz|Maske|Gateway|IPv6-Gateway|VRF|DHCP ja/nein|DNS|Helper|HSRP-VIP|OSPF-Area|BGP ja/nein",
+        "name": "vlanIpPlanList",
+        "value": "10|CLIENTS|192.168.10.0|255.255.255.0|192.168.10.1|2001:db8:10::1/64|SERVER|ja|1.1.1.1 8.8.8.8|192.168.99.10|192.168.10.254|0|ja\n20|SERVER|192.168.20.0|255.255.255.0|192.168.20.1|2001:db8:20::1/64|SERVER|nein||192.168.99.10||0|ja",
+        "help": "Zweck: VLAN-/IP-Adressplan zentral pflegen.\n\nBefehle:\nvlan <ID>, name <Name>, interface vlan <ID>, ip vrf forwarding <VRF>, ip address <Gateway> <Maske>, ipv6 address, ip helper-address, standby, ip dhcp pool.\n\nBefehlsteile:\nVRF wird vor ip address gesetzt.\nDHCP ja erzeugt einen DHCP-Pool.\nHelper erzeugt ip helper-address.\nHSRP-VIP erzeugt standby <VLAN> ip <VIP>.\nOSPF/BGP werden als Kommentarhinweis exportiert.",
+        "w": 1080,
+        "h": 350
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "routingBase",
+    "title": "Routing allgemein",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 260,
+    "default": false,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "IPv4-Routing",
+        "name": "ipRouting",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 1,
+        "help": "Aktiviert mit ip routing das IPv4-Routing auf einem Layer-3-Switch. Auf Routern ist Routing meist bereits aktiv; der Befehl wird trotzdem korrekt importiert und bei Auswahl erzeugt.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "staticRoutes",
+    "title": "Statische Routen",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 370,
+    "default": false,
+    "line": 2609,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Ziel|Maske|Next-Hop/Interface|AD optional",
+        "name": "staticRouteList",
+        "value": "0.0.0.0|0.0.0.0|192.168.1.1",
+        "help": "Statische Routen definieren feste Wege. AD optional: höhere AD kann Floating Static Route sein, die nur bei Ausfall dynamischer/niedrigerer Route genutzt wird.",
+        "w": 1080,
+        "h": 75
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "ospf",
+    "title": "OSPF",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 1120,
+    "default": false,
+    "line": 2611,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Process-ID",
+        "name": "ospfPid",
+        "value": "1",
+        "help": "OSPF Process-ID ist nur lokal auf diesem Router relevant. Sie muss nicht auf Nachbarroutern gleich sein. Sie identifiziert die lokale OSPF-Instanz.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Konfigurationsart",
+        "name": "ospfConfigMode",
+        "items": [
+          "Prozessbasiert",
+          "Interfacebasiert",
+          "Gemischt"
+        ],
+        "selected": 0,
+        "help": "Prozessbasiert erzeugt network ... area ... im OSPF-Prozess. Interfacebasiert erzeugt ip ospf <Prozess> area <Area> direkt unter den Interfaces. Gemischt erlaubt beide Varianten gleichzeitig.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Router-ID",
+        "name": "ospfRid",
+        "value": "",
+        "help": "Eindeutige 32-Bit-ID im IPv4-Format, z. B. 1.1.1.1. Sie identifiziert den OSPF-Router in LSAs, Nachbarschaften und der Link-State-Datenbank. Muss innerhalb der OSPF-Domäne eindeutig sein.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Ref-Bandwidth",
+        "name": "ospfRef",
+        "items": [
+          "",
+          "100",
+          "1000",
+          "10000",
+          "100000",
+          "1000000"
+        ],
+        "selected": 0,
+        "help": "Referenzbandbreite in Mbit/s für die Cost-Berechnung. 10000 = 10 Gbit/s. Auf allen OSPF-Routern gleich setzen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Adjacency-Logging",
+        "name": "ospfLogAdjacency",
+        "items": [
+          "Nein",
+          "Ja",
+          "Detail"
+        ],
+        "selected": 0,
+        "help": "Ja erzeugt log-adjacency-changes. Detail erzeugt log-adjacency-changes detail und protokolliert zusätzliche Zustandsänderungen der OSPF-Nachbarschaften.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Networks: Netz|Wildcard|Area",
+        "name": "ospfNetList",
+        "value": "192.168.10.0|0.0.0.255|0",
+        "help": "Aktiviert OSPF auf Interfaces, deren IP in den Bereich passt. Area 0 ist Backbone. Interfaces auf demselben Link müssen dieselbe Area haben.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Multi",
+        "label": "Interfaces: Interface|Area",
+        "name": "ospfInterfaceAreaList",
+        "value": "",
+        "help": "Interfacebasierte OSPF-Aktivierung. Pro Zeile: Interface|Area. Beispiel: GigabitEthernet1/0/48|0 erzeugt unter dem Interface ip ospf <Process-ID> area 0.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Combo",
+        "label": "Passive default",
+        "name": "ospfPassiveDefault",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "passive-interface default schützt vor ungewollten OSPF-Nachbarschaften. Danach gezielt no passive-interface setzen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Default originate",
+        "name": "ospfDefaultOriginate",
+        "items": [
+          "Nein",
+          "Ja",
+          "Immer"
+        ],
+        "selected": 0,
+        "help": "Ja erzeugt default-information originate. Immer erzeugt default-information originate always und verteilt die Default Route auch dann, wenn lokal keine 0.0.0.0/0 vorhanden ist.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "No-passive Interfaces",
+        "name": "ospfNoPassiveList",
+        "value": "Gi0/0\nVlan10",
+        "help": "Interfaces, auf denen OSPF Nachbarn bilden darf.",
+        "w": 1080,
+        "h": 55
+      },
+      {
+        "type": "Multi",
+        "label": "Stub Areas",
+        "name": "ospfStubAreas",
+        "value": "1\n2",
+        "help": "Erzeugt area X stub no-summary.",
+        "w": 500,
+        "h": 45
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|Cost|Priority|NetworkType",
+        "name": "ospfIfSettings",
+        "value": "Gi0/0|10|1|point-to-point",
+        "help": "Optionale Interface-Parameter für OSPF.",
+        "w": 500,
+        "h": 45
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "isis",
+    "title": "IS-IS",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 470,
+    "default": false,
+    "line": 2621,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "IS-IS Tag",
+        "name": "isisTag",
+        "value": "CORE",
+        "help": "Lokaler Prozessname. Interfaces werden später diesem IS-IS-Prozess zugeordnet. Der Tag muss nicht netzweit gleich sein.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "NET",
+        "name": "isisNet",
+        "value": "",
+        "help": "Network Entity Title. Identifiziert den IS-IS-Router. Muss eindeutig sein. Beispiel: 49.0001.0000.0000.0001.00.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Interfaces: Interface",
+        "name": "isisIfList",
+        "value": "",
+        "help": "IS-IS wird interfacebezogen aktiviert. Trage eine Interface-Bezeichnung pro Zeile ein, z. B. GigabitEthernet0/0.",
+        "w": 1080,
+        "h": 55
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "bgp",
+    "title": "BGP",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 780,
+    "default": false,
+    "line": 2625,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "BGP AS",
+        "name": "bgpAs",
+        "value": "",
+        "help": "Autonomous-System-Nummer des lokalen Routers. Gleiches AS beim Nachbarn = iBGP, anderes AS = eBGP.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Router-ID",
+        "name": "bgpRid",
+        "value": "",
+        "help": "Eindeutige BGP Router-ID. Sie sollte stabil sein, häufig wird eine Loopback-IP genutzt. Wichtig für BGP-Identifikation und Fehleranalyse.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Nachbarn: Neighbor-IP|Remote-AS|Beschreibung optional",
+        "name": "bgpNeighborList",
+        "value": "",
+        "help": "BGP baut keine Nachbarn automatisch. Jeder Neighbor muss explizit mit IP und Remote-AS konfiguriert werden.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Networks: Netz|Maske",
+        "name": "bgpNetworkList",
+        "value": "",
+        "help": "BGP announced nur Netze, die passend in der Routingtabelle existieren. Format: Netz|Maske.",
+        "w": 1080,
+        "h": 60
+      },
+      {
+        "type": "Multi",
+        "label": "Erweiterte Neighbor-Optionen: Neighbor|Update-Source|Multihop|Next-Hop-Self|Password|Max-Prefix|Soft-In|Default-Originate",
+        "name": "bgpExtNeighborList",
+        "value": "10.0.0.2|Loopback0|2|ja|bgpSecret|1000|ja|nein",
+        "help": "Optionale Erweiterungen je Neighbor. Muss zum Neighbor aus der oberen Liste passen.",
+        "w": 1080,
+        "h": 95
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "fhrp",
+    "title": "HSRP / VRRP / GLBP",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 385,
+    "default": false,
+    "line": 2631,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "HSRP: Interface|Gruppe|VIP|Priority|preempt",
+        "name": "hsrpList",
+        "value": "Vlan10|10|192.168.10.1|110|preempt",
+        "help": "HSRP stellt eine virtuelle Gateway-IP bereit. Clients nutzen die VIP als Default Gateway. Höhere Priority gewinnt. Preempt erlaubt Rückübernahme nach Wiederkehr.",
+        "w": 1080,
+        "h": 85
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfLite",
+    "title": "VRF-Lite",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 680,
+    "default": false,
+    "line": 2638,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "VRF: Name|RD|Beschreibung",
+        "name": "vrfList",
+        "value": "MGMT|65000:99|Management VRF",
+        "help": "Erzeugt VRF Definitionen.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|VRF|IP|Maske",
+        "name": "vrfInterfaceList",
+        "value": "Vlan99|MGMT|192.168.99.1|255.255.255.0",
+        "help": "Ordnet Interfaces einer VRF zu. Achtung: ip vrf forwarding entfernt bestehende IP auf echten Geräten.",
+        "w": 1080,
+        "h": 85
+      },
+      {
+        "type": "Multi",
+        "label": "VRF|Ziel|Maske|Next-Hop",
+        "name": "vrfRouteList",
+        "value": "MGMT|0.0.0.0|0.0.0.0|192.168.99.254",
+        "help": "Statische VRF-Routen.",
+        "w": 1080,
+        "h": 60
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "routeMapFilter",
+    "title": "Route-Maps / Prefix-Lists",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 670,
+    "default": false,
+    "line": 2645,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "PrefixList: Name|Seq|permit/deny|Prefix",
+        "name": "prefixListAdv",
+        "value": "PL-OUT|10|permit|192.168.10.0/24",
+        "help": "Prefix-Listen für Routingfilter.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "RouteMap: Name|permit/deny|Seq|PrefixList|Set-Befehl",
+        "name": "routeMapList",
+        "value": "RM-OUT|permit|10|PL-OUT|local-preference 200",
+        "help": "Route-Map mit optionalem match prefix-list und set-Befehl.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "Distribute: Routingprozess|ACL/Prefix|in/out",
+        "name": "distributeList",
+        "value": "ospf 1|10|in",
+        "help": "Einfache distribute-list-Zuweisung.",
+        "w": 1080,
+        "h": 50
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "ipSlaTracking",
+    "title": "IP SLA / Tracking",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 610,
+    "default": false,
+    "line": 2650,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "SLA-ID|Ziel|Source-Interface|Frequency|Track-ID",
+        "name": "ipSlaList",
+        "value": "1|8.8.8.8|Gi0/0|10|1",
+        "help": "Erzeugt ICMP IP SLA mit Track.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "Ziel|Maske|PrimaryNH|TrackID|BackupNH",
+        "name": "trackedRouteList",
+        "value": "0.0.0.0|0.0.0.0|192.168.1.1|1|192.168.2.1",
+        "help": "Erzeugt getrackte Primary Route plus Floating Backup Route.",
+        "w": 1080,
+        "h": 70
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "ospfAdvanced",
+    "title": "OSPF Optionen",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 720,
+    "default": false,
+    "line": 2656,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Area-Typ: Area|stub/totally-stubby/nssa/totally-nssa",
+        "name": "ospfAreaTypeList",
+        "value": "1|stub\n2|nssa",
+        "help": "Befehl: area <Area> stub, area <Area> stub no-summary, area <Area> nssa oder area <Area> nssa no-summary.\n\nHinweis: Area-Typen müssen auf allen Routern der Area zusammenpassen.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "Auth: Interface|md5/clear|Key",
+        "name": "ospfAuthList",
+        "value": "Gi0/0|md5|OspfKey123",
+        "help": "Befehle bei md5: ip ospf authentication message-digest und ip ospf message-digest-key 1 md5 <Key>.\n\nBefehlsteile: Interface = OSPF-Interface, md5/clear = Authentifizierungsart, Key = gemeinsamer Schlüssel.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "Timer: Interface|Hello|Dead",
+        "name": "ospfTimerList",
+        "value": "Gi0/0|10|40",
+        "help": "Befehle: ip ospf hello-interval <Sekunden> und ip ospf dead-interval <Sekunden>.\n\nHinweis: Nachbarn müssen gleiche Timer verwenden.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Summary: Area|Netz|Maske",
+        "name": "ospfSummaryList",
+        "value": "1|192.168.0.0|255.255.0.0",
+        "help": "Befehl: area <Area> range <Netz> <Maske>.\n\nEinsatz: Zusammenfassung auf ABR zwischen OSPF-Areas.",
+        "w": 1080,
+        "h": 70
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "bgpAdvanced",
+    "title": "BGP Optionen",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 560,
+    "default": false,
+    "line": 2663,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Neighbor Policy: Neighbor|RouteMap-In|RouteMap-Out|Prefix-In|Prefix-Out|Timer keepalive hold",
+        "name": "bgpPolicyNeighborList",
+        "value": "192.0.2.2|RM-IN|RM-OUT|PL-IN|PL-OUT|30 90",
+        "help": "Befehle: neighbor <IP> route-map <Name> in/out, neighbor <IP> prefix-list <Name> in/out, neighbor <IP> timers <keepalive> <hold>.\n\nRoute-Maps und Prefix-Lists müssen separat vorhanden sein.",
+        "w": 1080,
+        "h": 130
+      },
+      {
+        "type": "Multi",
+        "label": "IPv6 AF: Neighbor|Remote-AS|Prefix|RouteMap-In|RouteMap-Out",
+        "name": "bgpAfIpv6List",
+        "value": "2001:db8:ffff::2|65010|2001:db8:10::/64|RM6-IN|RM6-OUT",
+        "help": "Befehle: address-family ipv6 unicast, neighbor <IPv6> remote-as <AS>, neighbor <IPv6> activate, network <Prefix>, optional route-map in/out.\n\nEinsatz: BGP IPv6 separat von IPv4 aktivieren.",
+        "w": 1080,
+        "h": 130
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "mpls",
+    "title": "MPLS / LDP / L3VPN",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 920,
+    "default": false,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "ip cef",
+        "name": "mplsCef",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Aktiviert Cisco Express Forwarding. MPLS benötigt CEF auf klassischen IOS-/IOS-XE-Plattformen als Grundlage für Label Switching.\n\nBefehl:\nip cef",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "MPLS global aktivieren",
+        "name": "mplsGlobal",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Aktiviert MPLS global. Zusätzlich muss MPLS auf den Transit-/Core-Interfaces mit mpls ip aktiviert werden.\n\nBefehl:\nmpls ip",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Label Protocol",
+        "name": "mplsLabelProtocol",
+        "items": [
+          "ldp",
+          "keines"
+        ],
+        "selected": 0,
+        "help": "Legt das Label-Distribution-Protokoll fest. In modernen IOS-/IOS-XE-Designs ist LDP der übliche Standard.\n\nBefehl:\nmpls label protocol ldp",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "LDP Router-ID Interface",
+        "name": "mplsLdpRouterId",
+        "value": "Loopback0",
+        "help": "Setzt die stabile LDP Router-ID. Empfohlen ist ein Loopback-Interface, das über das IGP erreichbar ist.\n\nBefehl:\nmpls ldp router-id <Interface> [force]",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Router-ID force",
+        "name": "mplsLdpRouterIdForce",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Erzwingt die gewählte LDP Router-ID. Nutze force bewusst, da bestehende LDP-Sessions kurz neu aufgebaut werden können.\n\nBefehlsteil:\nforce",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "MPLS Interfaces: Interface|Beschreibung optional|MPLS-MTU optional|LDP-IGP-Sync Ja/Nein",
+        "name": "mplsInterfaceList",
+        "value": "Gi0/0|Core-Uplink P1||Ja\nGi0/1|Core-Uplink P2||Ja",
+        "help": "Aktiviert MPLS auf Transit-/Core-Interfaces. Optional kann pro Interface eine MPLS-MTU gesetzt werden. Leer lassen ist meist besser, wenn die Plattform den Overhead bereits korrekt behandelt oder die MTU separat geplant ist.\n\nBefehlsteile:\ninterface <Interface> = Core-/Transit-Interface.\ndescription <Beschreibung> = optionale Dokumentation.\nmpls ip = aktiviert MPLS/LDP auf dem Interface.\nmpls mtu <Bytes> = optional und plattformabhängig. Nicht pauschal 9000 setzen.\nmpls ldp igp sync = optional, verhindert Blackholing während LDP/IGP nicht synchron sind.\n\nFormat: Interface|Beschreibung optional|MPLS-MTU optional|LDP-IGP-Sync Ja/Nein",
+        "w": 520,
+        "h": 130
+      },
+      {
+        "type": "Multi",
+        "label": "LDP Neighbor Passwort: Neighbor-IP|Passwort",
+        "name": "mplsLdpPasswordList",
+        "value": "",
+        "help": "Setzt optionale LDP-Nachbarpasswörter. Nur nutzen, wenn die Gegenseite identisch konfiguriert ist.\n\nBefehl:\nmpls ldp neighbor <Neighbor-IP> password <Passwort>",
+        "w": 520,
+        "h": 90
+      },
+      {
+        "type": "Text",
+        "label": "MP-BGP AS optional",
+        "name": "mplsBgpAs",
+        "value": "",
+        "help": "Lokale BGP-AS für MPLS L3VPN/MP-BGP. Wenn leer, wird kein VPNv4-BGP erzeugt.\n\nBefehl:\nrouter bgp <AS>",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "VPNv4 Update-Source optional",
+        "name": "mplsVpnv4UpdateSource",
+        "value": "Loopback0",
+        "help": "Update-Source für VPNv4-Peers. Typisch ist Loopback0, damit die Session unabhängig vom physischen Link bleibt.\n\nBefehl:\nneighbor <Peer-IP> update-source <Interface>",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "VPNv4 Peers: Peer-IP|Remote-AS|Beschreibung optional|Send-Community extended Ja/Nein",
+        "name": "mplsVpnv4Peers",
+        "value": "",
+        "help": "Erzeugt MP-BGP VPNv4-Peers für MPLS L3VPN. Send-Community extended ist für Route-Targets praktisch erforderlich.\n\nBefehlsteile:\nneighbor <Peer-IP> remote-as <AS>\naddress-family vpnv4\n neighbor <Peer-IP> activate\n neighbor <Peer-IP> send-community extended\n\nFormat: Peer-IP|Remote-AS|Beschreibung optional|Send-Community extended Ja/Nein",
+        "w": 520,
+        "h": 110
+      },
+      {
+        "type": "Multi",
+        "label": "L3VPN VRFs: VRF|RD|RT Import|RT Export|Beschreibung optional",
+        "name": "mplsVpnVrfList",
+        "value": "",
+        "help": "Erzeugt VRF-Definitionen für MPLS L3VPN mit RD und Route-Targets. Wenn du bereits das VRF-Modul nutzt, können doppelte VRF-Definitionen entstehen; die Duplikatprüfung weist darauf hin.\n\nBefehlsteile:\nvrf definition <VRF>\n rd <RD>\n route-target import <RT>\n route-target export <RT>\n address-family ipv4\n\nFormat: VRF|RD|RT Import|RT Export|Beschreibung optional",
+        "w": 520,
+        "h": 120
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfDefs",
+    "title": "VRF Definitionen",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 600,
+    "default": false,
+    "line": 2670,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "VRF: Name|RD|Beschreibung",
+        "name": "vrfDefList",
+        "value": "SERVER|65000:10|Server VRF\nVOICE|65000:20|Voice VRF",
+        "help": "Format je Zeile: Name|RD|Beschreibung.\nName = frei wählbarer VRF-Name, der später bei Interfaces, statischen Routen und Routingprotokollen exakt gleich genutzt wird.\nRD = Route Distinguisher, z. B. 65000:10. Er macht Routen technisch eindeutig, besonders wenn gleiche Netze in mehreren VRFs existieren.\nBeschreibung = optionaler Klartext für Dokumentation.\nExportbeispiel:\nip vrf SERVER\n rd 65000:10\n description Server VRF",
+        "w": 1080,
+        "h": 100
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfSvi",
+    "title": "VLAN / SVI VRF",
+    "devices": [
+      "L3-Switch"
+    ],
+    "height": 710,
+    "default": false,
+    "line": 2674,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "SVI in VRF: VLAN|VRF|IPv4|Maske|leer|Name|IPv6/Prefix|IPv6 enable",
+        "name": "vrfSviList",
+        "value": "10|SERVER|192.168.10.1|255.255.255.0||SERVER|2001:db8:10::1/64|ja\n20|VOICE|192.168.20.1|255.255.255.0||VOICE|2001:db8:20::1/64|ja",
+        "help": "Format je Zeile: VLAN|VRF|IPv4|Maske|leer|Name|IPv6/Prefix|IPv6 enable.\nVLAN = VLAN-ID, z. B. 10.\nVRF = Name aus VRF Definitionen.\nIPv4/Maske = Gateway-Adresse des VLANs innerhalb dieser VRF.\nleer = Reservefeld, leer lassen, damit alte Vorlagen kompatibel bleiben.\nName = VLAN-Name.\nIPv6/Prefix = optionales IPv6-Gateway, z. B. 2001:db8:10::1/64.\nIPv6 enable = ja, wenn zusätzlich ipv6 enable gesetzt werden soll.\nExportbeispiel:\ninterface vlan 10\n ip vrf forwarding SERVER\n ip address 192.168.10.1 255.255.255.0",
+        "w": 1080,
+        "h": 155
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfStaticRoutes",
+    "title": "Static Routes VRF",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 710,
+    "default": false,
+    "line": 2678,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "IPv4: VRF|Ziel|Maske|Next-Hop",
+        "name": "vrfStaticList",
+        "value": "SERVER|0.0.0.0|0.0.0.0|192.168.10.254",
+        "help": "Befehl: ip route vrf <VRF> <Zielnetz> <Maske> <Next-Hop>.\nVRF = Routingtabelle, in der die Route installiert wird.\nZiel = Zielnetz, z. B. 0.0.0.0 für Default Route.\nMaske = Subnetzmaske des Zielnetzes.\nNext-Hop = nächster Router innerhalb derselben VRF.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "IPv6: VRF|Ziel/Prefix|Next-Hop",
+        "name": "vrfIpv6StaticList",
+        "value": "SERVER|::/0|2001:db8:10::fe",
+        "help": "Befehl: ipv6 route vrf <VRF> <IPv6-Prefix> <Next-Hop>.\nVRF = IPv6-Routingtabelle.\nZiel/Prefix = z. B. ::/0 für Default Route oder 2001:db8:20::/64.\nNext-Hop = IPv6-Adresse des nächsten Routers. Bei Link-Local Next-Hop ist meist zusätzlich ein Interface nötig.",
+        "w": 1080,
+        "h": 90
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfOspf",
+    "title": "OSPFv2 VRF",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 680,
+    "default": false,
+    "line": 2683,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "OSPFv2: VRF|Process|Netz|Wildcard|Area|Router-ID",
+        "name": "vrfOspfList",
+        "value": "SERVER|10|192.168.10.0|0.0.0.255|0|10.10.10.10",
+        "help": "Befehlsteile:\nVRF = Routingtabelle, in der OSPF läuft.\nProcess = lokale OSPF-Prozess-ID. Muss nicht mit Nachbarn identisch sein.\nNetz = IPv4-Netz, das per network-Befehl aktiviert wird.\nWildcard = inverse Maske, z. B. 0.0.0.255 für /24.\nArea = OSPF-Area, z. B. 0 als Backbone.\nRouter-ID = optional, aber empfohlen. Muss innerhalb der OSPF-Domäne eindeutig sein.\nExportbeispiel:\nrouter ospf 10 vrf SERVER\n router-id 10.10.10.10\n network 192.168.10.0 0.0.0.255 area 0",
+        "w": 1080,
+        "h": 150
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfOspfv3",
+    "title": "OSPFv3 VRF",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 740,
+    "default": false,
+    "line": 2687,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Prozess: VRF|Process|leer|Router-ID",
+        "name": "vrfOspfv3List",
+        "value": "SERVER|10||10.10.10.10",
+        "help": "Befehlsteile:\nVRF = Routingtabelle für IPv6-OSPF.\nProcess = OSPFv3-Prozess-ID.\nleer = Reservefeld für Kompatibilität, leer lassen.\nRouter-ID = OSPFv3 benötigt weiterhin eine ID im IPv4-Format.\nExportbeispiel:\nrouter ospfv3 10\n address-family ipv6 vrf SERVER\n  router-id 10.10.10.10",
+        "w": 1080,
+        "h": 110
+      },
+      {
+        "type": "Multi",
+        "label": "Interface: Interface|VRF|Process|Area",
+        "name": "vrfOspfv3IfList",
+        "value": "Vlan10|SERVER|10|0",
+        "help": "Befehl: interface <Interface> + ospfv3 <Process> ipv6 area <Area>.\nInterface = SVI oder physisches Interface mit VRF-Zuordnung.\nVRF = Dokumentations-/Prüffeld, die eigentliche VRF kommt vom Interface.\nProcess = muss zum OSPFv3-Prozess oben passen.\nArea = OSPFv3-Area, meistens 0 im Backbone.",
+        "w": 1080,
+        "h": 110
+      }
+    ]
+  },
+  {
+    "tab": "Routing",
+    "name": "vrfBgp",
+    "title": "BGP VRF",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 740,
+    "default": false,
+    "line": 2692,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "IPv4: VRF|AS|Neighbor|Remote-AS|Netz|Maske",
+        "name": "vrfBgpIpv4List",
+        "value": "SERVER|65000|192.0.2.2|65010|192.168.10.0|255.255.255.0",
+        "help": "Befehlsteile:\nVRF = BGP Address-Family, z. B. address-family ipv4 vrf SERVER.\nAS = lokale BGP-AS.\nNeighbor = IPv4-Adresse des BGP-Nachbarn in dieser VRF.\nRemote-AS = AS des Nachbarn. Gleich = iBGP, verschieden = eBGP.\nNetz/Maske = Prefix, der advertised wird. Er muss normalerweise in der Routingtabelle vorhanden sein.",
+        "w": 1080,
+        "h": 110
+      },
+      {
+        "type": "Multi",
+        "label": "IPv6: VRF|AS|Neighbor|Remote-AS|Prefix",
+        "name": "vrfBgpIpv6List",
+        "value": "SERVER|65000|2001:db8:ffff::2|65010|2001:db8:10::/64",
+        "help": "Befehlsteile:\nVRF = IPv6 Address-Family der VRF.\nAS = lokale BGP-AS.\nNeighbor = IPv6-Adresse des Nachbarn.\nRemote-AS = AS des Nachbarn.\nPrefix = IPv6-Netz, das advertised wird, z. B. 2001:db8:10::/64.\nExportbeispiel:\nrouter bgp 65000\n address-family ipv6 vrf SERVER\n  neighbor 2001:db8:ffff::2 remote-as 65010\n  neighbor 2001:db8:ffff::2 activate\n  network 2001:db8:10::/64",
+        "w": 1080,
+        "h": 150
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "ipv6",
+    "title": "IPv6",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 400,
+    "default": false,
+    "line": 2700,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "IPv6 Interfaces: Interface|IPv6/Prefix|LinkLocal optional",
+        "name": "ipv6IfList",
+        "value": "Gi0/0|2001:db8:10::1/64|fe80::1",
+        "help": "IPv6-Adresse mit Präfix, z. B. 2001:db8:10::1/64. Link-Local kann manuell gesetzt werden, besonders relevant bei statischen Routen via fe80::.",
+        "w": 1030,
+        "h": 80
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "dhcp",
+    "title": "DHCP",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 740,
+    "default": false,
+    "line": 2702,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Basis-Pools: Pool|Netz|Maske|Gateway|DNS",
+        "name": "dhcpPoolList",
+        "value": "CLIENTS|192.168.10.0|255.255.255.0|192.168.10.1|1.1.1.1",
+        "help": "Basis-DHCP-Pool. Für Domain, Lease oder Option 150 dieen Pools unten nutzen.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Multi",
+        "label": "Excluded: Start-IP|End-IP optional",
+        "name": "dhcpExcludedList",
+        "value": "192.168.10.1|192.168.10.30\n192.168.20.1|192.168.20.20",
+        "help": "Adressen oder Bereiche, die DHCP nicht vergeben darf.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Multi",
+        "label": "Erweiterte Pools: Pool|Netz|Maske|Gateway|DNS|Domain|Lease|Option150",
+        "name": "dhcpExtPoolList",
+        "value": "CLIENTS-EXT|192.168.10.0|255.255.255.0|192.168.10.1|1.1.1.1 8.8.8.8|hoeferhome.local|7|192.168.99.10",
+        "help": "Erweiterter DHCP Pool mit Domain, Lease und Option 150 für VoIP/TFTP.",
+        "w": 1080,
+        "h": 85
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "acl",
+    "title": "ACL",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 820,
+    "default": false,
+    "line": 2706,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "ACL: Name|permit/deny|Protokoll|Quelle|Ziel",
+        "name": "aclList",
+        "value": "MGMT-IN|permit|tcp|192.168.99.0 0.0.0.255|any eq 22",
+        "help": "Extended ACL. Quelle und Ziel im IOS-Format. Beispiel Ziel 'any eq 22' erlaubt SSH. ACLs filtern Traffic nach Richtung und Interface.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Zuweisung: Interface|ACL|in/out",
+        "name": "aclApplyList",
+        "value": "Gi0/0|MGMT-IN|in",
+        "help": "Weist ACL einem Interface zu. in prüft eingehenden Traffic auf dem Interface, out prüft ausgehenden Traffic.",
+        "w": 1080,
+        "h": 55
+      },
+      {
+        "type": "Multi",
+        "label": "Standard ACL: Nummer/Name|permit/deny|Quelle",
+        "name": "stdAclList",
+        "value": "10|permit|192.168.99.0 0.0.0.255",
+        "help": "Standard ACL filtert nur nach Quelle. Gut für VTY/Management ACLs.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Extended ACL Assistent: Name|permit/deny|Protokoll|Quelle|Ziel",
+        "name": "extAclList",
+        "value": "MGMT-IN|permit|tcp|192.168.99.0 0.0.0.255|any eq 22\nMGMT-IN|deny|ip|any|any log",
+        "help": "Extended ACL filtert nach Quelle, Ziel und Protokoll/Port.",
+        "w": 1080,
+        "h": 95
+      },
+      {
+        "type": "Multi",
+        "label": "Assistent-Zuweisung: Interface|ACL|in/out",
+        "name": "aclAssignExtList",
+        "value": "Vlan99|MGMT-IN|in",
+        "help": "Weist Assistent-ACLs Interfaces zu.",
+        "w": 1080,
+        "h": 45
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "ipv6Extended",
+    "title": "IPv6 Zusatz",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 740,
+    "default": false,
+    "line": 2719,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "IPv6 Static Routes: Ziel/Prefix|Next-Hop/Interface",
+        "name": "ipv6StaticRoutes",
+        "value": "::/0|fe80::1 Gi0/0",
+        "help": "Statische IPv6-Routen, auch via Link-Local + Interface.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "IPv6 ACL: Name|permit/deny|Protokoll|Quelle|Ziel",
+        "name": "ipv6AclList",
+        "value": "V6-MGMT|permit|tcp|2001:db8:99::/64|any eq 22",
+        "help": "IPv6 ACL Regeln.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Multi",
+        "label": "IPv6 ACL Apply: Interface|ACL|in/out",
+        "name": "ipv6AclApplyList",
+        "value": "Gi0/0|V6-MGMT|in",
+        "help": "Weist IPv6 ACL einem Interface zu.",
+        "w": 1080,
+        "h": 55
+      },
+      {
+        "type": "Multi",
+        "label": "RA Suppress Interfaces",
+        "name": "ipv6RaSuppressIfs",
+        "value": "Gi0/0",
+        "help": "Unterdrückt Router Advertisements auf Interfaces.",
+        "w": 500,
+        "h": 55
+      },
+      {
+        "type": "Multi",
+        "label": "DHCPv6 Relay: Interface|Destination",
+        "name": "dhcpv6RelayList",
+        "value": "Vlan10|2001:db8:99::10",
+        "help": "DHCPv6 Relay Ziel je Interface.",
+        "w": 500,
+        "h": 55
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "ospfv3",
+    "title": "OSPFv3",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 580,
+    "default": false,
+    "line": 2726,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "OSPFv3 Prozess",
+        "name": "ospfv3Process",
+        "value": "1",
+        "help": "OSPFv3 Prozess-ID.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Router-ID",
+        "name": "ospfv3Rid",
+        "value": "1.1.1.1",
+        "help": "Router-ID für OSPFv3.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|Area",
+        "name": "ospfv3IfList",
+        "value": "Gi0/0|0\nVlan10|0",
+        "help": "Aktiviert OSPFv3 IPv6 auf Interfaces.",
+        "w": 1080,
+        "h": 80
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "ipv6RoutingProtocols",
+    "title": "IPv6 Routingprotokolle",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 710,
+    "default": false,
+    "line": 2733,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "BGP IPv6: AS|Neighbor|Remote-AS|Prefix|leer|Update-Source|Route-Map-Out",
+        "name": "ipv6BgpList",
+        "value": "65000|2001:db8:ffff::2|65010|2001:db8:10::/64||Loopback0|RM-V6-OUT",
+        "help": "BGP für IPv6 ohne VRF. Erzeugt address-family ipv6 unicast, aktiviert Neighbor und advertised IPv6-Präfixe.",
+        "w": 1080,
+        "h": 90
+      },
+      {
+        "type": "Multi",
+        "label": "EIGRP IPv6: AS|Router-ID|Interface",
+        "name": "ipv6EigrpList",
+        "value": "100|1.1.1.1|Vlan10",
+        "help": "EIGRP für IPv6. IOS/IOS-XE- und Plattformabhängig. Benötigt ipv6 unicast-routing und Interface-Aktivierung.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "IS-IS IPv6: Tag|Interface",
+        "name": "ipv6IsisList",
+        "value": "CORE|Vlan10",
+        "help": "IS-IS für IPv6. Nutzt address-family ipv6 und aktiviert IS-IS auf dem Interface. Sinnvoll in größeren Provider-/Core-ähnlichen Designs.",
+        "w": 1080,
+        "h": 70
+      }
+    ]
+  },
+  {
+    "tab": "IPv6/DHCP/ACL",
+    "name": "aclAssistant",
+    "title": "ACL-Assistent",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 470,
+    "default": false,
+    "line": 2739,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "ACL-Name",
+        "name": "aclAssistName",
+        "value": "MGMT-SSH",
+        "help": "Befehl: ip access-list extended <Name>. Name der ACL, z. B. MGMT-SSH.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Aktion",
+        "name": "aclAssistAction",
+        "items": [
+          "permit",
+          "deny"
+        ],
+        "selected": 0,
+        "help": "permit erlaubt passenden Traffic. deny blockiert passenden Traffic.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Protokoll",
+        "name": "aclAssistProtocol",
+        "items": [
+          "ip",
+          "tcp",
+          "udp",
+          "icmp",
+          "ospf",
+          "eigrp",
+          "gre",
+          "esp"
+        ],
+        "selected": 1,
+        "help": "Protokoll der ACL-Regel. Ports sind nur bei tcp oder udp sinnvoll.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Quelle Typ",
+        "name": "aclAssistSrcType",
+        "items": [
+          "any",
+          "host",
+          "netz"
+        ],
+        "selected": 0,
+        "help": "any = jede Quelle. host = einzelne IP. netz = Netz mit Wildcard, z. B. 192.168.10.0 0.0.0.255.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Quelle Wert",
+        "name": "aclAssistSrc",
+        "value": "",
+        "help": "Bei host nur IP eintragen. Bei netz Netz + Wildcard eintragen. Bei any leer lassen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Ziel Typ",
+        "name": "aclAssistDstType",
+        "items": [
+          "any",
+          "host",
+          "netz"
+        ],
+        "selected": 1,
+        "help": "any = jedes Ziel. host = einzelne Ziel-IP. netz = Zielnetz mit Wildcard.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Ziel Wert",
+        "name": "aclAssistDst",
+        "value": "192.168.99.10",
+        "help": "Bei host nur IP eintragen. Bei netz Netz + Wildcard eintragen. Bei any leer lassen.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Port",
+        "name": "aclAssistPort",
+        "items": [
+          "kein Port",
+          "22 SSH",
+          "23 TELNET",
+          "53 DNS",
+          "80 HTTP",
+          "443 HTTPS",
+          "161 SNMP",
+          "3389 RDP"
+        ],
+        "selected": 1,
+        "help": "Port wird als eq <Port> am Ziel ergänzt. Nur bei TCP oder UDP.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Interface Apply",
+        "name": "aclAssistInterface",
+        "value": "Vlan99",
+        "help": "Optional. Wenn gesetzt, wird die ACL mit ip access-group auf dieses Interface angewendet.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "Richtung",
+        "name": "aclAssistDirection",
+        "items": [
+          "in",
+          "out"
+        ],
+        "selected": 0,
+        "help": "in = Traffic kommt ins Interface hinein. out = Traffic verlässt das Interface.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "security",
+    "title": "Hardening",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 650,
+    "default": false,
+    "line": 2755,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "no service pad",
+        "name": "hardNoPad",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Deaktiviert PAD Service.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "no ip source-route",
+        "name": "hardNoSourceRoute",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Deaktiviert IP Source Routing.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "no ip bootp server",
+        "name": "hardNoBootp",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Deaktiviert BOOTP Server.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "CDP aktiv",
+        "name": "hardCdp",
+        "items": [
+          "Nein",
+          "Ja"
+        ],
+        "selected": 0,
+        "help": "Nein erzeugt no cdp run.",
+        "w": 300
+      },
+      {
+        "type": "Combo",
+        "label": "LLDP aktiv",
+        "name": "hardLldp",
+        "items": [
+          "Ja",
+          "Nein"
+        ],
+        "selected": 0,
+        "help": "Ja erzeugt lldp run.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Unused Range",
+        "name": "hardUnusedRange",
+        "value": "",
+        "help": "Optional: Interface-Range, die als ungenutzt shutdown gesetzt wird, z. B. Gi0/10-24.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "nat",
+    "title": "NAT / PAT",
+    "devices": [
+      "Router"
+    ],
+    "height": 940,
+    "default": false,
+    "line": 2768,
+    "fields": [
+      {
+        "type": "Combo",
+        "label": "NAT Typ",
+        "name": "natMode",
+        "items": [
+          "PAT Overload",
+          "Static NAT",
+          "Portforward",
+          "Dynamic Pool",
+          "Exemption",
+          "Alle"
+        ],
+        "selected": 0,
+        "help": "Wählt, welche NAT-Art exportiert wird. Dadurch entstehen nicht versehentlich mehrere NAT-Varianten gleichzeitig. Alle nur nutzen, wenn du bewusst mehrere NAT-Arten kombinieren willst.",
+        "w": 300
+      },
+      {
+        "type": "Multi",
+        "label": "NAT Interfaces: Interface|inside/outside",
+        "name": "natIfList",
+        "value": "Gi0/0|outside\nGi0/1|inside",
+        "help": "inside = internes Netz, outside = Richtung WAN/Internet. NAT benötigt korrekt markierte Interfaces.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Overload: ACL|Outside-Interface",
+        "name": "natOverloadList",
+        "value": "1|Gi0/0",
+        "help": "PAT/NAT Overload übersetzt viele interne Quelladressen auf die Outside-Adresse des Interfaces.",
+        "w": 1080,
+        "h": 55
+      },
+      {
+        "type": "Multi",
+        "label": "Static NAT: InsideLocal|InsideGlobal",
+        "name": "natStaticList",
+        "value": "192.168.10.10|203.0.113.10",
+        "help": "1:1 NAT zwischen interner und globaler Adresse.",
+        "w": 1080,
+        "h": 60
+      },
+      {
+        "type": "Multi",
+        "label": "Portforward: Protokoll|InsideLocal|InsidePort|InsideGlobal|GlobalPort",
+        "name": "natPortList",
+        "value": "tcp|192.168.10.10|443|203.0.113.10|443",
+        "help": "Static PAT / Portweiterleitung.",
+        "w": 1080,
+        "h": 65
+      },
+      {
+        "type": "Multi",
+        "label": "NAT Pool: Name|StartIP|EndIP|Maske|ACL",
+        "name": "natPoolList",
+        "value": "NATPOOL|203.0.113.20|203.0.113.30|255.255.255.240|1",
+        "help": "Dynamischer NAT Pool mit ACL.",
+        "w": 1080,
+        "h": 65
+      },
+      {
+        "type": "Multi",
+        "label": "NAT Exemption: RouteMap|ACL|Interface",
+        "name": "natExemptList",
+        "value": "",
+        "help": "Grundlage für NAT-Ausnahmen, z. B. VPN Traffic.",
+        "w": 1080,
+        "h": 50
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "vpn",
+    "title": "GRE",
+    "devices": [
+      "Router"
+    ],
+    "height": 380,
+    "default": false,
+    "line": 2776,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "GRE: TunnelID|IP|Maske|Source|Destination",
+        "name": "greList",
+        "value": "",
+        "help": "GRE erstellt einen unverschlüsselten Tunnel zwischen zwei Endpunkten. Für Verschlüsselung GRE mit IPsec kombinieren.",
+        "w": 1080,
+        "h": 75
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "customCommands",
+    "title": "Eigene Zusatzbefehle",
+    "devices": [
+      "Router",
+      "L3-Switch",
+      "L2-Switch"
+    ],
+    "height": 380,
+    "default": false,
+    "line": 2778,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Ein Cisco-Befehl pro Zeile",
+        "name": "customConfigList",
+        "value": "",
+        "help": "Für Befehle, die noch kein eigenes Modul haben. Wird 1:1 in den Export übernommen. Vorsicht: keine Syntaxprüfung in diesem Feld.",
+        "w": 1080,
+        "h": 75
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "greIpsec",
+    "title": "GRE over IPsec",
+    "devices": [
+      "Router"
+    ],
+    "height": 490,
+    "default": false,
+    "line": 2785,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "TunnelID|Tunnel-IP|Maske|Source|Destination|PSK|ACL|CryptoMap|TransformSet",
+        "name": "greIpsecList",
+        "value": "0|10.10.10.1|255.255.255.252|Gi0/0|203.0.113.2|MeinPSK|110|VPN-MAP|TS-GRE",
+        "help": "Erzeugt Basis für GRE over IPsec mit ISAKMP Policy, Transform-Set, Crypto Map und Tunnelinterface.",
+        "w": 1080,
+        "h": 155
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "wanFailover",
+    "title": "WAN-Failover-Assistent",
+    "devices": [
+      "Router"
+    ],
+    "height": 640,
+    "default": false,
+    "line": 2791,
+    "fields": [
+      {
+        "type": "Text",
+        "label": "Primary WAN If",
+        "name": "wanPrimaryIf",
+        "value": "Gi0/0",
+        "help": "Primäres WAN-Interface.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Backup WAN If",
+        "name": "wanBackupIf",
+        "value": "Gi0/1",
+        "help": "Backup WAN-Interface.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Primary Next-Hop",
+        "name": "wanPrimaryNh",
+        "value": "192.168.1.1",
+        "help": "Next-Hop primär.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Backup Next-Hop",
+        "name": "wanBackupNh",
+        "value": "192.168.2.1",
+        "help": "Next-Hop Backup.",
+        "w": 300
+      },
+      {
+        "type": "Text",
+        "label": "Track Ziel",
+        "name": "wanTrackTarget",
+        "value": "8.8.8.8",
+        "help": "Ziel für IP SLA Tracking.",
+        "w": 300
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "zoneFirewall",
+    "title": "Zone-Based Firewall",
+    "devices": [
+      "Router"
+    ],
+    "height": 740,
+    "default": false,
+    "line": 2798,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Zonen, eine pro Zeile",
+        "name": "zoneList",
+        "value": "INSIDE\nOUTSIDE\nDMZ",
+        "help": "Security Zones.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Interface|Zone",
+        "name": "zoneMemberList",
+        "value": "Gi0/1|INSIDE\nGi0/0|OUTSIDE",
+        "help": "Ordnet Interfaces Zonen zu.",
+        "w": 1080,
+        "h": 70
+      },
+      {
+        "type": "Multi",
+        "label": "Class|Protocol|Policy|Action(inspect/pass/drop)",
+        "name": "zonePolicyList",
+        "value": "CM-INSIDE|tcp|PM-INSIDE-OUT|inspect",
+        "help": "Erzeugt Class-Map und Policy-Map.",
+        "w": 1080,
+        "h": 80
+      },
+      {
+        "type": "Multi",
+        "label": "ZonePair|SourceZone|DestinationZone|Policy",
+        "name": "zonePairList",
+        "value": "ZP-IN-OUT|INSIDE|OUTSIDE|PM-INSIDE-OUT",
+        "help": "Erzeugt Zone-Pair mit Service-Policy.",
+        "w": 1080,
+        "h": 70
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "dmzAssistant",
+    "title": "DMZ-Assistent",
+    "devices": [
+      "Router",
+      "L3-Switch"
+    ],
+    "height": 480,
+    "default": false,
+    "line": 2804,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Interface|IP|Maske|Server-IP",
+        "name": "dmzList",
+        "value": "Gi0/2|192.168.50.1|255.255.255.0|192.168.50.10",
+        "help": "Erzeugt einfache DMZ-Interface- und ACL-Grundlage.",
+        "w": 1080,
+        "h": 110
+      }
+    ]
+  },
+  {
+    "tab": "Security/WAN",
+    "name": "vpnAdvanced",
+    "title": "VPN Site-to-Site IPsec",
+    "devices": [
+      "Router"
+    ],
+    "height": 580,
+    "default": false,
+    "line": 2807,
+    "fields": [
+      {
+        "type": "Multi",
+        "label": "Peer|PSK|Outside-Interface|Crypto-ACL|TransformSet|CryptoMap",
+        "name": "ipsecS2SList",
+        "value": "203.0.113.2|MeinPSK|Gi0/0|110|TS-S2S|VPN-MAP",
+        "help": "Site-to-Site IPsec ohne GRE, IKEv1-Basis.",
+        "w": 1080,
+        "h": 130
+      }
+    ]
+  }
+]

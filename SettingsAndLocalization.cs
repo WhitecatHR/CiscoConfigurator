@@ -10,18 +10,22 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace CiscoConfigGuiWpf;
 
 public partial class MainWindow
 {
-    private static string L(string text) => LocalizationService.TranslateText(text);
-    private static string LT(string german, string english) => LocalizationService.IsEnglish ? english : german;
+    private static string T(string key) => LocalizationService.Get(key);
 
     private ApplicationSettings _appSettings = ApplicationSettingsService.Current;
     private readonly Dictionary<string, Control> _settingsControls = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<object, OriginalUiText> _originalUiTexts = new(ReferenceEqualityComparer.Instance);
+    private readonly HashSet<DataGrid> _localizedDataGrids = new(ReferenceEqualityComparer.Instance);
     private bool _applyingSettings;
+    private bool _languagePreviewQueued;
+    private bool _localizationTabHookInstalled;
+    private string _lastAppliedLanguage = string.Empty;
 
     private sealed class OriginalUiText
     {
@@ -54,28 +58,28 @@ public partial class MainWindow
 
     private void BuildSettingsTab()
     {
-        var tab = new TabItem { Header = "⚙  Einstellungen" };
+        var tab = new TabItem { Header = "⚙  " + T("navigation.settings") };
         var root = new Grid();
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
         var header = new Border
         {
-            Background = new SolidColorBrush(Color.FromRgb(18, 22, 30)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(42, 49, 61)),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(10),
             Padding = new Thickness(16),
             Margin = new Thickness(0, 0, 0, 10)
         };
+        header.SetResourceReference(Border.BackgroundProperty, "PanelBg");
+        header.SetResourceReference(Border.BorderBrushProperty, "BorderBrushSoft");
         var headerGrid = new Grid();
         headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var headerText = new StackPanel();
-        headerText.Children.Add(new TextBlock { Text = "Einstellungen verwalten", FontSize = 22, FontWeight = FontWeights.Bold });
+        headerText.Children.Add(new TextBlock { Text = T("settings.title"), FontSize = 22, FontWeight = FontWeights.Bold });
         headerText.Children.Add(new TextBlock
         {
-            Text = "Sprache, Darstellung, Konfiguration, Export, Sicherung, SSH sowie Diagramm- und Berichtsvorgaben zentral festlegen.",
+            Text = T("settings.subtitle"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 4, 0, 0)
@@ -83,10 +87,10 @@ public partial class MainWindow
         headerGrid.Children.Add(headerText);
 
         var actions = new WrapPanel { HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center };
-        var apply = new Button { Content = "Übernehmen", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var export = new Button { Content = "Einstellungen exportieren" };
-        var import = new Button { Content = "Einstellungen importieren" };
-        var defaults = new Button { Content = "Standardwerte" };
+        var apply = new Button { Content = T("common.apply"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var export = new Button { Content = T("settings.export") };
+        var import = new Button { Content = T("settings.import") };
+        var defaults = new Button { Content = T("settings.defaults") };
         apply.Click += (_, _) => ApplySettingsFromPage(true);
         export.Click += (_, _) => ExportApplicationSettings();
         import.Click += (_, _) => ImportApplicationSettings();
@@ -107,106 +111,146 @@ public partial class MainWindow
         };
         var stack = new StackPanel { Margin = new Thickness(0, 0, 8, 10) };
 
-        stack.Children.Add(CreateSettingsCategory("Allgemein", "Sprache, Startverhalten und grundlegende Sicherheitsabfragen.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.general"), T("text.sprache_startverhalten_und_grundlegende_sicherheitsabfragen"), panel =>
         {
-            AddSettingsCombo(panel, "language", "Anwendungssprache", new[] { "Systemsprache", "Deutsch", "English" }, LanguageToDisplay(_appSettings.Language));
-            AddSettingsCombo(panel, "reportLanguage", "Berichtssprache", new[] { "Systemsprache", "Deutsch", "English" }, LanguageToDisplay(_appSettings.ReportLanguage));
-            AddSettingsCombo(panel, "startPage", "Startseite", new[] { "Übersicht", "Basis", "Projekt", "Ausgabe", "Diagramm / Bericht" }, _appSettings.StartPage);
-            AddSettingsCheck(panel, "loadLastProject", "Letztes Projekt automatisch laden", _appSettings.LoadLastProject);
-            AddSettingsCheck(panel, "confirmReset", "Zurücksetzen bestätigen", _appSettings.ConfirmReset);
+            AddSettingsCombo(panel, "language", T("settings.application_language"), new[] { "Systemsprache", "Deutsch", "English" }, LanguageToDisplay(_appSettings.Language));
+            AddSettingsCombo(panel, "reportLanguage", T("settings.report_language"), new[] { "Systemsprache", "Deutsch", "English" }, LanguageToDisplay(_appSettings.ReportLanguage));
+            AddSettingsCombo(panel, "startPage", T("settings.start_page"), new[] { "Übersicht", "Basis", "Projekt", "Ausgabe", "Diagramm / Bericht" }, _appSettings.StartPage);
+            AddSettingsCheck(panel, "loadLastProject", T("text.letztes_projekt_automatisch_laden"), _appSettings.LoadLastProject);
+            AddSettingsCheck(panel, "confirmReset", T("text.zurucksetzen_bestatigen"), _appSettings.ConfirmReset);
         }, true));
 
-        stack.Children.Add(CreateSettingsCategory("Darstellung", "Design und Informationsdichte der Benutzeroberfläche.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.appearance"), T("text.design_und_informationsdichte_der_benutzeroberflache"), panel =>
         {
-            AddSettingsCombo(panel, "theme", "Design", new[] { "Dunkel", "Hell", "System" }, _appSettings.Theme);
-            AddSettingsCombo(panel, "accentColor", "Akzentfarbe", new[] { "Orange", "Blau", "Grün", "Violett" }, _appSettings.AccentColor);
-            AddSettingsCombo(panel, "fontSize", "Schriftgröße", new[] { "Klein", "Normal", "Groß" }, _appSettings.FontSize);
-            AddSettingsCheck(panel, "compactMode", "Kompakte Ansicht", _appSettings.CompactMode);
-            AddSettingsCheck(panel, "animations", "Animationen aktivieren", _appSettings.AnimationsEnabled);
-            AddSettingsCheck(panel, "tooltips", "Tooltips aktivieren", _appSettings.TooltipsEnabled);
-            AddSettingsCheck(panel, "livePreview", "Live-Vorschau anzeigen", _appSettings.LivePreviewEnabled);
-            AddSettingsCheck(panel, "collapsibleNavigation", "Navigation einklappbar", _appSettings.CollapsibleNavigation);
+            AddSettingsCombo(panel, "theme", T("settings.theme"), new[] { "Dunkel", "Hell", "System" }, _appSettings.Theme);
+            AddSettingsCombo(panel, "accentColor", T("settings.accent_color"), new[] { "Orange", "Blau", "Grün", "Violett" }, _appSettings.AccentColor);
+            AddSettingsCombo(panel, "fontSize", T("settings.font_size"), new[] { "Klein", "Normal", "Groß" }, _appSettings.FontSize);
+
+            var resetAccent = new Button
+            {
+                Content = T("settings.reset_accent"),
+                ToolTip = T("text.setzt_die_akzentfarbe_auf_orange_zuruck"),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            resetAccent.Click += (_, _) => ResetAccentColorPreview();
+            panel.Children.Add(CreateSettingsCard(string.Empty, resetAccent));
+            AddSettingsCheck(panel, "compactMode", T("text.kompakte_ansicht"), _appSettings.CompactMode);
+            AddSettingsCheck(panel, "animations", T("text.animationen_aktivieren"), _appSettings.AnimationsEnabled);
+            AddSettingsCheck(panel, "tooltips", T("text.tooltips_aktivieren"), _appSettings.TooltipsEnabled);
+            AddSettingsCheck(panel, "livePreview", T("text.live_vorschau_anzeigen"), _appSettings.LivePreviewEnabled);
+            AddSettingsCheck(panel, "collapsibleNavigation", T("text.navigation_einklappbar"), _appSettings.CollapsibleNavigation);
         }));
 
-        stack.Children.Add(CreateSettingsCategory("Konfiguration", "Standardwerte und Aufbau der erzeugten Cisco-Konfiguration.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.configuration"), T("text.standardwerte_und_aufbau_der_erzeugten_cisco_konfiguration"), panel =>
         {
-            AddSettingsCombo(panel, "defaultDevice", "Standardgerät", new[] { "Router", "L3-Switch", "L2-Switch" }, _appSettings.DefaultDeviceType);
-            AddSettingsCombo(panel, "defaultMode", "Standardmodus", new[] { "Ohne VRF", "Mit VRF" }, _appSettings.DefaultConfigMode);
-            AddSettingsCombo(panel, "defaultPlatform", "Standardplattform", new[] { "IOS-XE", "IOS", "Packet Tracer", "CML / EVE-NG" }, _appSettings.DefaultPlatform);
-            AddSettingsText(panel, "defaultInterface", "Standard-Interface", _appSettings.DefaultInterfacePattern);
-            AddSettingsCombo(panel, "defaultIpStack", "Standard-IP-Stack", new[] { "Dual Stack", "Nur IPv4", "Nur IPv6" }, _appSettings.DefaultIpStack);
-            AddSettingsCheck(panel, "includeComments", "Kommentare erzeugen", _appSettings.IncludeComments);
-            AddSettingsCheck(panel, "includeSeparators", "Abschnittstrenner erzeugen", _appSettings.IncludeSectionSeparators);
-            AddSettingsCheck(panel, "includeEnable", "enable exportieren", _appSettings.IncludeEnable);
-            AddSettingsCheck(panel, "includeConfigureTerminal", "configure terminal exportieren", _appSettings.IncludeConfigureTerminal);
-            AddSettingsCheck(panel, "includeEnd", "end exportieren", _appSettings.IncludeEnd);
-            AddSettingsCheck(panel, "includeWriteMemory", "write memory exportieren", _appSettings.IncludeWriteMemory);
-            AddSettingsCombo(panel, "validationMode", "Validierungsmodus", new[] { "Streng", "Tolerant" }, _appSettings.ValidationMode);
-            AddSettingsCombo(panel, "autoFixMode", "Automatische Korrekturen", new[] { "Nur vorschlagen", "Automatisch anwenden" }, _appSettings.AutoFixMode);
+            AddSettingsCombo(panel, "defaultDevice", T("text.standardgerat"), new[] { "Router", "L3-Switch", "L2-Switch" }, _appSettings.DefaultDeviceType);
+            AddSettingsCombo(panel, "defaultMode", T("text.standardmodus"), new[] { "Ohne VRF", "Mit VRF" }, _appSettings.DefaultConfigMode);
+            AddSettingsCombo(panel, "defaultPlatform", T("text.standardplattform"), new[] { "IOS-XE", "IOS", "Packet Tracer", "CML / EVE-NG" }, _appSettings.DefaultPlatform);
+            AddSettingsText(panel, "defaultInterface", T("text.standard_interface"), _appSettings.DefaultInterfacePattern);
+            AddSettingsCombo(panel, "defaultIpStack", T("text.standard_ip_stack"), new[] { "Dual Stack", "Nur IPv4", "Nur IPv6" }, _appSettings.DefaultIpStack);
+            AddSettingsCheck(panel, "includeComments", T("text.kommentare_erzeugen"), _appSettings.IncludeComments);
+            AddSettingsCheck(panel, "includeSeparators", T("text.abschnittstrenner_erzeugen"), _appSettings.IncludeSectionSeparators);
+            AddSettingsCheck(panel, "includeEnable", T("text.enable_exportieren"), _appSettings.IncludeEnable);
+            AddSettingsCheck(panel, "includeConfigureTerminal", T("text.configure_terminal_exportieren"), _appSettings.IncludeConfigureTerminal);
+            AddSettingsCheck(panel, "includeEnd", T("text.end_exportieren"), _appSettings.IncludeEnd);
+            AddSettingsCheck(panel, "includeWriteMemory", T("text.write_memory_exportieren"), _appSettings.IncludeWriteMemory);
+            AddSettingsCombo(panel, "validationMode", T("text.validierungsmodus"), new[] { "Streng", "Tolerant" }, _appSettings.ValidationMode);
+            AddSettingsCombo(panel, "autoFixMode", T("text.automatische_korrekturen"), new[] { "Nur vorschlagen", "Automatisch anwenden" }, _appSettings.AutoFixMode);
         }));
 
-        stack.Children.Add(CreateSettingsCategory("Import / Export", "Dateinamen, Zielordner und zusätzliche Exportartefakte.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.import_export"), T("text.dateinamen_zielordner_und_zusatzliche_exportartefakte"), panel =>
         {
-            AddSettingsText(panel, "exportFolder", "Standard-Exportordner", _appSettings.DefaultExportFolder);
-            AddSettingsText(panel, "fileNamePattern", "Dateinamensmuster", _appSettings.ExportFileNamePattern);
-            AddSettingsCombo(panel, "lineEndings", "Zeilenenden", new[] { "Windows (CRLF)", "Unix (LF)" }, _appSettings.LineEndings);
-            AddSettingsCheck(panel, "sortByModules", "Nach Modulen sortieren", _appSettings.SortConfigurationByModules);
-            AddSettingsCheck(panel, "keepUnknown", "Unbekannte Befehle übernehmen", _appSettings.KeepUnknownCommands);
-            AddSettingsCheck(panel, "includeCustom", "Zusatzbefehle übernehmen", _appSettings.IncludeCustomCommands);
-            AddSettingsCheck(panel, "timestampFile", "Zeitstempel im Dateinamen", _appSettings.TimestampInFileName);
-            AddSettingsCheck(panel, "exportPeer", "Gegenstellenkonfiguration mitexportieren", _appSettings.ExportPeerConfiguration);
-            AddSettingsCheck(panel, "generateRollback", "Rollback-Datei erzeugen", _appSettings.GenerateRollbackFile);
-            AddSettingsCheck(panel, "exportReports", "Berichte gemeinsam exportieren", _appSettings.ExportReportsTogether);
+            AddSettingsText(panel, "exportFolder", T("text.standard_exportordner"), _appSettings.DefaultExportFolder);
+            AddSettingsText(panel, "fileNamePattern", T("text.dateinamensmuster"), _appSettings.ExportFileNamePattern);
+            AddSettingsCombo(panel, "lineEndings", T("text.zeilenenden"), new[] { "Windows (CRLF)", "Unix (LF)" }, _appSettings.LineEndings);
+            AddSettingsCheck(panel, "sortByModules", T("text.nach_modulen_sortieren"), _appSettings.SortConfigurationByModules);
+            AddSettingsCheck(panel, "keepUnknown", T("text.unbekannte_befehle_ubernehmen"), _appSettings.KeepUnknownCommands);
+            AddSettingsCheck(panel, "includeCustom", T("text.zusatzbefehle_ubernehmen"), _appSettings.IncludeCustomCommands);
+            AddSettingsCheck(panel, "timestampFile", T("text.zeitstempel_im_dateinamen"), _appSettings.TimestampInFileName);
+            AddSettingsCheck(panel, "exportPeer", T("text.gegenstellenkonfiguration_mitexportieren"), _appSettings.ExportPeerConfiguration);
+            AddSettingsCheck(panel, "generateRollback", T("text.rollback_datei_erzeugen"), _appSettings.GenerateRollbackFile);
+            AddSettingsCheck(panel, "exportReports", T("text.berichte_gemeinsam_exportieren"), _appSettings.ExportReportsTogether);
         }));
 
-        stack.Children.Add(CreateSettingsCategory("Projekte / Sicherung", "Automatische Sicherung, Wiederherstellung und Historie.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.projects_backup"), T("text.automatische_sicherung_wiederherstellung_und_historie"), panel =>
         {
-            AddSettingsCheck(panel, "autoSave", "Autosave aktivieren", _appSettings.AutoSaveEnabled);
-            AddSettingsText(panel, "autoSaveInterval", "Autosave-Intervall (Sekunden)", _appSettings.AutoSaveIntervalSeconds.ToString(CultureInfo.InvariantCulture));
-            AddSettingsText(panel, "backupCount", "Anzahl lokaler Sicherungen", _appSettings.BackupCount.ToString(CultureInfo.InvariantCulture));
-            AddSettingsText(panel, "backupFolder", "Backup-Ordner", _appSettings.BackupFolder);
-            AddSettingsCheck(panel, "saveOnExit", "Projekt beim Beenden speichern", _appSettings.SaveProjectOnExit);
-            AddSettingsCheck(panel, "restoreCrash", "Nach Absturz wiederherstellen", _appSettings.RestoreAfterCrash);
-            AddSettingsCheck(panel, "history", "Konfigurationshistorie aktivieren", _appSettings.HistoryEnabled);
-            AddSettingsText(panel, "historyLimit", "Maximale Historieneinträge", _appSettings.HistoryLimit.ToString(CultureInfo.InvariantCulture));
+            AddSettingsCheck(panel, "autoSave", T("text.autosave_aktivieren"), _appSettings.AutoSaveEnabled);
+            AddSettingsText(panel, "autoSaveInterval", T("text.autosave_intervall_sekunden"), _appSettings.AutoSaveIntervalSeconds.ToString(CultureInfo.InvariantCulture));
+            AddSettingsText(panel, "backupCount", T("text.anzahl_lokaler_sicherungen"), _appSettings.BackupCount.ToString(CultureInfo.InvariantCulture));
+            AddSettingsText(panel, "backupFolder", T("text.backup_ordner"), _appSettings.BackupFolder);
+            AddSettingsCheck(panel, "saveOnExit", T("text.projekt_beim_beenden_speichern"), _appSettings.SaveProjectOnExit);
+            AddSettingsCheck(panel, "restoreCrash", T("text.nach_absturz_wiederherstellen"), _appSettings.RestoreAfterCrash);
+            AddSettingsCheck(panel, "history", T("text.konfigurationshistorie_aktivieren"), _appSettings.HistoryEnabled);
+            AddSettingsText(panel, "historyLimit", T("text.maximale_historieneintrage"), _appSettings.HistoryLimit.ToString(CultureInfo.InvariantCulture));
         }));
 
-        stack.Children.Add(CreateSettingsCategory("SSH / Betrieb", "Standardwerte für Gerätezugriff, Übertragung und Backups.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.ssh_operations"), T("text.standardwerte_fur_geratezugriff_ubertragung_und_backups"), panel =>
         {
-            AddSettingsText(panel, "sshPort", "Standard-SSH-Port", _appSettings.DefaultSshPort.ToString(CultureInfo.InvariantCulture));
-            AddSettingsText(panel, "connectionTimeout", "Verbindungs-Timeout (Sekunden)", _appSettings.ConnectionTimeoutSeconds.ToString(CultureInfo.InvariantCulture));
-            AddSettingsText(panel, "commandTimeout", "Befehls-Timeout (Sekunden)", _appSettings.CommandTimeoutSeconds.ToString(CultureInfo.InvariantCulture));
-            AddSettingsText(panel, "commandDelay", "Zeilenverzögerung (ms)", _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture));
-            AddSettingsCheck(panel, "backupBeforeTransfer", "Vor Übertragung sichern", _appSettings.BackupBeforeTransfer);
-            AddSettingsCheck(panel, "abortOnError", "Bei Fehler abbrechen", _appSettings.AbortTransferOnError);
-            AddSettingsCheck(panel, "showBeforeSend", "Befehle vor dem Senden anzeigen", _appSettings.ShowCommandsBeforeSend);
-            AddSettingsCheck(panel, "storePasswords", "Passwörter speichern", _appSettings.StorePasswords,
-                "Passwörter werden standardmäßig nicht gespeichert. Eine Aktivierung sollte nur auf einem geschützten Benutzerprofil erfolgen.");
-            AddSettingsCheck(panel, "sessionLogging", "Sitzungsprotokoll aktivieren", _appSettings.SessionLoggingEnabled);
-            AddSettingsText(panel, "deviceBackupFolder", "Geräte-Backup-Ordner", _appSettings.DeviceBackupFolder);
+            AddSettingsText(panel, "sshPort", T("text.standard_ssh_port"), _appSettings.DefaultSshPort.ToString(CultureInfo.InvariantCulture));
+            AddSettingsText(panel, "connectionTimeout", T("text.verbindungs_timeout_sekunden"), _appSettings.ConnectionTimeoutSeconds.ToString(CultureInfo.InvariantCulture));
+            AddSettingsText(panel, "commandTimeout", T("text.befehls_timeout_sekunden"), _appSettings.CommandTimeoutSeconds.ToString(CultureInfo.InvariantCulture));
+            AddSettingsText(panel, "commandDelay", T("text.zeilenverzogerung_ms"), _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture));
+            AddSettingsCheck(panel, "backupBeforeTransfer", T("text.vor_ubertragung_sichern"), _appSettings.BackupBeforeTransfer);
+            AddSettingsCheck(panel, "abortOnError", T("text.bei_fehler_abbrechen"), _appSettings.AbortTransferOnError);
+            AddSettingsCheck(panel, "showBeforeSend", T("text.befehle_vor_dem_senden_anzeigen"), _appSettings.ShowCommandsBeforeSend);
+            AddSettingsCheck(panel, "storePasswords", T("text.passworter_speichern"), _appSettings.StorePasswords,
+                T("text.passworter_werden_standardma_ig_nicht_gespeichert_eine_aktiv"));
+            AddSettingsCheck(panel, "sessionLogging", T("text.sitzungsprotokoll_aktivieren"), _appSettings.SessionLoggingEnabled);
+            AddSettingsText(panel, "deviceBackupFolder", T("text.gerate_backup_ordner"), _appSettings.DeviceBackupFolder);
         }));
 
-        stack.Children.Add(CreateSettingsCategory("Diagramm / Bericht", "Darstellung der Topologie und Vorgaben für Projektberichte.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.diagram_report"), T("text.darstellung_der_topologie_und_vorgaben_fur_projektberichte"), panel =>
         {
-            AddSettingsCheck(panel, "autoLayout", "Automatische Diagrammanordnung", _appSettings.AutomaticDiagramLayout);
-            AddSettingsCheck(panel, "snapGrid", "Am Raster ausrichten", _appSettings.SnapDiagramToGrid);
-            AddSettingsCheck(panel, "showLinkTypes", "Verbindungstypen anzeigen", _appSettings.ShowConnectionTypes);
-            AddSettingsCheck(panel, "showInterfaces", "Interface-Namen anzeigen", _appSettings.ShowInterfaceNames);
-            AddSettingsCheck(panel, "showIps", "IP-Adressen anzeigen", _appSettings.ShowIpAddresses);
-            AddSettingsCheck(panel, "showVlans", "VLANs anzeigen", _appSettings.ShowVlans);
-            AddSettingsCombo(panel, "reportFormat", "Standard-Berichtsformat", new[] { "PDF", "DOCX", "HTML" }, _appSettings.DefaultReportFormat);
-            AddSettingsText(panel, "company", "Firmenname", _appSettings.CompanyName);
-            AddSettingsText(panel, "projectManager", "Projektverantwortlicher", _appSettings.ProjectManager);
-            AddSettingsText(panel, "reportLogo", "Berichtslogo", _appSettings.ReportLogoPath);
-            AddSettingsCombo(panel, "pageSize", "Seitenformat", new[] { "A4", "Letter" }, _appSettings.PageSize);
-            AddSettingsCombo(panel, "pageOrientation", "Ausrichtung", new[] { "Hochformat", "Querformat" }, _appSettings.PageOrientation);
+            AddSettingsCheck(panel, "autoLayout", T("text.automatische_diagrammanordnung"), _appSettings.AutomaticDiagramLayout);
+            AddSettingsCheck(panel, "snapGrid", T("text.am_raster_ausrichten"), _appSettings.SnapDiagramToGrid);
+            AddSettingsCheck(panel, "showLinkTypes", T("text.verbindungstypen_anzeigen"), _appSettings.ShowConnectionTypes);
+            AddSettingsCheck(panel, "showInterfaces", T("text.interface_namen_anzeigen"), _appSettings.ShowInterfaceNames);
+            AddSettingsCheck(panel, "showIps", T("text.ip_adressen_anzeigen"), _appSettings.ShowIpAddresses);
+            AddSettingsCheck(panel, "showVlans", T("text.vlans_anzeigen"), _appSettings.ShowVlans);
+            AddSettingsCombo(panel, "reportFormat", T("text.standard_berichtsformat"), new[] { "PDF", "DOCX", "HTML" }, _appSettings.DefaultReportFormat);
+            AddSettingsText(panel, "company", T("text.firmenname"), _appSettings.CompanyName);
+            AddSettingsText(panel, "projectManager", T("text.projektverantwortlicher"), _appSettings.ProjectManager);
+            AddSettingsText(panel, "reportLogo", T("text.berichtslogo"), _appSettings.ReportLogoPath);
+            AddSettingsCombo(panel, "pageSize", T("text.seitenformat"), new[] { "A4", "Letter" }, _appSettings.PageSize);
+            AddSettingsCombo(panel, "pageOrientation", T("text.ausrichtung"), new[] { "Hochformat", "Querformat" }, _appSettings.PageOrientation);
         }));
 
-        stack.Children.Add(CreateSettingsCategory("Erweitert", "Zusätzliche Prüfungen und technische Diagnoseoptionen.", panel =>
+        stack.Children.Add(CreateSettingsCategory(T("settings.category.advanced"), T("text.zusatzliche_prufungen_und_technische_diagnoseoptionen"), panel =>
         {
-            AddSettingsCheck(panel, "strictImport", "Strenge Importprüfung", _appSettings.StrictImportValidation);
-            AddSettingsCheck(panel, "developerMode", "Entwicklermodus", _appSettings.DeveloperMode);
-            AddSettingsCheck(panel, "diagnosticDetails", "Diagnosedetails aufnehmen", _appSettings.IncludeDiagnosticDetails);
+            AddSettingsCheck(panel, "strictImport", T("text.strenge_importprufung"), _appSettings.StrictImportValidation,
+                T("text.die_strenge_importprufung_meldet_unvollstandige_widerspruchl"));
+            AddSettingsCheck(panel, "developerMode", T("settings.developer_mode"), _appSettings.DeveloperMode,
+                T("text.entwicklermodus_zeigt_interne_modul_und_feld_ids_in_tooltips"));
+
+            var developerInfo = new Border
+            {
+                Width = 708,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(12),
+                Margin = new Thickness(4),
+                Child = new TextBlock
+                {
+                    Text = T("text.der_entwicklermodus_ist_ausschlie_lich_fur_fehlersuche_und_u"),
+                    TextWrapping = TextWrapping.Wrap
+                }
+            };
+            developerInfo.SetResourceReference(Border.BackgroundProperty, "CardBg");
+            developerInfo.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
+            panel.Children.Add(developerInfo);
+
+            AddSettingsCheck(panel, "diagnosticDetails", T("text.diagnosedetails_aufnehmen"), _appSettings.IncludeDiagnosticDetails,
+                T("text.diagnosedetails_erganzen_fehlermeldungen_und_protokolle_um_t"));
+
+            var auditTranslations = new Button { Content = T("settings.audit_translation"), HorizontalAlignment = HorizontalAlignment.Stretch };
+            auditTranslations.ToolTip = TooltipBuilder.Create(T("settings.audit_translation"), T("text.durchsucht_die_aktuell_sichtbare_oberflache_einschlie_lich_t"));
+            auditTranslations.Click += (_, _) => RunTranslationAudit();
+            panel.Children.Add(CreateSettingsCard(string.Empty, auditTranslations));
+
+            var openDiagnostics = new Button { Content = T("settings.open_diagnostics"), HorizontalAlignment = HorizontalAlignment.Stretch };
+            openDiagnostics.ToolTip = TooltipBuilder.Create(T("settings.open_diagnostics"), T("text.offnet_den_ordner_mit_entwicklerprotokoll_ubersetzungsprufun"));
+            openDiagnostics.Click += (_, _) => DeveloperDiagnosticsService.OpenLogDirectory();
+            panel.Children.Add(CreateSettingsCard(string.Empty, openDiagnostics));
         }));
 
         var note = new Border
@@ -219,7 +263,7 @@ public partial class MainWindow
             Margin = new Thickness(0, 6, 0, 0),
             Child = new TextBlock
             {
-                Text = "Die Sprache wird ohne Neustart umgeschaltet. Cisco-Befehle und interne Konfigurationswerte werden nicht übersetzt.",
+                Text = T("settings.language_note"),
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = new SolidColorBrush(Color.FromRgb(253, 186, 116))
             }
@@ -233,14 +277,24 @@ public partial class MainWindow
         _tabsByName["Einstellungen"] = tab;
         MainTabs.Items.Add(tab);
 
+        if (!_localizationTabHookInstalled)
+        {
+            _localizationTabHookInstalled = true;
+            MainTabs.SelectionChanged += (_, e) =>
+            {
+                if (!ReferenceEquals(e.Source, MainTabs)) return;
+                if (MainTabs.SelectedContent is DependencyObject selectedContent)
+                    LocalizeObjectTree(selectedContent);
+            };
+        }
+
         if (_settingsControls.TryGetValue("language", out var languageControl) && languageControl is ComboBox languageCombo)
         {
             languageCombo.SelectionChanged += (_, _) =>
             {
                 if (_applyingSettings) return;
                 var selected = languageCombo.SelectedItem?.ToString() ?? "Systemsprache";
-                LocalizationService.SetLanguage(DisplayToLanguage(selected));
-                ApplyLocalizationToVisualTree();
+                QueueLanguagePreview(DisplayToLanguage(selected));
             };
         }
 
@@ -254,6 +308,60 @@ public partial class MainWindow
                 ApplyThemeToVisualTree();
             };
         }
+
+        if (_settingsControls.TryGetValue("accentColor", out var accentControl) && accentControl is ComboBox accentCombo)
+        {
+            accentCombo.SelectionChanged += (_, _) =>
+            {
+                if (_applyingSettings) return;
+                _appSettings.AccentColor = accentCombo.SelectedItem?.ToString() ?? "Orange";
+                ApplyThemeResources();
+                ApplyThemeToVisualTree();
+            };
+        }
+    }
+    private void QueueLanguagePreview(string language)
+    {
+        LocalizationService.SetLanguage(language);
+        if (_languagePreviewQueued) return;
+
+        _languagePreviewQueued = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+        {
+            _languagePreviewQueued = false;
+            if (string.Equals(_lastAppliedLanguage, LocalizationService.CurrentLanguage, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var previousCursor = Cursor;
+            try
+            {
+                Cursor = System.Windows.Input.Cursors.Wait;
+                ApplyLocalizationToVisualTree();
+                _lastAppliedLanguage = LocalizationService.CurrentLanguage;
+                RefreshNetworkDiagram();
+                UpdateStatusBar();
+            }
+            finally
+            {
+                Cursor = previousCursor;
+            }
+        }));
+    }
+
+    private void ResetAccentColorPreview()
+    {
+        _appSettings.AccentColor = "Orange";
+        _applyingSettings = true;
+        try
+        {
+            SetSettingCombo("accentColor", "Orange");
+        }
+        finally
+        {
+            _applyingSettings = false;
+        }
+        ApplyThemeResources();
+        ApplyThemeToVisualTree();
     }
 
     private Expander CreateSettingsCategory(string title, string subtitle, Action<WrapPanel> build, bool expanded = false)
@@ -270,17 +378,18 @@ public partial class MainWindow
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 2, 0, 0)
         });
-        return new Expander
+        var expander = new Expander
         {
             Header = header,
             Content = panel,
             IsExpanded = expanded,
-            Background = new SolidColorBrush(Color.FromRgb(18, 22, 30)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(42, 49, 61)),
             BorderThickness = new Thickness(1),
             Padding = new Thickness(12),
             Margin = new Thickness(0, 0, 0, 8)
         };
+        expander.SetResourceReference(Control.BackgroundProperty, "PanelBg");
+        expander.SetResourceReference(Control.BorderBrushProperty, "BorderBrushSoft");
+        return expander;
     }
 
     private void AddSettingsCombo(Panel panel, string key, string label, IEnumerable<string> options, string selected)
@@ -312,18 +421,19 @@ public partial class MainWindow
         if (!string.IsNullOrWhiteSpace(label))
             stack.Children.Add(new TextBlock { Text = label, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
         stack.Children.Add(control);
-        return new Border
+        var card = new Border
         {
             Width = 350,
-            MinHeight = 76,
-            Background = new SolidColorBrush(Color.FromRgb(23, 28, 37)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(45, 53, 66)),
+            MinHeight = string.IsNullOrWhiteSpace(label) ? 76 : 96,
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(11),
             Margin = new Thickness(4),
             Child = stack
         };
+        card.SetResourceReference(Border.BackgroundProperty, "CardBg");
+        card.SetResourceReference(Border.BorderBrushProperty, "BorderBrushSoft");
+        return card;
     }
 
     private void ApplySettingsFromPage(bool showConfirmation)
@@ -413,7 +523,7 @@ public partial class MainWindow
             LocalizationService.SetLanguage(_appSettings.Language);
             ApplyRuntimeSettings();
             if (showConfirmation)
-                MessageBox.Show(this, LocalizationService.TranslateText("Einstellungen wurden gespeichert."), LocalizationService.TranslateText("Einstellungen"), MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, LocalizationService.Get("text.einstellungen_wurden_gespeichert"), LocalizationService.Get("navigation.settings"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         finally
         {
@@ -428,7 +538,14 @@ public partial class MainWindow
         ApplyDisplayDensity();
         ApplyToolTipSetting();
         ApplyLivePreviewSetting();
-        ApplyLocalizationToVisualTree();
+
+        if (!string.Equals(_lastAppliedLanguage, LocalizationService.CurrentLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyLocalizationToVisualTree();
+            _lastAppliedLanguage = LocalizationService.CurrentLanguage;
+        }
+
+        DeveloperDiagnosticsService.Log("SETTINGS", $"Runtime settings applied. Language={LocalizationService.CurrentLanguage}, Theme={_appSettings.Theme}, Accent={_appSettings.AccentColor}");
 
         if (WriteMemCombo.Items.Count > 0)
             WriteMemCombo.SelectedItem = _appSettings.IncludeWriteMemory ? "Ja" : "Nein";
@@ -473,7 +590,10 @@ public partial class MainWindow
         var accent = GetAccentColor(_appSettings.AccentColor);
         SetBrushResource("AccentBrush", accent);
         SetBrushResource("AccentBrightBrush", Lighten(accent, 35));
-        SetBrushResource("AccentSoftBrush", light ? Color.FromArgb(40, accent.R, accent.G, accent.B) : Darken(accent, 145));
+        SetBrushResource("AccentHoverBrush", Lighten(accent, 18));
+        SetBrushResource("AccentPressedBrush", Darken(accent, 38));
+        SetBrushResource("AccentSoftBrush", Color.FromArgb(light ? (byte)42 : (byte)64, accent.R, accent.G, accent.B));
+        SetBrushResource("CheckMarkBrush", Colors.White);
 
         if (light)
         {
@@ -512,48 +632,93 @@ public partial class MainWindow
         var accent = GetAccentColor(_appSettings.AccentColor);
         foreach (var element in EnumerateUiObjects(RootLayout))
         {
+            // Elemente innerhalb eines ControlTemplates werden über DynamicResource und
+            // TemplateBinding gestaltet. Lokale Farbwerte würden die Templates nach einem
+            // Themewechsel überdecken und beispielsweise ComboBox-Inhalte unsichtbar machen.
+            if (element is FrameworkElement templateElement && templateElement.TemplatedParent != null)
+                continue;
+
             var original = GetOrCreateOriginal(element);
             if (element is Border border)
             {
-                CaptureBackground(original, border.Background);
-                CaptureBorder(original, border.BorderBrush);
-                border.Background = AdaptBackground(CloneBrush(original.Background), light);
-                border.BorderBrush = AdaptBorder(CloneBrush(original.Border), light, accent);
+                if (!UsesResourceExpression(border, Border.BackgroundProperty))
+                {
+                    CaptureBackground(original, border.Background);
+                    border.Background = AdaptBackground(CloneBrush(original.Background), light);
+                }
+                if (!UsesResourceExpression(border, Border.BorderBrushProperty))
+                {
+                    CaptureBorder(original, border.BorderBrush);
+                    border.BorderBrush = AdaptBorder(CloneBrush(original.Border), light, accent);
+                }
             }
             else if (element is Panel panel)
             {
-                CaptureBackground(original, panel.Background);
-                panel.Background = AdaptBackground(CloneBrush(original.Background), light);
+                if (!UsesResourceExpression(panel, Panel.BackgroundProperty))
+                {
+                    CaptureBackground(original, panel.Background);
+                    panel.Background = AdaptBackground(CloneBrush(original.Background), light);
+                }
             }
             else if (element is Control control)
             {
-                CaptureBackground(original, control.Background);
-                CaptureBorder(original, control.BorderBrush);
-                CaptureForeground(original, control.Foreground);
-                control.Background = AdaptBackground(CloneBrush(original.Background), light);
-                control.BorderBrush = AdaptBorder(CloneBrush(original.Border), light, accent);
-                control.Foreground = AdaptForeground(CloneBrush(original.Foreground), light, accent);
+                if (!UsesResourceExpression(control, Control.BackgroundProperty))
+                {
+                    CaptureBackground(original, control.Background);
+                    control.Background = AdaptBackground(CloneBrush(original.Background), light);
+                }
+                if (!UsesResourceExpression(control, Control.BorderBrushProperty))
+                {
+                    CaptureBorder(original, control.BorderBrush);
+                    control.BorderBrush = AdaptBorder(CloneBrush(original.Border), light, accent);
+                }
+                if (!UsesResourceExpression(control, Control.ForegroundProperty))
+                {
+                    CaptureForeground(original, control.Foreground);
+                    control.Foreground = AdaptForeground(CloneBrush(original.Foreground), light, accent);
+                }
             }
             else if (element is TextBlock text)
             {
-                CaptureForeground(original, text.Foreground);
-                text.Foreground = AdaptForeground(CloneBrush(original.Foreground), light, accent);
+                if (!UsesResourceExpression(text, TextBlock.ForegroundProperty))
+                {
+                    CaptureForeground(original, text.Foreground);
+                    text.Foreground = AdaptForeground(CloneBrush(original.Foreground), light, accent);
+                }
             }
             else if (element is Shape shape)
             {
-                if (!original.StrokeCaptured)
+                if (!UsesResourceExpression(shape, Shape.StrokeProperty))
                 {
-                    original.Stroke = CloneBrush(shape.Stroke);
-                    original.StrokeCaptured = true;
+                    if (!original.StrokeCaptured)
+                    {
+                        original.Stroke = CloneBrush(shape.Stroke);
+                        original.StrokeCaptured = true;
+                    }
+                    shape.Stroke = AdaptBorder(CloneBrush(original.Stroke), light, accent);
                 }
-                if (!original.FillCaptured)
+                if (!UsesResourceExpression(shape, Shape.FillProperty))
                 {
-                    original.Fill = CloneBrush(shape.Fill);
-                    original.FillCaptured = true;
+                    if (!original.FillCaptured)
+                    {
+                        original.Fill = CloneBrush(shape.Fill);
+                        original.FillCaptured = true;
+                    }
+                    shape.Fill = AdaptForeground(CloneBrush(original.Fill), light, accent);
                 }
-                shape.Stroke = AdaptBorder(CloneBrush(original.Stroke), light, accent);
-                shape.Fill = AdaptForeground(CloneBrush(original.Fill), light, accent);
             }
+        }
+    }
+
+    private static bool UsesResourceExpression(DependencyObject owner, DependencyProperty property)
+    {
+        try
+        {
+            return DependencyPropertyHelper.GetValueSource(owner, property).IsExpression;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -589,7 +754,10 @@ public partial class MainWindow
     {
         if (brush is not SolidColorBrush solid) return brush;
         var c = solid.Color;
-        if (IsAccentLike(c)) return new SolidColorBrush(GetAccentColor(_appSettings.AccentColor));
+        // Transparente und halbtransparente Template-Flächen dürfen nicht in deckende
+        // Theme-Flächen umgewandelt werden. Andernfalls überdecken sie Inhalte von
+        // ComboBoxen, Tabs und Diagramm-Beschriftungen bis zum nächsten Neustart.
+        if (c.A < 255) return brush;
         var brightness = (c.R + c.G + c.B) / 3d;
         if (light)
         {
@@ -605,7 +773,9 @@ public partial class MainWindow
     private Brush? AdaptBorder(Brush? brush, bool light, Color accent)
     {
         if (brush is not SolidColorBrush solid) return brush;
-        if (IsAccentLike(solid.Color)) return new SolidColorBrush(accent);
+        if (solid.Color.A < 255) return brush;
+        // Semantische Farben, etwa Verbindungstypen im Diagramm, bleiben erhalten.
+        // Die eigentliche Akzentfarbe wird ausschließlich über DynamicResource gesetzt.
         var brightness = (solid.Color.R + solid.Color.G + solid.Color.B) / 3d;
         if (light && brightness < 150) return new SolidColorBrush(Color.FromRgb(203, 213, 225));
         if (!light && brightness > 180) return new SolidColorBrush(Color.FromRgb(56, 66, 82));
@@ -615,7 +785,8 @@ public partial class MainWindow
     private Brush? AdaptForeground(Brush? brush, bool light, Color accent)
     {
         if (brush is not SolidColorBrush solid) return brush;
-        if (IsAccentLike(solid.Color)) return new SolidColorBrush(accent);
+        if (solid.Color.A < 255) return brush;
+        // Keine pauschale Umfärbung semantischer Diagramm- und Statusfarben.
         var brightness = (solid.Color.R + solid.Color.G + solid.Color.B) / 3d;
         var neutral = Math.Abs(solid.Color.R - solid.Color.G) < 25 && Math.Abs(solid.Color.G - solid.Color.B) < 25;
         if (light)
@@ -629,60 +800,233 @@ public partial class MainWindow
         return brush;
     }
 
+    private static readonly HashSet<string> LocalizedBindingPaths = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Status", "Severity", "Area", "Message", "FixKey", "Category", "Recommendation",
+        "ChangeType", "DeviceType", "ConfigMode", "Module", "Mode", "Meaning", "Role", "Result"
+    };
+
     private void ApplyLocalizationToVisualTree()
     {
-        Title = LocalizationService.TranslateText("Cisco Konfigurator");
+        Title = LocalizationService.Get("app.title");
         if (RootLayout == null) return;
-        foreach (var item in EnumerateUiObjects(RootLayout))
+        LocalizeObjectTree(RootLayout, visibleOnly: true);
+    }
+
+    private void LocalizeObjectTree(DependencyObject root, bool visibleOnly = false)
+    {
+        foreach (var item in EnumerateUiObjects(root))
         {
-            var original = GetOrCreateOriginal(item);
-            if (item is TextBlock text)
+            if (visibleOnly && item is UIElement uiElement && !uiElement.IsVisible)
+                continue;
+            if (item is TextBlock or Run or HeaderedContentControl or HeaderedItemsControl or ContentControl or ItemsControl or DataGrid)
             {
-                if (!original.TextCaptured) { original.Text = text.Text; original.TextCaptured = true; }
-                text.Text = LocalizationService.TranslateText(original.Text);
+                LocalizeSingleObject(item);
+                continue;
             }
-            if (item is HeaderedContentControl headeredContent && headeredContent.Header is string headerText)
+
+            if (item is FrameworkElement element && (element.ToolTip != null || element.ContextMenu != null))
+                LocalizeSingleObject(item);
+        }
+    }
+
+    private void LocalizeSingleObject(DependencyObject item)
+    {
+        var original = GetOrCreateOriginal(item);
+
+        if (item is TextBlock text)
+        {
+            if (!original.TextCaptured)
             {
-                if (!original.HeaderCaptured) { original.Header = headerText; original.HeaderCaptured = true; }
-                headeredContent.Header = LocalizationService.TranslateText(original.Header);
+                original.Text = text.Tag is LocalizationSource tagged ? tagged.Text : text.Text;
+                original.TextCaptured = true;
             }
-            else if (item is HeaderedItemsControl headeredItems && headeredItems.Header is string itemsHeader)
+            text.Text = LocalizationService.TranslateText(original.Text);
+        }
+        else if (item is Run run)
+        {
+            if (!original.TextCaptured) { original.Text = run.Text; original.TextCaptured = true; }
+            run.Text = LocalizationService.TranslateText(original.Text);
+        }
+
+        if (item is HeaderedContentControl headeredContent && headeredContent.Header is string headerText)
+        {
+            if (!original.HeaderCaptured) { original.Header = headerText; original.HeaderCaptured = true; }
+            headeredContent.Header = LocalizationService.TranslateText(original.Header);
+        }
+        else if (item is HeaderedItemsControl headeredItems && headeredItems.Header is string itemsHeader)
+        {
+            if (!original.HeaderCaptured) { original.Header = itemsHeader; original.HeaderCaptured = true; }
+            headeredItems.Header = LocalizationService.TranslateText(original.Header);
+        }
+
+        if (item is ContentControl contentControl && contentControl.Content is string contentText)
+        {
+            if (!original.ContentCaptured)
             {
-                if (!original.HeaderCaptured) { original.Header = itemsHeader; original.HeaderCaptured = true; }
-                headeredItems.Header = LocalizationService.TranslateText(original.Header);
+                original.Content = contentControl.Tag is LocalizationSource tagged ? tagged.Text : contentText;
+                original.ContentCaptured = true;
             }
-            if (item is ContentControl contentControl && contentControl.Content is string contentText)
-            {
-                if (!original.ContentCaptured) { original.Content = contentText; original.ContentCaptured = true; }
-                contentControl.Content = LocalizationService.TranslateText(original.Content);
-            }
-            if (item is FrameworkElement frameworkElement && frameworkElement.ToolTip is string toolTipText)
+            contentControl.Content = LocalizationService.TranslateText(original.Content);
+        }
+
+        if (item is FrameworkElement frameworkElement)
+        {
+            if (frameworkElement.ToolTip is string toolTipText)
             {
                 if (!original.ToolTipCaptured) { original.ToolTip = toolTipText; original.ToolTipCaptured = true; }
                 frameworkElement.ToolTip = LocalizationService.TranslateText(original.ToolTip);
             }
-            if (item is ComboBox combo && string.IsNullOrWhiteSpace(combo.DisplayMemberPath))
+            else if (frameworkElement.ToolTip is ToolTip toolTip)
             {
-                var first = combo.Items.Cast<object>().FirstOrDefault(x => x != null);
-                if (first is string)
-                {
-                    combo.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
-                    combo.Items.Refresh();
-                }
+                LocalizeObjectTree(toolTip);
             }
-            if (item is DataGrid dataGrid)
+            else if (frameworkElement.ToolTip is DependencyObject toolTipObject)
             {
-                foreach (var column in dataGrid.Columns)
+                LocalizeObjectTree(toolTipObject);
+            }
+
+            if (frameworkElement.ContextMenu is { } contextMenu)
+                LocalizeObjectTree(contextMenu);
+        }
+
+        if (item is ItemsControl itemsControl && string.IsNullOrWhiteSpace(itemsControl.DisplayMemberPath))
+        {
+            var first = itemsControl.Items.Cast<object>().FirstOrDefault(x => x != null);
+            if (first is string)
+            {
+                // Das Ersetzen des Templates aktualisiert die übersetzte Darstellung,
+                // ohne SelectedItem/SelectedIndex wie Items.Refresh() zu verlieren.
+                itemsControl.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
+            }
+        }
+
+        if (item is DataGrid dataGrid)
+        {
+            foreach (var column in dataGrid.Columns)
+            {
+                var columnOriginal = GetOrCreateOriginal(column);
+                if (column.Header is string columnHeader)
                 {
-                    var columnOriginal = GetOrCreateOriginal(column);
-                    if (column.Header is string columnHeader)
+                    if (!columnOriginal.HeaderCaptured) { columnOriginal.Header = columnHeader; columnOriginal.HeaderCaptured = true; }
+                    column.Header = LocalizationService.TranslateText(columnOriginal.Header);
+                }
+
+                if (column is DataGridTextColumn textColumn && textColumn.Binding is Binding binding)
+                {
+                    var path = binding.Path?.Path ?? string.Empty;
+                    if (path.Equals("Meaning", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!columnOriginal.HeaderCaptured) { columnOriginal.Header = columnHeader; columnOriginal.HeaderCaptured = true; }
-                        column.Header = LocalizationService.TranslateText(columnOriginal.Header);
+                        if (binding.Converter is not CommandDescriptionConverter)
+                            textColumn.Binding = CloneLocalizedBinding(binding, new CommandDescriptionConverter());
+                    }
+                    else if (LocalizedBindingPaths.Contains(path) && binding.Converter is not LocalizedTextConverter)
+                    {
+                        textColumn.Binding = CloneLocalizedBinding(binding, new LocalizedTextConverter());
                     }
                 }
             }
+            if (_localizedDataGrids.Add(dataGrid))
+            {
+                dataGrid.IsVisibleChanged += (_, _) =>
+                {
+                    if (!dataGrid.IsVisible) return;
+                    try { dataGrid.Items.Refresh(); } catch { }
+                };
+            }
+
+            // Verdeckte Tabellen werden erst beim Öffnen aktualisiert. Dadurch muss der
+            // Sprachwechsel nicht sofort hunderte Befehlsbeschreibungen rendern.
+            if (dataGrid.IsVisible)
+            {
+                try { dataGrid.Items.Refresh(); } catch { }
+            }
         }
+    }
+
+    private static Binding CloneLocalizedBinding(Binding source, IValueConverter converter)
+    {
+        return new Binding
+        {
+            Path = source.Path,
+            XPath = source.XPath,
+            Mode = source.Mode,
+            UpdateSourceTrigger = source.UpdateSourceTrigger,
+            StringFormat = source.StringFormat,
+            TargetNullValue = source.TargetNullValue,
+            FallbackValue = source.FallbackValue,
+            ConverterCulture = source.ConverterCulture,
+            ConverterParameter = source.ConverterParameter,
+            Converter = converter,
+            ValidatesOnDataErrors = source.ValidatesOnDataErrors,
+            ValidatesOnExceptions = source.ValidatesOnExceptions,
+            NotifyOnValidationError = source.NotifyOnValidationError
+        };
+    }
+
+    private void RunTranslationAudit()
+    {
+        var developerMode = GetSettingCheck("developerMode", _appSettings.DeveloperMode);
+        if (!developerMode)
+        {
+            MessageBox.Show(this,
+                LocalizationService.Get("text.die_ubersetzungsprufung_ist_nur_im_entwicklermodus_verfugbar"),
+                LocalizationService.Get("text.ubersetzungsprufung"),
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return;
+        }
+
+        if (!LocalizationService.IsEnglish)
+        {
+            MessageBox.Show(this,
+                LocalizationService.Get("text.fur_die_ubersetzungsprufung_muss_die_anwendungssprache_auf_e"),
+                LocalizationService.Get("text.ubersetzungsprufung"),
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return;
+        }
+
+        ApplyLocalizationToVisualTree();
+        var findings = new List<string>();
+        if (RootLayout != null)
+        {
+            foreach (var item in EnumerateUiObjects(RootLayout))
+            {
+                CollectUntranslatedText(item, findings);
+                if (item is FrameworkElement element && element.ToolTip is DependencyObject tip)
+                    foreach (var tipItem in EnumerateUiObjects(tip)) CollectUntranslatedText(tipItem, findings);
+            }
+        }
+
+        findings.AddRange(LocalizationService.ValidateEmbeddedCatalogs());
+        DeveloperDiagnosticsService.WriteTranslationAudit(findings);
+        var result = findings.Count == 0
+            ? LocalizationService.Get("text.keine_unubersetzten_sichtbaren_texte_gefunden")
+            : $"{findings.Distinct(StringComparer.Ordinal).Count()} {LocalizationService.Get("text.unubersetzte_sichtbare_texte_gefunden")}.";
+        MessageBox.Show(this,
+            result + Environment.NewLine + DeveloperDiagnosticsService.TranslationAuditPath,
+            LocalizationService.Get("text.ubersetzungsprufung"),
+            MessageBoxButton.OK,
+            findings.Count == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
+    }
+
+    private static void CollectUntranslatedText(DependencyObject item, ICollection<string> findings)
+    {
+        static void Add(string? value, ICollection<string> target)
+        {
+            if (!string.IsNullOrWhiteSpace(value) && LocalizationService.LooksGerman(value)) target.Add(value.Trim());
+        }
+
+        if (item is TextBlock text) Add(text.Text, findings);
+        if (item is Run run) Add(run.Text, findings);
+        if (item is HeaderedContentControl hcc && hcc.Header is string h1) Add(h1, findings);
+        if (item is HeaderedItemsControl hic && hic.Header is string h2) Add(h2, findings);
+        if (item is ContentControl cc && cc.Content is string content) Add(content, findings);
+        if (item is FrameworkElement fe && fe.ToolTip is string tip) Add(tip, findings);
+        if (item is DataGrid grid)
+            foreach (var column in grid.Columns)
+                if (column.Header is string header) Add(header, findings);
     }
 
     private OriginalUiText GetOrCreateOriginal(object owner)
@@ -726,20 +1070,20 @@ public partial class MainWindow
         ApplySettingsFromPage(false);
         var dialog = new SaveFileDialog
         {
-            Title = LocalizationService.TranslateText("Einstellungen exportieren"),
+            Title = LocalizationService.Get("settings.export"),
             Filter = "JSON (*.json)|*.json",
             FileName = "cisco_konfigurator_settings.json"
         };
         if (dialog.ShowDialog(this) != true) return;
         ApplicationSettingsService.Export(dialog.FileName, _appSettings);
-        MessageBox.Show(this, LocalizationService.TranslateText("Einstellungen wurden exportiert."), LocalizationService.TranslateText("Einstellungen"), MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, LocalizationService.Get("text.einstellungen_wurden_exportiert"), LocalizationService.Get("navigation.settings"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void ImportApplicationSettings()
     {
         var dialog = new OpenFileDialog
         {
-            Title = LocalizationService.TranslateText("Einstellungen importieren"),
+            Title = LocalizationService.Get("settings.import"),
             Filter = "JSON (*.json)|*.json"
         };
         if (dialog.ShowDialog(this) != true) return;
@@ -750,17 +1094,17 @@ public partial class MainWindow
             PopulateSettingsPage();
             LocalizationService.SetLanguage(_appSettings.Language);
             ApplyRuntimeSettings();
-            MessageBox.Show(this, LocalizationService.TranslateText("Einstellungen wurden importiert."), LocalizationService.TranslateText("Einstellungen"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, LocalizationService.Get("text.einstellungen_wurden_importiert"), LocalizationService.Get("navigation.settings"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, LocalizationService.TranslateText("Fehler"), MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("text.fehler"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
     private void ResetApplicationSettings()
     {
-        if (MessageBox.Show(this, LocalizationService.TranslateText("Alle Einstellungen auf Standardwerte zurücksetzen?"), LocalizationService.TranslateText("Standardwerte"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        if (MessageBox.Show(this, LocalizationService.Get("text.alle_einstellungen_auf_standardwerte_zurucksetzen"), LocalizationService.Get("settings.defaults"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
         _appSettings = new ApplicationSettings();
         ApplicationSettingsService.Save(_appSettings);
@@ -927,9 +1271,33 @@ public partial class MainWindow
         (byte)Math.Max(0, c.G - amount),
         (byte)Math.Max(0, c.B - amount));
 
-    private static bool IsAccentLike(Color color) =>
-        (color.R > 180 && color.G is > 70 and < 175 && color.B < 80) ||
-        (color.R > 220 && color.G > 130 && color.B < 80);
+    private static bool IsAccentLike(Color color)
+    {
+        var palette = new[]
+        {
+            Color.FromRgb(232, 121, 26),
+            Color.FromRgb(59, 130, 246),
+            Color.FromRgb(34, 197, 94),
+            Color.FromRgb(139, 92, 246)
+        };
+
+        foreach (var baseColor in palette)
+        {
+            if (ColorDistance(color, baseColor) <= 42) return true;
+            if (ColorDistance(color, Lighten(baseColor, 35)) <= 42) return true;
+            if (ColorDistance(color, Lighten(baseColor, 18)) <= 42) return true;
+            if (ColorDistance(color, Darken(baseColor, 38)) <= 42) return true;
+        }
+        return false;
+    }
+
+    private static double ColorDistance(Color left, Color right)
+    {
+        var dr = left.R - right.R;
+        var dg = left.G - right.G;
+        var db = left.B - right.B;
+        return Math.Sqrt((dr * dr) + (dg * dg) + (db * db));
+    }
 
     private void SetBrushResource(string key, Color color)
     {

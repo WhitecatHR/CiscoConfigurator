@@ -1,7 +1,7 @@
 <Window x:Class="CiscoConfigGuiWpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Cisco Konfigurator"
+        Title="{DynamicResource Loc.app.title}"
         Width="1440" Height="900" MinWidth="1260" MinHeight="720"
         WindowStartupLocation="CenterScreen" Icon="Assets/network.ico"
         FontFamily="Segoe UI" UseLayoutRounding="True" SnapsToDevicePixels="True">
@@ -26,7 +26,10 @@
         <SolidColorBrush x:Key="MutedBrush" Color="#9CA6B5" />
         <SolidColorBrush x:Key="AccentBrush" Color="#E8791A" />
         <SolidColorBrush x:Key="AccentBrightBrush" Color="#F59E0B" />
-        <SolidColorBrush x:Key="AccentSoftBrush" Color="#2C1A0C" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#402C1A0C" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#F08A24" />
+        <SolidColorBrush x:Key="AccentPressedBrush" Color="#C45F10" />
+        <SolidColorBrush x:Key="CheckMarkBrush" Color="#FFFFFF" />
         <SolidColorBrush x:Key="SuccessBrush" Color="#4ADE80" />
         <SolidColorBrush x:Key="WarningBrush" Color="#FBBF24" />
 
@@ -60,13 +63,13 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                                <Setter TargetName="Border" Property="Background" Value="#111720" />
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CardBgHover}" />
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource BorderBrushStrong}" />
                             </Trigger>
                             <Trigger Property="IsReadOnly" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#0B0F15" />
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource PanelBg}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.48" />
@@ -149,7 +152,7 @@
                                         MaxHeight="{TemplateBinding MaxDropDownHeight}"
                                         Margin="0,4,0,0"
                                         Padding="4"
-                                        Background="#121720"
+                                        Background="{DynamicResource PanelBg}"
                                         BorderBrush="{DynamicResource BorderBrushStrong}"
                                         BorderThickness="1"
                                         CornerRadius="8">
@@ -164,14 +167,14 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="ComboBorder" Property="BorderBrush" Value="{DynamicResource BorderBrushStrong}" />
-                                <Setter TargetName="ComboBorder" Property="Background" Value="#111720" />
+                                <Setter TargetName="ComboBorder" Property="Background" Value="{DynamicResource CardBgHover}" />
                             </Trigger>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                 <Setter TargetName="ComboBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             </Trigger>
                             <Trigger Property="IsDropDownOpen" Value="True">
                                 <Setter TargetName="ComboBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                                <Setter TargetName="ComboBorder" Property="Background" Value="#111720" />
+                                <Setter TargetName="ComboBorder" Property="Background" Value="{DynamicResource CardBgHover}" />
                             </Trigger>
                             <Trigger Property="HasItems" Value="False">
                                 <Setter TargetName="DropDownBorder" Property="MinHeight" Value="34" />
@@ -206,12 +209,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#2C1A0C" />
-                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#7A3C10" />
-                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource CheckMarkBrush}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Foreground" Value="#667080" />
@@ -264,7 +267,7 @@
 
         <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-            <Setter Property="BorderBrush" Value="#F59E0B" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrightBrush}" />
             <Setter Property="Foreground" Value="#FFFFFF" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -279,11 +282,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="PrimaryBorder" Property="Background" Value="#F08A24" />
-                                <Setter TargetName="PrimaryBorder" Property="BorderBrush" Value="#FDBA74" />
+                                <Setter TargetName="PrimaryBorder" Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+                                <Setter TargetName="PrimaryBorder" Property="BorderBrush" Value="{DynamicResource AccentBrightBrush}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="PrimaryBorder" Property="Background" Value="#C45F10" />
+                                <Setter TargetName="PrimaryBorder" Property="Background" Value="{DynamicResource AccentPressedBrush}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="PrimaryBorder" Property="Opacity" Value="0.42" />
@@ -313,6 +316,81 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Margin" Value="2,5" />
             <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid SnapsToDevicePixels="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="CheckBorder"
+                                    Width="19" Height="19"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource InputBg}"
+                                    BorderBrush="{DynamicResource BorderBrushStrong}"
+                                    BorderThickness="1.5"
+                                    CornerRadius="4">
+                                <Grid>
+                                    <Path x:Name="CheckGlyph"
+                                          Width="11" Height="8"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Data="M 0 4 L 3.5 7.5 L 10.5 0"
+                                          Stroke="{DynamicResource CheckMarkBrush}"
+                                          StrokeThickness="2.2"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Stretch="None"
+                                          Visibility="Collapsed" />
+                                    <Border x:Name="IndeterminateGlyph"
+                                            Width="9" Height="2"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            Background="{DynamicResource CheckMarkBrush}"
+                                            CornerRadius="1"
+                                            Visibility="Collapsed" />
+                                </Grid>
+                            </Border>
+                            <ContentPresenter Grid.Column="1"
+                                              Margin="8,0,0,0"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              RecognizesAccessKey="True"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource AccentBrightBrush}" />
+                                <Setter TargetName="CheckGlyph" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="{x:Null}">
+                                <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource AccentBrightBrush}" />
+                                <Setter TargetName="IndeterminateGlyph" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                    <Condition Property="IsChecked" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource CardBgHover}" />
+                            </MultiTrigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource AccentBrightBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
 
@@ -714,8 +792,8 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Cisco Konfigurator" FontSize="21" FontWeight="Bold" />
-                        <TextBlock Text="IOS / IOS-XE Konfiguration strukturiert erstellen und prüfen"
+                        <TextBlock Text="{DynamicResource Loc.app.title}" FontSize="21" FontWeight="Bold" />
+                        <TextBlock Text="{DynamicResource Loc.app.subtitle}"
                                    Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,2,0,0" />
                     </StackPanel>
                 </StackPanel>
@@ -724,31 +802,31 @@
                         Background="#0D1118" BorderBrush="#272E39" BorderThickness="1"
                         CornerRadius="10" Padding="10,7" Margin="20,0">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Gerät" Foreground="{DynamicResource MutedBrush}"
+                        <TextBlock Text="{DynamicResource Loc.header.device}" Foreground="{DynamicResource MutedBrush}"
                                    VerticalAlignment="Center" Margin="0,0,7,0" />
                         <ComboBox x:Name="DeviceTypeCombo" Width="126" Margin="0,0,14,0" />
                         <Border Width="1" Background="#303744" Margin="0,2,14,2" />
-                        <TextBlock Text="Modus" Foreground="{DynamicResource MutedBrush}"
+                        <TextBlock Text="{DynamicResource Loc.header.mode}" Foreground="{DynamicResource MutedBrush}"
                                    VerticalAlignment="Center" Margin="0,0,7,0" />
                         <ComboBox x:Name="ConfigModeCombo" Width="132" />
                     </StackPanel>
                 </Border>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="ResetAllButton" Content="Alles zurücksetzen"
+                    <Button x:Name="ResetAllButton" Content="{DynamicResource Loc.header.reset_all}"
                             Style="{StaticResource GhostButtonStyle}"
-                            ToolTip="Setzt alle Eingaben und Module auf die Ausgangswerte zurück." />
-                    <Button x:Name="LoadTemplateButton" Content="Vorlage laden"
+                            ToolTip="{DynamicResource Loc.text.setzt_alle_eingaben_und_module_auf_die_ausgangswerte_zuruck}" />
+                    <Button x:Name="LoadTemplateButton" Content="{DynamicResource Loc.header.load_template}"
                             Style="{StaticResource GhostButtonStyle}"
-                            ToolTip="Lädt eine gespeicherte JSON-Vorlage." />
-                    <Button x:Name="SaveTemplateButton" Content="Vorlage sichern"
+                            ToolTip="{DynamicResource Loc.text.ladt_eine_gespeicherte_json_vorlage}" />
+                    <Button x:Name="SaveTemplateButton" Content="{DynamicResource Loc.header.save_template}"
                             Style="{StaticResource GhostButtonStyle}"
-                            ToolTip="Speichert Eingaben und aktive Module als JSON-Vorlage." />
-                    <Button x:Name="SaveButton" Content="TXT Export"
-                            ToolTip="Erzeugt die Konfiguration und speichert sie als Textdatei." />
-                    <Button x:Name="CopyButton" Content="Kopieren"
+                            ToolTip="{DynamicResource Loc.text.speichert_eingaben_und_aktive_module_als_json_vorlage}" />
+                    <Button x:Name="SaveButton" Content="{DynamicResource Loc.header.txt_export}"
+                            ToolTip="{DynamicResource Loc.text.erzeugt_die_konfiguration_und_speichert_sie_als_textdatei}" />
+                    <Button x:Name="CopyButton" Content="{DynamicResource Loc.common.copy}"
                             Style="{StaticResource PrimaryButtonStyle}"
-                            ToolTip="Erzeugt die Konfiguration und kopiert sie in die Zwischenablage." />
+                            ToolTip="{DynamicResource Loc.text.erzeugt_die_konfiguration_und_kopiert_sie_in_die_zwischenablage}" />
                 </StackPanel>
 
                 <ComboBox x:Name="WriteMemCombo" Width="0" Height="0" Visibility="Collapsed" />
@@ -770,11 +848,11 @@
                 <TextBlock x:Name="StatusDot" Text="●" Foreground="{StaticResource SuccessBrush}"
                            FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBlock x:Name="ValidationTextBlock" Grid.Column="1"
-                           Text="Validierung: keine Warnungen"
+                           Text="{DynamicResource Loc.status.validation_no_warnings}"
                            VerticalAlignment="Center" Foreground="#86EFAC"
                            TextTrimming="CharacterEllipsis" Cursor="Hand" />
                 <TextBlock x:Name="ModuleSummaryTextBlock" Grid.Column="2"
-                           Text="0 Module aktiv" Foreground="{DynamicResource MutedBrush}"
+                           Text="{DynamicResource Loc.status.no_active_modules}" Foreground="{DynamicResource MutedBrush}"
                            VerticalAlignment="Center" Margin="18,0,0,0" />
             </Grid>
         </Border>

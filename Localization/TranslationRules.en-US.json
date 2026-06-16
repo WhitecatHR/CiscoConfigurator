@@ -1,0 +1,1776 @@
+{
+  "phrases": [
+    {
+      "source": "Gerät auswählen, benötigte Module aktivieren, Eingaben prüfen und die fertige Cisco-Konfiguration ausgeben.",
+      "target": "Select a device, enable required modules, validate the input and generate the final Cisco configuration."
+    },
+    {
+      "source": "Wird über die Kopfzeile ausgewählt.",
+      "target": "Selected in the top bar."
+    },
+    {
+      "source": "Nur aktive Module werden exportiert.",
+      "target": "Only active modules are exported."
+    },
+    {
+      "source": "Warnungen führen direkt zum betroffenen Feld.",
+      "target": "Warnings navigate directly to the affected field."
+    },
+    {
+      "source": "Häufig verwendete Bereiche ohne Umweg öffnen.",
+      "target": "Open frequently used areas directly."
+    },
+    {
+      "source": "Durchsucht die Module dieses Bereichs.",
+      "target": "Searches the modules in this section."
+    },
+    {
+      "source": "Aktiviert alle sichtbaren Module.",
+      "target": "Enables all visible modules."
+    },
+    {
+      "source": "Deaktiviert alle Module dieses Bereichs.",
+      "target": "Disables all modules in this section."
+    },
+    {
+      "source": "Aktiviert nur die markierten Favoritenmodule.",
+      "target": "Enables only favorite modules."
+    },
+    {
+      "source": "Als Favorit markieren oder entfernen.",
+      "target": "Add to or remove from favorites."
+    },
+    {
+      "source": "Modul aktivieren",
+      "target": "Enable module"
+    },
+    {
+      "source": "keine offensichtlichen Pflichtfeld-Warnungen",
+      "target": "no obvious required-field warnings"
+    },
+    {
+      "source": "Module aktiv",
+      "target": "modules active"
+    },
+    {
+      "source": "von",
+      "target": "of"
+    },
+    {
+      "source": "Klicke auf die Statuszeile, um zur ersten Warnung zu springen.",
+      "target": "Click the status bar to navigate to the first warning."
+    },
+    {
+      "source": "Für die aktuell aktivierten Module wurden keine offensichtlichen leeren Pflichtfelder erkannt.",
+      "target": "No obvious empty required fields were detected for the currently active modules."
+    },
+    {
+      "source": "Setzt alle Eingaben und Module auf die Ausgangswerte zurück.",
+      "target": "Resets all inputs and modules to their default state."
+    },
+    {
+      "source": "Lädt eine gespeicherte JSON-Vorlage.",
+      "target": "Loads a saved JSON template."
+    },
+    {
+      "source": "Speichert Eingaben und aktive Module als JSON-Vorlage.",
+      "target": "Saves inputs and active modules as a JSON template."
+    },
+    {
+      "source": "Erzeugt die Konfiguration und speichert sie als Textdatei.",
+      "target": "Generates the configuration and saves it as a text file."
+    },
+    {
+      "source": "Erzeugt die Konfiguration und kopiert sie in die Zwischenablage.",
+      "target": "Generates the configuration and copies it to the clipboard."
+    },
+    {
+      "source": "Verwaltet mehrere Router und Switches mit gemeinsamen IPAM-, Link-, Backup- und Berichtsdaten.",
+      "target": "Manages multiple routers and switches with shared IPAM, link, backup and report data."
+    },
+    {
+      "source": "Geräte können mit der Maus verschoben werden.",
+      "target": "Devices can be moved with the mouse."
+    },
+    {
+      "source": "Geräte per Drag & Drop verschieben",
+      "target": "Move devices by drag and drop"
+    },
+    {
+      "source": "Verbindungstypen",
+      "target": "connection types"
+    },
+    {
+      "source": "Erzeugt Geräteübersicht, IP-Plan, Verbindungen, Prüfungen und Testplan",
+      "target": "Generates device overview, IP plan, connections, checks and test plan"
+    },
+    {
+      "source": "Konfiguration wurde in die Zwischenablage kopiert.",
+      "target": "Configuration was copied to the clipboard."
+    },
+    {
+      "source": "Konfiguration wurde gespeichert.",
+      "target": "Configuration was saved."
+    },
+    {
+      "source": "Fehler beim Erzeugen",
+      "target": "Generation error"
+    },
+    {
+      "source": "Fehler beim Export",
+      "target": "Export error"
+    },
+    {
+      "source": "Eingaben wurden geändert.",
+      "target": "Inputs were changed."
+    },
+    {
+      "source": "Klicke auf",
+      "target": "Click"
+    },
+    {
+      "source": "um die",
+      "target": "to"
+    },
+    {
+      "source": "anzuzeigen",
+      "target": "display"
+    },
+    {
+      "source": "wiederherstellen",
+      "target": "restore"
+    },
+    {
+      "source": "gefunden",
+      "target": "found"
+    },
+    {
+      "source": "Einstellungen wurden gespeichert.",
+      "target": "Settings were saved."
+    },
+    {
+      "source": "Einstellungen wurden importiert.",
+      "target": "Settings were imported."
+    },
+    {
+      "source": "Einstellungen wurden exportiert.",
+      "target": "Settings were exported."
+    },
+    {
+      "source": "Alle Einstellungen auf Standardwerte zurücksetzen?",
+      "target": "Reset all settings to defaults?"
+    },
+    {
+      "source": "Die Sprache wird ohne Neustart umgeschaltet.",
+      "target": "The language is switched without restarting."
+    },
+    {
+      "source": "Cisco-Befehle und interne Konfigurationswerte werden nicht übersetzt.",
+      "target": "Cisco commands and internal configuration values are not translated."
+    },
+    {
+      "source": "Passwörter werden standardmäßig nicht gespeichert.",
+      "target": "Passwords are not stored by default."
+    },
+    {
+      "source": "Änderungen übernehmen",
+      "target": "Apply changes"
+    },
+    {
+      "source": "Einstellungen verwalten",
+      "target": "Manage settings"
+    },
+    {
+      "source": "IPv6-Präfixmaske",
+      "target": "IPv6 prefix mask"
+    },
+    {
+      "source": "Gegenstelle aktualisieren",
+      "target": "Refresh peer device"
+    },
+    {
+      "source": "Nachbargeräts",
+      "target": "peer device"
+    },
+    {
+      "source": "Root-Rolle",
+      "target": "root role"
+    },
+    {
+      "source": "Bridge-Priorität",
+      "target": "bridge priority"
+    },
+    {
+      "source": "Listenzeile",
+      "target": "list entry"
+    },
+    {
+      "source": "VLAN-STP-Wert",
+      "target": "VLAN STP value"
+    },
+    {
+      "source": "MST-Instanzen",
+      "target": "MST instances"
+    },
+    {
+      "source": "VLAN-Modul",
+      "target": "VLAN module"
+    },
+    {
+      "source": "Label-Overhead",
+      "target": "label overhead"
+    },
+    {
+      "source": "Frame-Overhead",
+      "target": "frame overhead"
+    },
+    {
+      "source": "plattformabhängig",
+      "target": "platform-dependent"
+    },
+    {
+      "source": "Wirkt sehr niedrig",
+      "target": "appears very low"
+    },
+    {
+      "source": "wirkt sehr niedrig",
+      "target": "appears very low"
+    },
+    {
+      "source": "Prüfe",
+      "target": "Verify"
+    },
+    {
+      "source": "Beim Export",
+      "target": "During export"
+    },
+    {
+      "source": "Beim MST-Assistenten",
+      "target": "In the MST assistant"
+    },
+    {
+      "source": "Beim VLAN-Assistenten",
+      "target": "In the VLAN assistant"
+    },
+    {
+      "source": "zurückgesetzt werden",
+      "target": "be reset"
+    },
+    {
+      "source": "Importdaten",
+      "target": "import data"
+    },
+    {
+      "source": "aktivierten Module",
+      "target": "enabled modules"
+    },
+    {
+      "source": "eingefügte Konfiguration",
+      "target": "pasted configuration"
+    },
+    {
+      "source": "nicht automatisch dauerhaft unter",
+      "target": "not permanently below"
+    },
+    {
+      "source": "unter der Eingabemaske",
+      "target": "below the input form"
+    },
+    {
+      "source": "Konfiguration wirklich an",
+      "target": "Really transfer the configuration to"
+    },
+    {
+      "source": "übertragen?",
+      "target": "?"
+    },
+    {
+      "source": "wurde aber nicht",
+      "target": "but was not"
+    },
+    {
+      "source": "am Trunk",
+      "target": "on trunk"
+    },
+    {
+      "source": "erlaubt",
+      "target": "allowed"
+    },
+    {
+      "source": "zugeordnet",
+      "target": "assigned"
+    },
+    {
+      "source": "sind parallel definiert",
+      "target": "are defined simultaneously"
+    },
+    {
+      "source": "Nur eine Methode verwenden",
+      "target": "Use only one method"
+    },
+    {
+      "source": "widersprüchliche",
+      "target": "conflicting"
+    },
+    {
+      "source": "beim Export",
+      "target": "during export"
+    },
+    {
+      "source": "hat beim Export Vorrang",
+      "target": "takes precedence during export"
+    },
+    {
+      "source": "Sollen wirklich",
+      "target": "Do you really want"
+    },
+    {
+      "source": "auf die Ausgangswerte",
+      "target": "to their default values"
+    },
+    {
+      "source": "stehen rechts unter",
+      "target": "are listed on the right under"
+    },
+    {
+      "source": "Es werden nur",
+      "target": "Only"
+    },
+    {
+      "source": "für weitere Einträge",
+      "target": "for additional entries"
+    },
+    {
+      "source": "wurde gelesen",
+      "target": "was read"
+    },
+    {
+      "source": "es wurden keine",
+      "target": "no"
+    },
+    {
+      "source": "Cisco-Konsole",
+      "target": "Cisco console"
+    },
+    {
+      "source": "soll diese Konfiguration erhalten",
+      "target": "is intended to receive this configuration"
+    },
+    {
+      "source": "Die aktuelle Konfiguration wird über",
+      "target": "The current configuration will be sent via"
+    },
+    {
+      "source": "Baud gesendet",
+      "target": "baud"
+    }
+  ],
+  "sentences": [
+    {
+      "pattern": "^Setzt\\b",
+      "replacement": "Sets"
+    },
+    {
+      "pattern": "^Aktiviert\\b",
+      "replacement": "Enables"
+    },
+    {
+      "pattern": "^Deaktiviert\\b",
+      "replacement": "Disables"
+    },
+    {
+      "pattern": "^Erstellt\\b",
+      "replacement": "Creates"
+    },
+    {
+      "pattern": "^Erzeugt\\b",
+      "replacement": "Generates"
+    },
+    {
+      "pattern": "^Öffnet\\b",
+      "replacement": "Opens"
+    },
+    {
+      "pattern": "^Zeigt\\b",
+      "replacement": "Displays"
+    },
+    {
+      "pattern": "^Konfiguriert\\b",
+      "replacement": "Configures"
+    },
+    {
+      "pattern": "^Definiert\\b",
+      "replacement": "Defines"
+    },
+    {
+      "pattern": "^Nutzt\\b",
+      "replacement": "Uses"
+    },
+    {
+      "pattern": "^Verhindert\\b",
+      "replacement": "Prevents"
+    },
+    {
+      "pattern": "^Verschlüsselt\\b",
+      "replacement": "Encrypts"
+    },
+    {
+      "pattern": "^Beschränkt\\b",
+      "replacement": "Restricts"
+    },
+    {
+      "pattern": "^Wechselt\\b",
+      "replacement": "Switches"
+    },
+    {
+      "pattern": "^Speichert\\b",
+      "replacement": "Saves"
+    },
+    {
+      "pattern": "^Verlässt\\b",
+      "replacement": "Exits"
+    },
+    {
+      "pattern": "^Startet\\b",
+      "replacement": "Starts"
+    },
+    {
+      "pattern": "^Protokolliert\\b",
+      "replacement": "Logs"
+    },
+    {
+      "pattern": "^Ordnet\\b",
+      "replacement": "Assigns"
+    },
+    {
+      "pattern": "^Bindet\\b",
+      "replacement": "Binds"
+    },
+    {
+      "pattern": "^Wendet\\b",
+      "replacement": "Applies"
+    },
+    {
+      "pattern": "^Begrenzt\\b",
+      "replacement": "Limits"
+    },
+    {
+      "pattern": "^Filtert\\b",
+      "replacement": "Filters"
+    },
+    {
+      "pattern": "^Optimiert\\b",
+      "replacement": "Optimizes"
+    },
+    {
+      "pattern": "^Tunnelt\\b",
+      "replacement": "Tunnels"
+    },
+    {
+      "pattern": "^Benennt\\b",
+      "replacement": "Names"
+    },
+    {
+      "pattern": "^Inseriert\\b",
+      "replacement": "Injects"
+    },
+    {
+      "pattern": "^Prüft\\b",
+      "replacement": "Checks"
+    },
+    {
+      "pattern": "^Analysiert\\b",
+      "replacement": "Analyzes"
+    },
+    {
+      "pattern": "^Vergleicht\\b",
+      "replacement": "Compares"
+    },
+    {
+      "pattern": "^Findet\\b",
+      "replacement": "Finds"
+    },
+    {
+      "pattern": "^Überträgt\\b",
+      "replacement": "Transfers"
+    },
+    {
+      "pattern": "^Verknüpft\\b",
+      "replacement": "Links"
+    },
+    {
+      "pattern": "^Schützt\\b",
+      "replacement": "Protects"
+    },
+    {
+      "pattern": "^Entfernt\\b",
+      "replacement": "Removes"
+    },
+    {
+      "pattern": "^Fügt\\b",
+      "replacement": "Adds"
+    },
+    {
+      "pattern": "^Meldet\\b",
+      "replacement": "Reports"
+    },
+    {
+      "pattern": "^Berechnet\\b",
+      "replacement": "Calculates"
+    },
+    {
+      "pattern": "^Verwendet\\b",
+      "replacement": "Uses"
+    },
+    {
+      "pattern": "^Liest\\b",
+      "replacement": "Reads"
+    },
+    {
+      "pattern": "^Schreibt\\b",
+      "replacement": "Writes"
+    },
+    {
+      "pattern": "^Lädt\\b",
+      "replacement": "Loads"
+    },
+    {
+      "pattern": "^Kopiert\\b",
+      "replacement": "Copies"
+    },
+    {
+      "pattern": "^Exportiert\\b",
+      "replacement": "Exports"
+    },
+    {
+      "pattern": "^Importiert\\b",
+      "replacement": "Imports"
+    },
+    {
+      "pattern": "^Erlaubt\\b",
+      "replacement": "Allows"
+    },
+    {
+      "pattern": "^Blockiert\\b",
+      "replacement": "Blocks"
+    },
+    {
+      "pattern": "^Deaktiviert\\b",
+      "replacement": "Disables"
+    },
+    {
+      "pattern": "^Legt\\b",
+      "replacement": "Sets"
+    },
+    {
+      "pattern": "^Schränkt\\b",
+      "replacement": "Restricts"
+    },
+    {
+      "pattern": "^Sendet\\b",
+      "replacement": "Sends"
+    },
+    {
+      "pattern": "^Markiert\\b",
+      "replacement": "Marks"
+    },
+    {
+      "pattern": "^Unterdrückt\\b",
+      "replacement": "Suppresses"
+    },
+    {
+      "pattern": "^Schließt\\b",
+      "replacement": "Excludes"
+    },
+    {
+      "pattern": "^Übernimmt\\b",
+      "replacement": "Applies"
+    },
+    {
+      "pattern": "^Wählt\\b",
+      "replacement": "Selects"
+    },
+    {
+      "pattern": "^Wähle\\b",
+      "replacement": "Select"
+    },
+    {
+      "pattern": "^Erhöhe\\b",
+      "replacement": "Increase"
+    },
+    {
+      "pattern": "^Ergänzt\\b",
+      "replacement": "Adds"
+    },
+    {
+      "pattern": "^Enthält\\b",
+      "replacement": "Contains"
+    },
+    {
+      "pattern": "^Macht\\b",
+      "replacement": "Makes"
+    },
+    {
+      "pattern": "^Gibt\\b",
+      "replacement": "Returns"
+    },
+    {
+      "pattern": "^Stellt\\b",
+      "replacement": "Sets"
+    },
+    {
+      "pattern": "^Archiviert\\b",
+      "replacement": "Archives"
+    },
+    {
+      "pattern": "^Matcht\\b",
+      "replacement": "Matches"
+    },
+    {
+      "pattern": "^Leitet\\b",
+      "replacement": "Forwards"
+    },
+    {
+      "pattern": "^Listet\\b",
+      "replacement": "Lists"
+    },
+    {
+      "pattern": "^Loggt\\b",
+      "replacement": "Logs"
+    },
+    {
+      "pattern": "^Reduziert\\b",
+      "replacement": "Reduces"
+    },
+    {
+      "pattern": "^Testet\\b",
+      "replacement": "Tests"
+    },
+    {
+      "pattern": "^Prüfe\\b",
+      "replacement": "Checks"
+    },
+    {
+      "pattern": "^Sollen\\b",
+      "replacement": "Should"
+    },
+    {
+      "pattern": "\\bwird\\b",
+      "replacement": "is"
+    },
+    {
+      "pattern": "\\bwerden\\b",
+      "replacement": "are"
+    },
+    {
+      "pattern": "\\bwurde\\b",
+      "replacement": "was"
+    },
+    {
+      "pattern": "\\bwurden\\b",
+      "replacement": "were"
+    },
+    {
+      "pattern": "\\bmuss\\b",
+      "replacement": "must"
+    },
+    {
+      "pattern": "\\bmüssen\\b",
+      "replacement": "must"
+    },
+    {
+      "pattern": "\\bkann\\b",
+      "replacement": "can"
+    },
+    {
+      "pattern": "\\bkönnen\\b",
+      "replacement": "can"
+    },
+    {
+      "pattern": "\\bsollte\\b",
+      "replacement": "should"
+    },
+    {
+      "pattern": "\\bsollen\\b",
+      "replacement": "should"
+    },
+    {
+      "pattern": "\\bnur\\b",
+      "replacement": "only"
+    },
+    {
+      "pattern": "\\bnicht\\b",
+      "replacement": "not"
+    },
+    {
+      "pattern": "\\bsofern\\b",
+      "replacement": "if"
+    },
+    {
+      "pattern": "\\bfalls\\b",
+      "replacement": "if"
+    },
+    {
+      "pattern": "\\bwenn\\b",
+      "replacement": "when"
+    },
+    {
+      "pattern": "\\bdamit\\b",
+      "replacement": "so that"
+    },
+    {
+      "pattern": "\\bdadurch\\b",
+      "replacement": "thereby"
+    },
+    {
+      "pattern": "\\bvorher\\b",
+      "replacement": "beforehand"
+    },
+    {
+      "pattern": "\\banschließend\\b",
+      "replacement": "afterwards"
+    },
+    {
+      "pattern": "\\bgleichzeitig\\b",
+      "replacement": "at the same time"
+    },
+    {
+      "pattern": "\\boptional\\b",
+      "replacement": "optional"
+    },
+    {
+      "pattern": "\\blokal\\b",
+      "replacement": "locally"
+    },
+    {
+      "pattern": "\\bglobal\\b",
+      "replacement": "globally"
+    },
+    {
+      "pattern": "\\bautomatisch\\b",
+      "replacement": "automatically"
+    },
+    {
+      "pattern": "\\bmanuell\\b",
+      "replacement": "manually"
+    },
+    {
+      "pattern": "\\berforderlich\\b",
+      "replacement": "required"
+    },
+    {
+      "pattern": "\\bgültig\\b",
+      "replacement": "valid"
+    },
+    {
+      "pattern": "\\bungültig\\b",
+      "replacement": "invalid"
+    },
+    {
+      "pattern": "\\bverfügbar\\b",
+      "replacement": "available"
+    },
+    {
+      "pattern": "\\bunterstützt\\b",
+      "replacement": "supported"
+    },
+    {
+      "pattern": "\\bbenötigt\\b",
+      "replacement": "requires"
+    },
+    {
+      "pattern": "\\bverwendet\\b",
+      "replacement": "used"
+    },
+    {
+      "pattern": "\\beingetragen\\b",
+      "replacement": "configured"
+    },
+    {
+      "pattern": "\\bausgewählt\\b",
+      "replacement": "selected"
+    },
+    {
+      "pattern": "\\baktiviert\\b",
+      "replacement": "enabled"
+    },
+    {
+      "pattern": "\\bdeaktiviert\\b",
+      "replacement": "disabled"
+    },
+    {
+      "pattern": "\\bgespeichert\\b",
+      "replacement": "stored"
+    },
+    {
+      "pattern": "\\berzeugt\\b",
+      "replacement": "generated"
+    },
+    {
+      "pattern": "\\bgeprüft\\b",
+      "replacement": "validated"
+    },
+    {
+      "pattern": "\\berkannt\\b",
+      "replacement": "detected"
+    },
+    {
+      "pattern": "\\bzugeordnet\\b",
+      "replacement": "assigned"
+    },
+    {
+      "pattern": "\\bangezeigt\\b",
+      "replacement": "displayed"
+    },
+    {
+      "pattern": "\\bübernommen\\b",
+      "replacement": "applied"
+    },
+    {
+      "pattern": "\\bder\\b",
+      "replacement": "the"
+    },
+    {
+      "pattern": "\\bdie\\b",
+      "replacement": "the"
+    },
+    {
+      "pattern": "\\bdas\\b",
+      "replacement": "the"
+    },
+    {
+      "pattern": "\\bden\\b",
+      "replacement": "the"
+    },
+    {
+      "pattern": "\\bdem\\b",
+      "replacement": "the"
+    },
+    {
+      "pattern": "\\bdes\\b",
+      "replacement": "the"
+    },
+    {
+      "pattern": "\\beinen\\b",
+      "replacement": "a"
+    },
+    {
+      "pattern": "\\beinem\\b",
+      "replacement": "a"
+    },
+    {
+      "pattern": "\\beiner\\b",
+      "replacement": "a"
+    },
+    {
+      "pattern": "\\beine\\b",
+      "replacement": "a"
+    },
+    {
+      "pattern": "\\bein\\b",
+      "replacement": "a"
+    },
+    {
+      "pattern": "\\bkeine\\b",
+      "replacement": "no"
+    },
+    {
+      "pattern": "\\bkein\\b",
+      "replacement": "no"
+    },
+    {
+      "pattern": "\\bmit\\b",
+      "replacement": "with"
+    },
+    {
+      "pattern": "\\bohne\\b",
+      "replacement": "without"
+    },
+    {
+      "pattern": "\\bdurch\\b",
+      "replacement": "through"
+    },
+    {
+      "pattern": "\\büber\\b",
+      "replacement": "via"
+    },
+    {
+      "pattern": "\\bzwischen\\b",
+      "replacement": "between"
+    },
+    {
+      "pattern": "\\binnerhalb\\b",
+      "replacement": "within"
+    },
+    {
+      "pattern": "\\baußerhalb\\b",
+      "replacement": "outside"
+    },
+    {
+      "pattern": "\\bvor\\b",
+      "replacement": "before"
+    },
+    {
+      "pattern": "\\bnach\\b",
+      "replacement": "after"
+    },
+    {
+      "pattern": "\\bim\\b",
+      "replacement": "in the"
+    },
+    {
+      "pattern": "\\bin\\b",
+      "replacement": "in"
+    },
+    {
+      "pattern": "\\bam\\b",
+      "replacement": "on the"
+    },
+    {
+      "pattern": "\\ban\\b",
+      "replacement": "on"
+    },
+    {
+      "pattern": "\\bauf\\b",
+      "replacement": "on"
+    },
+    {
+      "pattern": "\\baus\\b",
+      "replacement": "from"
+    },
+    {
+      "pattern": "\\bvom\\b",
+      "replacement": "from the"
+    },
+    {
+      "pattern": "\\bvon\\b",
+      "replacement": "from"
+    },
+    {
+      "pattern": "\\bzur\\b",
+      "replacement": "to the"
+    },
+    {
+      "pattern": "\\bzum\\b",
+      "replacement": "to the"
+    },
+    {
+      "pattern": "\\bbei\\b",
+      "replacement": "for"
+    },
+    {
+      "pattern": "\\bgegenüber\\b",
+      "replacement": "relative to"
+    },
+    {
+      "pattern": "\\bgenau\\b",
+      "replacement": "exactly"
+    },
+    {
+      "pattern": "\\bmehrere\\b",
+      "replacement": "multiple"
+    },
+    {
+      "pattern": "\\balle\\b",
+      "replacement": "all"
+    },
+    {
+      "pattern": "\\bjede\\b",
+      "replacement": "each"
+    },
+    {
+      "pattern": "\\bjeder\\b",
+      "replacement": "each"
+    },
+    {
+      "pattern": "\\bjeweils\\b",
+      "replacement": "respectively"
+    }
+  ],
+  "words": {
+    "Geräte": "devices",
+    "Gerät": "device",
+    "Module": "modules",
+    "Modul": "module",
+    "Feld": "field",
+    "Felder": "fields",
+    "aktiv": "active",
+    "inaktiv": "inactive",
+    "anzeigen": "show",
+    "ausblenden": "hide",
+    "speichern": "save",
+    "laden": "load",
+    "löschen": "delete",
+    "entfernen": "remove",
+    "hinzufügen": "add",
+    "prüfen": "validate",
+    "erzeugen": "generate",
+    "exportieren": "export",
+    "importieren": "import",
+    "auswählen": "select",
+    "aktivieren": "enable",
+    "deaktivieren": "disable",
+    "Standard": "default",
+    "optional": "optional",
+    "Pflichtfeld": "required field",
+    "Warnungen": "warnings",
+    "Warnung": "warning",
+    "Fehler": "error",
+    "Hinweise": "notices",
+    "Hinweis": "notice",
+    "Beschreibung": "description",
+    "Name": "name",
+    "Adresse": "address",
+    "Netz": "network",
+    "Schnittstelle": "interface",
+    "Verbindung": "connection",
+    "Verbindungen": "connections",
+    "Konfiguration": "configuration",
+    "Bericht": "report",
+    "Diagramm": "diagram",
+    "Projekt": "project",
+    "Sicherung": "backup",
+    "Betrieb": "operations",
+    "Ausgabe": "output",
+    "Zugriff": "access",
+    "Benutzer": "user",
+    "Passwort": "password",
+    "Zeit": "time",
+    "Quelle": "source",
+    "Ziel": "target",
+    "Bereich": "section",
+    "Übersicht": "overview",
+    "Einstellungen": "settings",
+    "Zeitzone": "time zone",
+    "Abweichung": "offset",
+    "Stunden": "hours",
+    "Minuten": "minutes",
+    "Sommerzeit": "daylight saving time",
+    "Regel": "rule",
+    "Standort": "location",
+    "Ende": "end",
+    "Größe": "size",
+    "nutzen": "use",
+    "Rechte": "privileges",
+    "Assistent": "assistant",
+    "Profil": "profile",
+    "Profile": "profiles",
+    "Rolle": "role",
+    "Rollen": "roles",
+    "Wert": "value",
+    "Mehrere": "multiple",
+    "Rücksetzen": "reset",
+    "allgemein": "general",
+    "Statische": "static",
+    "Routen": "routes",
+    "Optionen": "options",
+    "Definitionen": "definitions",
+    "Zusatz": "additional",
+    "Eigene": "custom",
+    "Befehl": "command",
+    "Befehle": "commands",
+    "Nachbarn": "neighbors",
+    "leer": "empty",
+    "Strikte": "strict",
+    "Kompatibilität": "compatibility",
+    "erweitern": "extend",
+    "Methode": "method",
+    "Instanz": "instance",
+    "Vergleich": "comparison",
+    "Nummer": "number",
+    "Protokoll": "protocol",
+    "Richtung": "direction",
+    "Aktion": "action",
+    "Maske": "mask",
+    "Priorität": "priority",
+    "für": "for",
+    "und": "and",
+    "oder": "or",
+    "Netzadresse": "network address",
+    "Präfix": "prefix",
+    "Netzüberschneidung": "network overlap",
+    "Überschneidung": "overlap",
+    "Überschneidungen": "overlaps",
+    "Eintrag": "entry",
+    "Einträge": "entries",
+    "Gateway": "gateway",
+    "Gateways": "gateways",
+    "ausgewählt": "selected",
+    "Ausgewähltes": "selected",
+    "Ausgewählten": "selected",
+    "aktuell": "current",
+    "Schlüssel": "key",
+    "Schlüsseldatei": "key file",
+    "Übertragung": "transfer",
+    "Prüfung": "check",
+    "Prüfungen": "checks",
+    "Sicherheitsprüfung": "security audit",
+    "Abhängigkeiten": "dependencies",
+    "Abhängigkeit": "dependency",
+    "Konfliktprüfung": "conflict validation",
+    "Pflichtwerte": "required values",
+    "Voraussetzungen": "prerequisites",
+    "Feststellung": "finding",
+    "Empfehlung": "recommendation",
+    "Stufe": "severity",
+    "Meldung": "message",
+    "Kategorie": "category",
+    "Änderung": "change",
+    "Geändert": "modified",
+    "Start": "start",
+    "Ergebnis": "result",
+    "Ergebnisse": "results",
+    "Erklärung": "explanation",
+    "erklären": "explain",
+    "erklärt": "explains",
+    "direkt": "directly",
+    "passenden": "relevant",
+    "zugehörigen": "associated",
+    "gespeicherten": "stored",
+    "aktuelle": "current",
+    "aktuellen": "current",
+    "erzeugte": "generated",
+    "erzeugten": "generated",
+    "fehlende": "missing",
+    "typische": "common",
+    "zentral": "centrally",
+    "gemeinsam": "together",
+    "komplett": "complete",
+    "vollständig": "complete",
+    "internen": "internal",
+    "interne": "internal",
+    "technische": "technical",
+    "zusätzliche": "additional",
+    "grundlegende": "basic",
+    "sichtbare": "visible",
+    "sichtbaren": "visible",
+    "unübersetzte": "untranslated",
+    "deutschen": "German",
+    "Texte": "texts",
+    "Text": "text",
+    "Ordner": "folder",
+    "Protokollierung": "logging",
+    "Details": "details",
+    "Diagnose": "diagnostics",
+    "Diagnoseordner": "diagnostics folder",
+    "Entwicklerdetails": "developer details",
+    "Entwicklermodus": "developer mode",
+    "Sichtbar": "Visible",
+    "Gerätetyp": "device type",
+    "Konfigurationsmodus": "configuration mode",
+    "Befehlszeile": "command line",
+    "Befehlszeilen": "command lines",
+    "Befehlswörter": "command keywords",
+    "Parameterpositionen": "parameter positions",
+    "Adressbereich": "address range",
+    "Subnetzmaske": "subnet mask",
+    "Adressierung": "addressing",
+    "Netzplanung": "network planning",
+    "Portübersicht": "port overview",
+    "Portplan": "port plan",
+    "Rücksetzkonfiguration": "rollback configuration",
+    "Konfigurationen": "configurations",
+    "Korrekturen": "fixes",
+    "Korrektur": "fix",
+    "Platzhalter": "placeholders",
+    "sicherheitsrelevante": "security-related",
+    "ungültigen": "invalid",
+    "Ungültige": "Invalid",
+    "Ungültiger": "Invalid",
+    "Erlaubt": "Allowed",
+    "Erwartet": "Expected",
+    "Hinzugefügt": "Added",
+    "erkannt": "detected",
+    "übernommen": "applied",
+    "angewendet": "applied",
+    "vorhanden": "available",
+    "gewählt": "selected",
+    "gewählte": "selected",
+    "gewählten": "selected",
+    "eingetragen": "configured",
+    "gesetzt": "set",
+    "bleibt": "remains",
+    "bleiben": "remain",
+    "verfügbar": "available",
+    "notwendig": "required",
+    "benötigt": "required",
+    "wichtig": "important",
+    "Passwörter": "passwords",
+    "Duplikatprüfung": "duplicate check",
+    "Geräteübersicht": "device overview",
+    "Daten": "data",
+    "übernehmen": "apply",
+    "Zeilenverzögerung": "line delay",
+    "übernehmbare": "applicable",
+    "Gerätename": "device name",
+    "Gerätenamen": "device name",
+    "zusätzlicher": "additional",
+    "zusätzlichen": "additional",
+    "Parameter": "parameter",
+    "Broadcast-Stürme": "broadcast storms",
+    "Multicast-Stürme": "multicast storms",
+    "Schlüsseldateien": "key files",
+    "enthält": "contains",
+    "enthalten": "contain",
+    "STP-Portpriorität": "STP port priority",
+    "öffnet": "opens",
+    "eingefügt": "pasted",
+    "Noch": "Not yet",
+    "ausgeführt": "performed",
+    "Rücksetzzeile": "reset line",
+    "Prüfpunkte": "checks",
+    "Inbetriebnahme": "commissioning",
+    "Inaktivitäts-Timeout": "inactivity timeout",
+    "Übersetzungen": "translations",
+    "Einfügung": "insertion",
+    "Dokumentationspräfix": "documentation prefix",
+    "Verschlüsselung": "encryption",
+    "ergänzt": "adds",
+    "Adressen": "addresses",
+    "DHCP-Pool": "DHCP pool",
+    "Änderungen": "changes",
+    "Archive-Änderungen": "archive changes",
+    "Provider-VLAN": "provider VLAN",
+    "Speichergröße": "buffer size",
+    "Puffergröße": "buffer size",
+    "Byte": "bytes",
+    "Übereinstimmung": "match",
+    "äußeres": "outer",
+    "äußeren": "outer",
+    "Service-VLAN": "service VLAN",
+    "lokalen": "local",
+    "lokale": "local",
+    "Seite": "side",
+    "Tunnelinterface": "tunnel interface",
+    "klassische": "classic",
+    "verschlüsselte": "encrypted",
+    "standardmäßig": "by default",
+    "passiv": "passive",
+    "RSA-Schlüsselerzeugung": "RSA key generation",
+    "schnellen": "fast",
+    "Portstart": "port startup",
+    "Endgeräte": "end devices",
+    "vertrauenswürdig": "trusted",
+    "unterstützte": "supported",
+    "Rücksetzdefinition": "reset definition",
+    "Route-Map-Eintrag": "route-map entry",
+    "RSA-Schlüssellänge": "RSA key length",
+    "fest": "defined",
+    "Endgeräteports": "end-device ports",
+    "eingehenden": "incoming",
+    "Konfigurationsänderungs-Logging": "configuration change logging",
+    "Projektdatei": "project file",
+    "gültigen": "valid",
+    "Bestätigung": "confirmation",
+    "neu": "again",
+    "unverschlüsselte": "unencrypted",
+    "inneres": "inner",
+    "Zähler": "counters",
+    "Subnetze": "subnets",
+    "möglich": "possible",
+    "Mindestlänge": "minimum length",
+    "Zustandsänderungen": "state changes",
+    "Nachbarschaften": "adjacencies",
+    "DHCP-Modul": "DHCP module",
+    "keinen": "no",
+    "Einstellungsdatei": "settings file",
+    "Einfache": "simple",
+    "Line-Passwörter": "line passwords",
+    "verschleiert": "obfuscated",
+    "übernehmbar": "applicable",
+    "frei": "freely",
+    "wählbarer": "selectable",
+    "Beschreibungstext": "description text",
+    "Dokumentation": "documentation",
+    "fehlt": "is missing",
+    "Domainname": "domain name",
+    "DAI": "DAI",
+    "Router Advertisements": "router advertisements",
+    "maximale": "maximum",
+    "Anzahl": "number",
+    "empfangener": "received",
+    "BGP-Präfixe": "BGP prefixes",
+    "benannte": "named",
+    "Label-Protokoll": "label protocol",
+    "abhängig": "depending",
+    "einfachen": "simple",
+    "Authentifizierungsschlüssel": "authentication key",
+    "Ungültiges": "Invalid",
+    "Mapping": "mapping",
+    "Quellnetze": "source networks",
+    "einschränken": "restrict",
+    "Authentifizierung": "authentication",
+    "einschließlich": "including",
+    "Trefferzählern": "hit counters",
+    "Logmeldungen": "log messages",
+    "Eingabezeile": "input line",
+    "zerreißen": "disrupt",
+    "Verschlüsselungs": "encryption",
+    "Hash-Parametern": "hash parameters",
+    "Mögliche": "Possible",
+    "doppelte": "duplicate",
+    "Objektdefinition": "object definition",
+    "ergänzen": "add",
+    "Secrets": "secrets",
+    "bevorzugen": "prefer",
+    "einen": "a",
+    "Ordnet": "Assigns",
+    "QinQ-Port": "QinQ port",
+    "Provider": "provider",
+    "Schränkt": "Restricts",
+    "erlaubten": "allowed",
+    "Verschlüsselungsalgorithmen": "encryption algorithms",
+    "Vorschau": "preview",
+    "öffnen": "open",
+    "senden": "send",
+    "herstellerübergreifende": "multi-vendor",
+    "Nachbarerkennung": "neighbor discovery",
+    "tatsächlich": "actually",
+    "benötigten": "required",
+    "Funktionsbereiche": "feature areas",
+    "einschalten": "enable",
+    "Geräteplattform": "device platform",
+    "Unternehmensrichtlinien": "company policies",
+    "zusätzlich": "additionally",
+    "NAT-Zähler": "NAT counters",
+    "konfigurierte": "configured",
+    "bewusst": "intentionally",
+    "übersprungen": "skipped",
+    "Nachbargerät": "peer device",
+    "angepasst": "adjusted",
+    "detaillierte": "detailed",
+    "Zeiteinstellungen": "time settings",
+    "festlegen": "configure",
+    "Plattformstandard": "platform default",
+    "zurück": "back",
+    "Klartext-Passwörter": "plaintext passwords",
+    "jeweiligen": "respective",
+    "erreichbarer": "reachable",
+    "abgebrochen": "canceled",
+    "Zeitlimit": "timeout",
+    "überschritten": "exceeded",
+    "Prozess-ID": "process ID",
+    "identisch": "identical",
+    "nötig": "required",
+    "widersprüchlich": "conflicting",
+    "definiert": "defined",
+    "möglicherweise": "possibly",
+    "keinem": "no",
+    "zugewiesen": "assigned",
+    "wirklich": "really",
+    "Adressvergabe": "address assignment",
+    "IPv6-Funktionen": "IPv6 features",
+    "übersichtlich": "clearly",
+    "zusammengeführt": "combined",
+    "SNMPv3-Gruppe": "SNMPv3 group",
+    "echten": "real",
+    "reinen": "pure",
+    "Logdatei-Test": "log-file test",
+    "niedrig": "low",
+    "übliche": "common",
+    "Präfixlänge": "prefix length",
+    "offensichtlichen": "obvious",
+    "Sicherheitsmängel": "security issues",
+    "statischen": "static",
+    "gleichen": "same",
+    "gehören": "belong",
+    "Rückroute": "return route",
+    "verwendeten": "used",
+    "Update-Source": "update source",
+    "Richtlinien": "policies",
+    "vollständigen": "full",
+    "Session-Neustart": "session restart",
+    "passende": "matching",
+    "ausgewählte": "selected",
+    "unverändert": "unchanged",
+    "Zusatzbefehle": "custom commands",
+    "vielen": "many",
+    "Reload": "reload",
+    "angelegt": "created",
+    "beiden": "both",
+    "Seiten": "sides",
+    "übereinstimmen": "match",
+    "Router-spezifische": "router-specific",
+    "bitte": "please",
+    "unabhängig": "regardless",
+    "Vorhandensein": "presence",
+    "Gegenstelle": "peer device",
+    "Anforderungen": "requirements",
+    "denselben": "same",
+    "doppelt": "twice",
+    "Plattformgrenzen": "platform limits",
+    "Globales": "global",
+    "rechts": "right",
+    "stehen": "shows",
+    "Zusammenfassung": "summary",
+    "aktivierte": "enabled",
+    "unbekannte": "unknown",
+    "Konfigurationsbefehle": "configuration commands",
+    "gedrückter": "pressed",
+    "linker": "left",
+    "Maustaste": "mouse button",
+    "verschieben": "move",
+    "gelesen": "read",
+    "übernehmbaren": "applicable",
+    "parallel": "simultaneously",
+    "verwenden": "use",
+    "aber": "but",
+    "zusammen": "together",
+    "typischerweise": "typically",
+    "Endgeräteport-Konfiguration": "end-device port configuration",
+    "gesamte": "entire",
+    "Transportnetz": "transport network",
+    "Framegröße": "frame size",
+    "lokaler": "local",
+    "Neighbor-Eintrag": "neighbor entry",
+    "zeigt": "points",
+    "BGP-Quelladresse": "BGP source address",
+    "Interfaceprofil": "interface profile",
+    "manuelle": "manual",
+    "STP-Interfacezeile": "STP interface line",
+    "können": "can",
+    "Zulässiger": "Permitted",
+    "Gegenstellenmodus": "peer mode",
+    "Kanalnummer": "channel number",
+    "Layer-2-Modus": "Layer 2 mode",
+    "konsistent": "consistent",
+    "MST-Assistenten": "MST assistant",
+    "VLAN-Assistenten": "VLAN assistant",
+    "Vorrang": "precedence",
+    "Eingaben": "inputs",
+    "Ausgangswerte": "defaults",
+    "neue": "new",
+    "kleiner": "smaller",
+    "Ausgangsnetz": "source network",
+    "gleich": "equal",
+    "größer": "larger",
+    "Aktivierung": "activation",
+    "geschützten": "protected",
+    "Benutzerprofil": "user profile",
+    "erfolgen": "be used",
+    "Diese": "These",
+    "weitere": "additional",
+    "maximal": "maximum",
+    "aktiven": "active",
+    "erforderlichen": "required",
+    "Beispielbefehle": "example commands",
+    "wegen": "because of",
+    "zusätzlichem": "additional",
+    "Plattform": "platform",
+    "Benötigtes": "Required",
+    "Programm": "program",
+    "arbeitet": "uses",
+    "schlüsselbasiert": "key-based authentication",
+    "Passwortauthentifizierung": "password authentication",
+    "liegen": "are located",
+    "einige": "some",
+    "erweiterten": "advanced",
+    "simuliertem": "simulated",
+    "Zielgerät": "target device",
+    "Plattformabhängige": "platform-dependent",
+    "pauschal": "arbitrarily",
+    "setzen": "set",
+    "durchgehend": "end-to-end",
+    "anhand": "based on",
+    "gesetzten": "configured",
+    "Werte": "values",
+    "dauerhaft": "permanently",
+    "Eingabemaske": "input form",
+    "Komplette": "Complete",
+    "Teilkonfiguration": "partial configuration",
+    "Bekannte": "Recognized",
+    "musst": "must",
+    "separat": "separately",
+    "notiert": "listed",
+    "passend": "matching",
+    "Zweck": "Purpose",
+    "Bedienung": "Usage",
+    "Links": "On the left",
+    "ausfüllen": "complete",
+    "Dropdowns": "Drop-down lists",
+    "begrenzen": "limit",
+    "feste": "fixed",
+    "Auswahlwerte": "choices",
+    "Freitext": "free text",
+    "Grundidentität": "base identity",
+    "Basisschutz": "basic security",
+    "Geräts": "device",
+    "besonders": "especially",
+    "Basisbereich": "base section",
+    "Konfigurationsart": "configuration method",
+    "prozessbasiert": "process-based",
+    "interfacebasiert": "interface-based",
+    "gemischt": "mixed",
+    "Dynamische": "Dynamic",
+    "Auswahl": "selection",
+    "Eingabebereiche": "input sections",
+    "Globale": "Global",
+    "Interfaceprofile": "interface profiles",
+    "Instanzen": "instances",
+    "Rücksetzbefehle": "reset commands",
+    "Prioritätsraster": "priority increments",
+    "Zuordnungen": "assignments",
+    "Guard-Konflikte": "guard conflicts",
+    "Port-Channel-Konsistenz": "port-channel consistency",
+    "MST-Regionsvergleich": "MST region comparison",
+    "Plattformhinweise": "platform notes",
+    "Abschnitt": "section",
+    "erscheint": "appears",
+    "gesendet": "sent",
+    "Vorher": "Before",
+    "sicherstellen": "ensure",
+    "verbunden": "connected",
+    "bereit": "ready",
+    "Fortfahren": "Continue",
+    "hier": "here",
+    "einfügen": "paste",
+    "beim": "in the",
+    "ist": "is",
+    "sind": "are",
+    "sein": "be",
+    "zu": "to",
+    "unter": "under",
+    "aktualisieren": "refresh",
+    "Nachbargeräts": "peer device",
+    "MST-Instanzen": "MST instances",
+    "Root-Rolle": "root role",
+    "Bridge-Priorität": "bridge priority",
+    "Listenzeile": "list entry",
+    "VLAN-STP-Wert": "VLAN STP value",
+    "wirkt": "appears",
+    "sehr": "very",
+    "Prüfe": "Verify",
+    "aktualisiert": "refreshed",
+    "zurückgesetzt": "reset",
+    "aktivierten": "enabled",
+    "Vorschauen": "previews",
+    "erhalten": "receive",
+    "Konsole": "console",
+    "übertragen": "transfer",
+    "dies": "this",
+    "Endgeräteport": "end-device port",
+    "Erhöhe": "Increase",
+    "angezeigt": "displayed",
+    "wurde": "was",
+    "nicht": "not",
+    "im": "in the",
+    "am": "on the",
+    "den": "the",
+    "der": "the",
+    "die": "the",
+    "es": "it",
+    "werden": "are",
+    "soll": "should",
+    "hat": "has",
+    "definieren": "define",
+    "VLAN": "VLAN",
+    "Präfixmaske": "prefix mask",
+    "zugeordnet": "assigned",
+    "Trunk": "trunk",
+    "Importdaten": "import data",
+    "Hinweistext": "notice text",
+    "Aktive": "Active",
+    "Routingprotokolle": "routing protocols",
+    "Trefferzähler": "hit counters",
+    "Nachbargeräte": "neighbor devices",
+    "Telefonerkennung": "phone discovery",
+    "Grundlage": "foundation",
+    "Switchport-Kontext": "switchport context",
+    "diesem": "this",
+    "OSPFv2-Netze": "OSPFv2 networks",
+    "Legacy-PVST-BackboneFast-Optimierung": "legacy PVST BackboneFast optimization",
+    "Legacy-PVST-UplinkFast-Optimierung": "legacy PVST UplinkFast optimization",
+    "AAA-Gruppe": "AAA group",
+    "Routingtabelle": "routing table",
+    "Routingänderungen": "routing changes",
+    "zurücksetzen": "reset",
+    "leeren": "clear",
+    "Sitzungen": "sessions",
+    "Zustände": "states",
+    "Pfadprüfung": "path test",
+    "Konsistenzprüfungen": "consistency checks",
+    "blockierte": "blocked",
+    "andere": "other",
+    "vorsichtig": "with caution",
+    "Quellinterface": "source interface",
+    "Quelladresse": "source address",
+    "Routingentscheidung": "routing decision",
+    "Forwarding-Tabelle": "forwarding table",
+    "Pool-Auslastung": "pool utilization",
+    "DTP-Aushandlung": "DTP negotiation",
+    "EXEC-Autorisierung": "EXEC authorization",
+    "RADIUS-Servergruppe": "RADIUS server group",
+    "AAA-Servergruppe": "AAA server group",
+    "Interface-Beschreibungen": "interface descriptions",
+    "Interface-Details": "interface details",
+    "Erzeugung": "generation",
+    "Fragmentierung": "fragmentation",
+    "Guard-Zustand": "guard state",
+    "Q-Kapselung": "802.1Q encapsulation",
+    "RADIUS-Wiederholungen": "RADIUS retries",
+    "Diffie-Hellman-Gruppe": "Diffie-Hellman group",
+    "Tunnelziel": "tunnel destination",
+    "VRF-Zuordnung": "VRF assignment",
+    "Lastverteilung": "load balancing",
+    "Regelverletzung": "violation",
+    "Serveradresse": "server address",
+    "Tunnelquelle": "tunnel source",
+    "QinQ-/Trunk-Details": "QinQ/trunk details",
+    "Zeitquelle": "time source",
+    "TFTP-/CallManager-Erreichbarkeit": "TFTP/CallManager reachability",
+    "Layer-2-Protokolle": "Layer 2 protocols",
+    "Portzuordnung": "port assignment",
+    "CoS-Markierungen": "CoS markings",
+    "DSCP-Markierungen": "DSCP markings",
+    "Inside-/Outside-Interfaces": "inside/outside interfaces",
+    "Core-/Transit-Interface": "core/transit interface",
+    "Port-Channel-Interface": "port-channel interface",
+    "MPLS-Interfaces": "MPLS interfaces",
+    "Tunnelinterfaces": "tunnel interfaces",
+    "IPv4-Routingtabelle": "IPv4 routing table",
+    "EXEC-Sitzungen": "EXEC sessions",
+    "local/VTY-Sitzungen": "local/VTY sessions",
+    "Blocking-/Discarding-Zustand": "blocking/discarding state",
+    "Router-on-a-Stick-Subinterface": "router-on-a-stick subinterface",
+    "Loopback-/Quellinterface": "loopback/source interface",
+    "Loopback-Interface": "loopback interface",
+    "QinQ-Subinterface": "QinQ subinterface",
+    "Interface-Zähler": "interface counters",
+    "Nachbarschaftsprobleme": "adjacency problems",
+    "Netze": "networks",
+    "Ports": "ports",
+    "Status": "status",
+    "Erreichbarkeit": "reachability",
+    "bestimmtes": "specific",
+    "bestimmten": "specific",
+    "innerhalb": "within",
+    "einer": "a",
+    "einem": "a",
+    "dieser": "this",
+    "dieses": "this",
+    "entsprechenden": "corresponding",
+    "aufbauen": "rebuild",
+    "starten": "restart",
+    "als": "as",
+    "kompakt": "compact",
+    "Telefonport": "phone port",
+    "Telefonports": "phone ports",
+    "Tabelle": "table",
+    "Zustand": "state",
+    "genutzt": "used",
+    "laufende": "running",
+    "resetten": "reset",
+    "debuggen": "debug",
+    "eingehende": "incoming",
+    "testen": "test",
+    "administrativ": "administratively",
+    "pro": "per",
+    "Statistik": "statistics",
+    "hinter": "behind",
+    "Datum": "date",
+    "Millisekunden": "milliseconds",
+    "beziehungsweise": "or",
+    "gezielt": "specifically",
+    "je": "per",
+    "Bandbreite": "bandwidth",
+    "statisches": "static",
+    "benannten": "named",
+    "weiter": "onward",
+    "filtern": "filter",
+    "Prozess": "process",
+    "Pfad": "path",
+    "angewendete": "applied",
+    "aller": "all",
+    "eines": "a",
+    "klassischen": "classic",
+    "bestimmte": "specific",
+    "Ursache": "cause",
+    "Ereignislogging": "event logging",
+    "Loginversuche": "login attempts",
+    "Logpuffer": "log buffer",
+    "Regeln": "rules",
+    "Nachbar": "neighbor",
+    "Quellnetz": "source network",
+    "Zielnetz": "destination network",
+    "Zieladresse": "destination address",
+    "Präfixe": "prefixes",
+    "Anfragen": "queries",
+    "Abfragen": "queries",
+    "Fehlerzähler": "error counters",
+    "Auslastung": "utilization",
+    "Synchronisationsstatus": "synchronization status",
+    "Startkonfiguration": "startup configuration",
+    "Konfigurationszeilen": "configuration lines",
+    "um": "to",
+    "IP-Telefone": "IP phones",
+    "Erweitert": "Advanced",
+    "OSPF-Netzwerktyp": "OSPF network type",
+    "globalen": "global",
+    "STP-Modus": "STP mode",
+    "Pfadkosten": "path cost",
+    "Switchport-Modus": "switchport mode",
+    "dass": "that",
+    "Vertraut": "Trusts",
+    "ausgehende": "outgoing",
+    "Catalyst-Plattformen": "Catalyst platforms",
+    "Benutzerkonten": "user accounts",
+    "portbasiertes": "port-based",
+    "abschalten": "disable",
+    "zyklisch": "periodically",
+    "Zeitintervall": "time interval",
+    "Autorisiert": "Authorizes",
+    "DHCP-Pakete": "DHCP packets",
+    "Sekunde": "second",
+    "gleichwertiger": "equal-cost",
+    "OSPF-Pfade": "OSPF paths",
+    "empfangene": "received",
+    "Prefixe": "prefixes",
+    "nachvollziehbar": "traceable",
+    "Beschreibt": "Describes",
+    "VTY-Zugriffe": "VTY access",
+    "Blendet": "Hides",
+    "sonstigen": "other",
+    "loggt": "logs",
+    "Treffer": "matches",
+    "Cisco-Telefone": "Cisco phones",
+    "inklusive": "including",
+    "DHCP-Leases": "DHCP leases",
+    "interessanten": "relevant",
+    "PVST-/Rapid-PVST-Informationen": "PVST/Rapid-PVST information",
+    "Detaillierter": "Detailed",
+    "lokalem": "local",
+    "STP-Interfaceoption": "STP interface option",
+    "Erkennt": "Detects",
+    "fehlerhaft": "incorrect",
+    "EtherChannels": "EtherChannels",
+    "DMZ-Server": "DMZ server",
+    "Hops": "hops",
+    "Präfixen": "prefixes",
+    "Nachbarschaft": "adjacency",
+    "Nachbarschaftsstatus": "adjacency status",
+    "konfigurierten": "configured",
+    "zugehörige": "associated",
+    "betroffenen": "affected",
+    "erlaubte": "allowed",
+    "prüft": "checks",
+    "geprüft": "checked",
+    "erneut": "again",
+    "löscht": "deletes",
+    "leert": "clears",
+    "gespeicherte": "stored",
+    "laufenden": "running",
+    "bestimmt": "determines",
+    "bestimmter": "specific",
+    "Portzuordnungen": "port assignments",
+    "Adresszuordnungen": "address assignments",
+    "Prozesse": "processes",
+    "Neustart": "restart",
+    "plattformspezifisch": "platform-specific",
+    "plattformabhängig": "platform-dependent",
+    "falls": "if",
+    "sofern": "if",
+    "z.B.": "e.g.",
+    "z. B.": "e.g.",
+    "alle": "all"
+  }
+}

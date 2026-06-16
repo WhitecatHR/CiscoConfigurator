@@ -1,0 +1,2555 @@
+[
+  {
+    "name": "Konfig: Basis",
+    "rows": [
+      {
+        "module": "Grunddaten",
+        "mode": "Privileged EXEC",
+        "command": "enable",
+        "meaning": "Wechselt in den privilegierten EXEC-Modus."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "configure terminal",
+        "meaning": "Wechselt in den globalen Konfigurationsmodus."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "hostname <Hostname>",
+        "meaning": "Setzt den Gerätenamen."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "ip domain-name <Domain>",
+        "meaning": "Setzt den DNS-Domainnamen; wird auch für SSH/RSA-Schlüssel benötigt."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "enable secret <Secret>",
+        "meaning": "Setzt das verschlüsselte Enable-Passwort."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "no ip domain-lookup",
+        "meaning": "Verhindert DNS-Lookups bei falsch eingegebenen Befehlen."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "service password-encryption",
+        "meaning": "Verschlüsselt einfache Klartext-Passwörter in der Running-Config."
+      },
+      {
+        "module": "Grunddaten",
+        "mode": "Global",
+        "command": "security passwords min-length <Anzahl>",
+        "meaning": "Definiert eine Mindestlänge für lokale Passwörter."
+      },
+      {
+        "module": "Clock",
+        "mode": "Global",
+        "command": "clock timezone <Name> <Stunden> <Minuten>",
+        "meaning": "Setzt den Zeitzonennamen und die Abweichung gegenüber UTC."
+      },
+      {
+        "module": "Clock",
+        "mode": "Global",
+        "command": "clock summer-time <Name> recurring <Startregel> <Endregel>",
+        "meaning": "Konfiguriert eine wiederkehrende Sommerzeitregel."
+      },
+      {
+        "module": "Banner",
+        "mode": "Global",
+        "command": "banner motd ^<Text>^",
+        "meaning": "Erstellt einen Message-of-the-Day-Banner vor dem Login."
+      },
+      {
+        "module": "Banner",
+        "mode": "Global",
+        "command": "banner login ^<Text>^",
+        "meaning": "Erstellt einen Login-Banner vor der Authentifizierung."
+      },
+      {
+        "module": "Abschluss",
+        "mode": "Global",
+        "command": "end",
+        "meaning": "Verlässt die Konfigurationsebene."
+      },
+      {
+        "module": "Abschluss",
+        "mode": "Privileged EXEC",
+        "command": "write memory",
+        "meaning": "Speichert die laufende Konfiguration in die Startup-Config."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: SSH / AAA",
+    "rows": [
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "crypto key generate rsa",
+        "meaning": "Startet die RSA-Schlüsselerzeugung für SSH."
+      },
+      {
+        "module": "SSH",
+        "mode": "RSA-Dialog",
+        "command": "modulus <Bits>",
+        "meaning": "Legt die RSA-Schlüssellänge fest, z. B. 2048."
+      },
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "ip ssh version 2",
+        "meaning": "Aktiviert SSH Version 2."
+      },
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "ip ssh time-out <Sekunden>",
+        "meaning": "Setzt den SSH-Authentifizierungs-Timeout."
+      },
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "ip ssh authentication-retries <Anzahl>",
+        "meaning": "Setzt die erlaubten SSH-Loginversuche."
+      },
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "ip ssh source-interface <Interface>",
+        "meaning": "Bindet SSH an ein Quellinterface."
+      },
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "ip ssh logging events",
+        "meaning": "Aktiviert SSH-Ereignislogging."
+      },
+      {
+        "module": "SSH",
+        "mode": "Global",
+        "command": "ip ssh server algorithm encryption <Algorithmus>",
+        "meaning": "Schränkt die erlaubten SSH-Verschlüsselungsalgorithmen ein."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "line vty <Start> <Ende>",
+        "meaning": "Öffnet die VTY-Line-Konfiguration."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "access-class <ACL> in",
+        "meaning": "Beschränkt eingehende VTY-Zugriffe über eine ACL."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "login authentication default",
+        "meaning": "Nutzt die AAA-Login-Methode default."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "password <Passwort>",
+        "meaning": "Setzt ein Line-Passwort, falls kein Login local/AAA genutzt wird."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "login",
+        "meaning": "Aktiviert Login über das Line-Passwort."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "login local",
+        "meaning": "Aktiviert lokale Benutzerkonten für den Login."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "transport input ssh",
+        "meaning": "Erlaubt nur SSH auf den VTY-Lines."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "exec-timeout <Minuten> <Sekunden>",
+        "meaning": "Setzt den Inaktivitäts-Timeout."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "logging synchronous",
+        "meaning": "Verhindert, dass Logmeldungen die Eingabezeile zerreißen."
+      },
+      {
+        "module": "VTY",
+        "mode": "Line",
+        "command": "privilege level <Level>",
+        "meaning": "Setzt das Standard-Privilege-Level für diese Line."
+      },
+      {
+        "module": "Console",
+        "mode": "Line",
+        "command": "line console 0",
+        "meaning": "Öffnet die Konsolen-Line-Konfiguration."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa new-model",
+        "meaning": "Aktiviert das AAA-Framework."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa authentication login default local",
+        "meaning": "Nutzt lokale Benutzer für Login-Authentifizierung."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa authorization exec default local",
+        "meaning": "Autorisiert EXEC-Sitzungen lokal."
+      },
+      {
+        "module": "RADIUS",
+        "mode": "Global",
+        "command": "radius server <Name>",
+        "meaning": "Legt einen benannten RADIUS-Server an."
+      },
+      {
+        "module": "RADIUS",
+        "mode": "Radius-Server",
+        "command": "address ipv4 <IP> auth-port <Port> acct-port <Port>",
+        "meaning": "Setzt Adresse und Ports des RADIUS-Servers."
+      },
+      {
+        "module": "RADIUS",
+        "mode": "Radius-Server",
+        "command": "timeout <Sekunden>",
+        "meaning": "Setzt RADIUS-Timeout."
+      },
+      {
+        "module": "RADIUS",
+        "mode": "Radius-Server",
+        "command": "retransmit <Anzahl>",
+        "meaning": "Setzt Anzahl der RADIUS-Wiederholungen."
+      },
+      {
+        "module": "RADIUS",
+        "mode": "Radius-Server",
+        "command": "key <Shared-Secret>",
+        "meaning": "Setzt das RADIUS Shared Secret."
+      },
+      {
+        "module": "TACACS+",
+        "mode": "Global",
+        "command": "tacacs server <Name>",
+        "meaning": "Legt einen TACACS+-Server an."
+      },
+      {
+        "module": "TACACS+",
+        "mode": "Tacacs-Server",
+        "command": "address ipv4 <IP>",
+        "meaning": "Setzt die TACACS+-Serveradresse."
+      },
+      {
+        "module": "TACACS+",
+        "mode": "Tacacs-Server",
+        "command": "key <Shared-Secret>",
+        "meaning": "Setzt das TACACS+ Shared Secret."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa group server radius <Gruppe>",
+        "meaning": "Erstellt eine RADIUS-Servergruppe."
+      },
+      {
+        "module": "AAA",
+        "mode": "Servergruppe",
+        "command": "server name <Name>",
+        "meaning": "Ordnet der AAA-Gruppe einen benannten Server zu."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa authentication login default group <Gruppe> local",
+        "meaning": "Nutzt zuerst AAA-Gruppe, danach lokale Benutzer."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa authorization exec default group <Gruppe> local",
+        "meaning": "EXEC-Autorisierung über AAA-Gruppe mit lokalem Fallback."
+      },
+      {
+        "module": "AAA",
+        "mode": "Global",
+        "command": "aaa accounting exec default start-stop group <Gruppe>",
+        "meaning": "Aktiviert EXEC-Accounting über die AAA-Gruppe."
+      },
+      {
+        "module": "RADIUS",
+        "mode": "Global",
+        "command": "ip radius source-interface <Interface>",
+        "meaning": "Setzt das Quellinterface für RADIUS-Pakete."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: Monitoring",
+    "rows": [
+      {
+        "module": "NTP",
+        "mode": "Global",
+        "command": "ntp server <IP> [prefer]",
+        "meaning": "Konfiguriert einen NTP-Server, optional bevorzugt."
+      },
+      {
+        "module": "Syslog",
+        "mode": "Global",
+        "command": "logging host <IP>",
+        "meaning": "Sendet Logs an einen Syslog-Server."
+      },
+      {
+        "module": "Syslog",
+        "mode": "Global",
+        "command": "logging trap <Level>",
+        "meaning": "Setzt die Syslog-Schweregradgrenze."
+      },
+      {
+        "module": "Syslog",
+        "mode": "Global",
+        "command": "logging buffered <Bytes>",
+        "meaning": "Setzt die Größe des lokalen Logpuffers."
+      },
+      {
+        "module": "Syslog",
+        "mode": "Global",
+        "command": "service timestamps debug datetime msec localtime show-timezone",
+        "meaning": "Erweitert Debug-Zeitstempel um Datum, Millisekunden und Zeitzone."
+      },
+      {
+        "module": "Syslog",
+        "mode": "Global",
+        "command": "service timestamps log datetime msec localtime show-timezone",
+        "meaning": "Erweitert Log-Zeitstempel um Datum, Millisekunden und Zeitzone."
+      },
+      {
+        "module": "SNMP",
+        "mode": "Global",
+        "command": "snmp-server group <Gruppe> v3 priv",
+        "meaning": "Erstellt eine SNMPv3-Gruppe mit Authentifizierung und Verschlüsselung."
+      },
+      {
+        "module": "SNMP",
+        "mode": "Global",
+        "command": "snmp-server user <User> <Gruppe> v3 auth <AuthAlgo> <AuthKey> priv <PrivAlgo> <PrivKey>",
+        "meaning": "Erstellt einen SNMPv3-Benutzer."
+      },
+      {
+        "module": "Archive",
+        "mode": "Global",
+        "command": "archive",
+        "meaning": "Öffnet den Archive-Konfigurationsmodus."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "log config",
+        "meaning": "Aktiviert das Konfigurationsänderungs-Logging."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "logging enable",
+        "meaning": "Schaltet Archive-Logging ein."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "notify syslog",
+        "meaning": "Sendet Archive-Änderungen an Syslog."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "hidekeys",
+        "meaning": "Blendet Schlüssel in Archive-Logs aus."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "path <Pfad>",
+        "meaning": "Setzt den Ablagepfad für Konfigurationsarchive."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "write-memory",
+        "meaning": "Archiviert bei write memory."
+      },
+      {
+        "module": "Archive",
+        "mode": "Archive",
+        "command": "time-period <Minuten>",
+        "meaning": "Archiviert zyklisch nach Zeitintervall."
+      },
+      {
+        "module": "Login-Audit",
+        "mode": "Global",
+        "command": "login on-failure log",
+        "meaning": "Loggt fehlgeschlagene Loginversuche."
+      },
+      {
+        "module": "Login-Audit",
+        "mode": "Global",
+        "command": "login on-success log",
+        "meaning": "Loggt erfolgreiche Loginversuche."
+      },
+      {
+        "module": "Benutzer",
+        "mode": "Global",
+        "command": "username <User> privilege <Level> secret <Secret>",
+        "meaning": "Erstellt einen lokalen Benutzer mit Privilege-Level."
+      },
+      {
+        "module": "Parser View",
+        "mode": "Global",
+        "command": "parser view <Name>",
+        "meaning": "Erstellt eine rollenbasierte CLI-Ansicht."
+      },
+      {
+        "module": "Parser View",
+        "mode": "Parser-View",
+        "command": "secret <Secret>",
+        "meaning": "Setzt das Parser-View-Passwort."
+      },
+      {
+        "module": "Parser View",
+        "mode": "Parser-View",
+        "command": "commands exec include <Befehl>",
+        "meaning": "Erlaubt einen EXEC-Befehl innerhalb der Parser View."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: Interfaces / VLAN",
+    "rows": [
+      {
+        "module": "Interface",
+        "mode": "Global",
+        "command": "interface <Interface>",
+        "meaning": "Öffnet ein einzelnes Interface."
+      },
+      {
+        "module": "Interface",
+        "mode": "Global",
+        "command": "interface range <Interface-Range>",
+        "meaning": "Öffnet mehrere Interfaces gleichzeitig."
+      },
+      {
+        "module": "Interface",
+        "mode": "Interface",
+        "command": "description <Beschreibung>",
+        "meaning": "Setzt eine Interface-Beschreibung."
+      },
+      {
+        "module": "Interface",
+        "mode": "Interface",
+        "command": "no switchport",
+        "meaning": "Wandelt einen Switchport in ein L3-Routed-Port um."
+      },
+      {
+        "module": "Interface",
+        "mode": "Interface",
+        "command": "ip address <IP> <Maske>",
+        "meaning": "Setzt eine IPv4-Adresse."
+      },
+      {
+        "module": "Interface",
+        "mode": "Interface",
+        "command": "no shutdown",
+        "meaning": "Aktiviert das Interface administrativ."
+      },
+      {
+        "module": "Interface",
+        "mode": "Interface",
+        "command": "shutdown",
+        "meaning": "Deaktiviert das Interface administrativ."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport mode access",
+        "meaning": "Setzt den Port in den Access-Modus."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport access vlan <VLAN>",
+        "meaning": "Ordnet den Access-Port einem VLAN zu."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport voice vlan <VLAN>",
+        "meaning": "Setzt ein Voice-VLAN für IP-Telefone."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport mode trunk",
+        "meaning": "Setzt den Port in den Trunk-Modus."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport trunk allowed vlan <VLAN-Liste>",
+        "meaning": "Beschränkt die auf dem Trunk erlaubten VLANs."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport trunk native vlan <VLAN>",
+        "meaning": "Setzt das Native VLAN."
+      },
+      {
+        "module": "Switchport",
+        "mode": "Interface",
+        "command": "switchport nonegotiate",
+        "meaning": "Deaktiviert DTP-Aushandlung."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree portfast",
+        "meaning": "Aktiviert PortFast am Interface."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree portfast trunk",
+        "meaning": "Aktiviert PortFast für einen Trunk-Port."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree bpduguard enable",
+        "meaning": "Aktiviert BPDU Guard am Interface."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree bpdufilter enable",
+        "meaning": "Aktiviert BPDU Filter am Interface."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree guard root",
+        "meaning": "Verhindert, dass der Port Root-Port wird."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree guard loop",
+        "meaning": "Aktiviert Loop Guard am Interface."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree link-type <point-to-point|shared>",
+        "meaning": "Setzt den STP-Linktyp des Interfaces."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree port-priority <Priorität>",
+        "meaning": "Setzt die STP-Portpriorität."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree cost <Kosten>",
+        "meaning": "Setzt die STP-Pfadkosten des Interfaces."
+      },
+      {
+        "module": "Subinterface",
+        "mode": "Global",
+        "command": "interface <Parent>.<VLAN>",
+        "meaning": "Erstellt ein Router-on-a-Stick-Subinterface."
+      },
+      {
+        "module": "Subinterface",
+        "mode": "Interface",
+        "command": "encapsulation dot1Q <VLAN> [native]",
+        "meaning": "Setzt 802.1Q-Kapselung auf einem Subinterface."
+      },
+      {
+        "module": "VLAN",
+        "mode": "Global",
+        "command": "vlan <VLAN-ID>",
+        "meaning": "Erstellt oder öffnet ein VLAN."
+      },
+      {
+        "module": "VLAN",
+        "mode": "VLAN",
+        "command": "name <VLAN-Name>",
+        "meaning": "Setzt den VLAN-Namen."
+      },
+      {
+        "module": "SVI",
+        "mode": "Global",
+        "command": "interface vlan <VLAN-ID>",
+        "meaning": "Erstellt oder öffnet ein SVI."
+      },
+      {
+        "module": "SVI",
+        "mode": "Interface",
+        "command": "ip helper-address <DHCP-Server-IP>",
+        "meaning": "Leitet DHCP-Anfragen an einen DHCP-Server weiter."
+      },
+      {
+        "module": "Switch",
+        "mode": "Global",
+        "command": "ip default-gateway <Gateway-IP>",
+        "meaning": "Setzt das Default-Gateway auf L2-Switches."
+      },
+      {
+        "module": "EtherChannel",
+        "mode": "Global",
+        "command": "port-channel load-balance <Methode>",
+        "meaning": "Setzt die Lastverteilung für EtherChannel."
+      },
+      {
+        "module": "EtherChannel",
+        "mode": "Interface-Range",
+        "command": "channel-group <ID> mode <active|passive|on|desirable|auto>",
+        "meaning": "Ordnet Ports einem EtherChannel zu."
+      },
+      {
+        "module": "EtherChannel",
+        "mode": "Global",
+        "command": "interface port-channel <ID>",
+        "meaning": "Öffnet das logische Port-Channel-Interface."
+      },
+      {
+        "module": "Storm-Control",
+        "mode": "Interface",
+        "command": "storm-control broadcast level <Wert>",
+        "meaning": "Begrenzt Broadcast-Stürme."
+      },
+      {
+        "module": "Storm-Control",
+        "mode": "Interface",
+        "command": "storm-control multicast level <Wert>",
+        "meaning": "Begrenzt Multicast-Stürme."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: Switching Security",
+    "rows": [
+      {
+        "module": "DHCP Snooping",
+        "mode": "Global",
+        "command": "ip dhcp snooping",
+        "meaning": "Aktiviert DHCP Snooping global."
+      },
+      {
+        "module": "DHCP Snooping",
+        "mode": "Global",
+        "command": "ip dhcp snooping vlan <VLAN-Liste>",
+        "meaning": "Aktiviert DHCP Snooping für VLANs."
+      },
+      {
+        "module": "DHCP Snooping",
+        "mode": "Global",
+        "command": "no ip dhcp snooping information option",
+        "meaning": "Deaktiviert Option-82-Einfügung."
+      },
+      {
+        "module": "DHCP Snooping",
+        "mode": "Interface",
+        "command": "ip dhcp snooping trust",
+        "meaning": "Markiert ein Interface als vertrauenswürdig."
+      },
+      {
+        "module": "DHCP Snooping",
+        "mode": "Interface",
+        "command": "ip dhcp snooping limit rate <Rate>",
+        "meaning": "Begrenzt DHCP-Pakete pro Sekunde."
+      },
+      {
+        "module": "DAI",
+        "mode": "Global",
+        "command": "ip arp inspection vlan <VLAN-Liste>",
+        "meaning": "Aktiviert Dynamic ARP Inspection für VLANs."
+      },
+      {
+        "module": "DAI",
+        "mode": "Interface",
+        "command": "ip arp inspection trust",
+        "meaning": "Markiert ein Interface für DAI als vertrauenswürdig."
+      },
+      {
+        "module": "IPSG",
+        "mode": "Interface",
+        "command": "ip verify source",
+        "meaning": "Aktiviert IP Source Guard."
+      },
+      {
+        "module": "Port-Security",
+        "mode": "Interface",
+        "command": "switchport port-security",
+        "meaning": "Aktiviert Port-Security auf dem Interface."
+      },
+      {
+        "module": "Port-Security",
+        "mode": "Interface",
+        "command": "switchport port-security maximum <Anzahl>",
+        "meaning": "Setzt die maximale Anzahl erlaubter MAC-Adressen."
+      },
+      {
+        "module": "Port-Security",
+        "mode": "Interface",
+        "command": "switchport port-security mac-address sticky",
+        "meaning": "Lernt MAC-Adressen sticky in der Konfiguration."
+      },
+      {
+        "module": "Port-Security",
+        "mode": "Interface",
+        "command": "switchport port-security violation <protect|restrict|shutdown>",
+        "meaning": "Setzt die Reaktion bei Regelverletzung."
+      },
+      {
+        "module": "Port-Security",
+        "mode": "Interface",
+        "command": "switchport port-security aging time <Minuten>",
+        "meaning": "Setzt die Aging-Zeit für gelernte MAC-Adressen."
+      },
+      {
+        "module": "Port-Security",
+        "mode": "Interface",
+        "command": "switchport port-security aging type <absolute|inactivity>",
+        "meaning": "Setzt die Aging-Art."
+      },
+      {
+        "module": "Errdisable",
+        "mode": "Global",
+        "command": "errdisable recovery interval <Sekunden>",
+        "meaning": "Setzt das automatische Recovery-Intervall."
+      },
+      {
+        "module": "Errdisable",
+        "mode": "Global",
+        "command": "errdisable recovery cause <Ursache>",
+        "meaning": "Aktiviert Recovery für eine bestimmte Ursache."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree mode <pvst|rapid-pvst|mst>",
+        "meaning": "Setzt den globalen STP-Modus."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree extend system-id",
+        "meaning": "Erweitert die Bridge-ID um die VLAN- beziehungsweise Instanz-ID."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree pathcost method <short|long>",
+        "meaning": "Setzt die verwendete STP-Pfadkostenskala."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree vlan <VLAN> root <primary|secondary>",
+        "meaning": "Setzt den Switch als STP-Root für VLANs."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree vlan <VLAN> priority <Priorität>",
+        "meaning": "Setzt die Bridge-Priorität für ein VLAN."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree vlan <VLAN> hello-time <Sekunden>",
+        "meaning": "Setzt den STP-Hello-Timer für ein VLAN."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree vlan <VLAN> forward-time <Sekunden>",
+        "meaning": "Setzt den STP-Forward-Delay für ein VLAN."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree vlan <VLAN> max-age <Sekunden>",
+        "meaning": "Setzt das maximale Alter von STP-Informationen für ein VLAN."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree portfast default",
+        "meaning": "Aktiviert PortFast standardmäßig für Access-Ports."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree portfast bpduguard default",
+        "meaning": "Aktiviert BPDU Guard global für PortFast-Ports."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree portfast bpdufilter default",
+        "meaning": "Aktiviert BPDU Filter global für PortFast-Ports."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree loopguard default",
+        "meaning": "Aktiviert Loop Guard global."
+      },
+      {
+        "module": "STP",
+        "mode": "Global",
+        "command": "spanning-tree etherchannel guard misconfig",
+        "meaning": "Erkennt fehlerhaft konfigurierte EtherChannels."
+      },
+      {
+        "module": "MST",
+        "mode": "Global",
+        "command": "spanning-tree mst configuration",
+        "meaning": "Öffnet den MST-Region-Konfigurationsmodus."
+      },
+      {
+        "module": "MST",
+        "mode": "MST-Konfiguration",
+        "command": "name <Region>",
+        "meaning": "Setzt den MST-Regionsnamen."
+      },
+      {
+        "module": "MST",
+        "mode": "MST-Konfiguration",
+        "command": "revision <Revision>",
+        "meaning": "Setzt die MST-Revisionsnummer."
+      },
+      {
+        "module": "MST",
+        "mode": "MST-Konfiguration",
+        "command": "instance <Instanz> vlan <VLAN-Liste>",
+        "meaning": "Ordnet VLANs einer MST-Instanz zu."
+      },
+      {
+        "module": "MST",
+        "mode": "Global",
+        "command": "spanning-tree mst <Instanz> priority <Priorität>",
+        "meaning": "Setzt die Bridge-Priorität für eine MST-Instanz."
+      },
+      {
+        "module": "MST",
+        "mode": "Global",
+        "command": "spanning-tree mst <Instanz> root <primary|secondary>",
+        "meaning": "Setzt die Root-Rolle einer MST-Instanz."
+      },
+      {
+        "module": "PVST",
+        "mode": "Global",
+        "command": "spanning-tree uplinkfast",
+        "meaning": "Aktiviert die Legacy-PVST-UplinkFast-Optimierung."
+      },
+      {
+        "module": "PVST",
+        "mode": "Global",
+        "command": "spanning-tree backbonefast",
+        "meaning": "Aktiviert die Legacy-PVST-BackboneFast-Optimierung."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree link-type <point-to-point|shared>",
+        "meaning": "Setzt den Link-Typ für Rapid-PVST oder MST."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree port-priority <0-240>",
+        "meaning": "Setzt die STP-Port-Priorität in Schritten von 16."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree cost <Kosten>",
+        "meaning": "Setzt die allgemeine STP-Pfadkostenmetrik."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree vlan <VLAN> port-priority <0-240>",
+        "meaning": "Setzt die Port-Priorität für ein VLAN."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree vlan <VLAN> cost <Kosten>",
+        "meaning": "Setzt die Pfadkosten für ein VLAN."
+      },
+      {
+        "module": "MST",
+        "mode": "Global",
+        "command": "spanning-tree mst max-hops <1-40>",
+        "meaning": "Setzt die maximale Hop-Anzahl innerhalb einer MST-Region."
+      },
+      {
+        "module": "MST",
+        "mode": "Interface",
+        "command": "spanning-tree mst <Instanz> port-priority <0-240>",
+        "meaning": "Setzt die Port-Priorität für eine MST-Instanz."
+      },
+      {
+        "module": "MST",
+        "mode": "Interface",
+        "command": "spanning-tree mst <Instanz> cost <Kosten>",
+        "meaning": "Setzt die Pfadkosten für eine MST-Instanz."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree guard <root|loop>",
+        "meaning": "Aktiviert Root Guard oder Loop Guard."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree portfast [trunk]",
+        "meaning": "Aktiviert PortFast auf Access- oder bewusst gewählten Trunk-Ports."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree bpduguard enable",
+        "meaning": "Setzt das Interface bei unerwarteten BPDUs in err-disabled."
+      },
+      {
+        "module": "STP",
+        "mode": "Interface",
+        "command": "spanning-tree bpdufilter enable",
+        "meaning": "Filtert BPDUs am Interface; nur gezielt verwenden."
+      },
+      {
+        "module": "STP Reset",
+        "mode": "Global",
+        "command": "no spanning-tree vlan <VLAN> priority",
+        "meaning": "Setzt die VLAN-Bridge-Priorität auf den Plattformstandard zurück."
+      },
+      {
+        "module": "STP Reset",
+        "mode": "Interface",
+        "command": "no spanning-tree <portfast|guard|cost|port-priority>",
+        "meaning": "Entfernt eine STP-Interfaceoption."
+      },
+      {
+        "module": "STP Diagnose",
+        "mode": "EXEC",
+        "command": "show spanning-tree summary",
+        "meaning": "Zeigt Modus, Root-Status und globale STP-Funktionen."
+      },
+      {
+        "module": "STP Diagnose",
+        "mode": "EXEC",
+        "command": "show spanning-tree inconsistentports",
+        "meaning": "Zeigt durch Guard- oder Konsistenzmechanismen blockierte Ports."
+      },
+      {
+        "module": "MST Diagnose",
+        "mode": "EXEC",
+        "command": "show spanning-tree mst configuration",
+        "meaning": "Zeigt MST-Region, Revision, VLAN-Mapping und Digest."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: Routing IPv4",
+    "rows": [
+      {
+        "module": "Routing",
+        "mode": "Global",
+        "command": "ip routing",
+        "meaning": "Aktiviert IPv4-Routing auf einem Layer-3-Switch."
+      },
+      {
+        "module": "Routing",
+        "mode": "Global",
+        "command": "no ip routing",
+        "meaning": "Deaktiviert IPv4-Routing auf einem Layer-3-Switch."
+      },
+      {
+        "module": "Static Route",
+        "mode": "Global",
+        "command": "ip route <Zielnetz> <Maske> <Next-Hop|Interface> [Distanz]",
+        "meaning": "Erstellt eine statische IPv4-Route."
+      },
+      {
+        "module": "Tracked Route",
+        "mode": "Global",
+        "command": "ip route <Zielnetz> <Maske> <Next-Hop> track <Track-ID>",
+        "meaning": "Erstellt eine statische Route mit Tracking."
+      },
+      {
+        "module": "Backup Route",
+        "mode": "Global",
+        "command": "ip route <Zielnetz> <Maske> <Next-Hop> <Administrative-Distanz>",
+        "meaning": "Erstellt eine Floating Static Route."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Global",
+        "command": "router ospf <OSPF-Prozess>",
+        "meaning": "Öffnet den OSPFv2-Prozess."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "router-id <Router-ID>",
+        "meaning": "Setzt die OSPF-Router-ID."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "auto-cost reference-bandwidth <Mbit>",
+        "meaning": "Setzt die OSPF-Referenzbandbreite."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "log-adjacency-changes",
+        "meaning": "Protokolliert Änderungen von OSPF-Nachbarschaften."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "log-adjacency-changes detail",
+        "meaning": "Protokolliert detaillierte Änderungen von OSPF-Nachbarschaften."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "network <Netz> <Wildcard> area <Area>",
+        "meaning": "Aktiviert OSPF für passende Interfaces."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf <OSPF-Prozess> area <Area>",
+        "meaning": "Aktiviert OSPF direkt auf einem Interface und ordnet es einer Area zu."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "passive-interface default",
+        "meaning": "Setzt alle Interfaces standardmäßig passiv."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "no passive-interface <Interface>",
+        "meaning": "Aktiviert OSPF-Nachbarschaften auf einem Interface."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "default-information originate",
+        "meaning": "Inseriert eine Default Route in OSPF."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "area <Area> stub",
+        "meaning": "Setzt eine OSPF-Area als Stub Area."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "area <Area> stub no-summary",
+        "meaning": "Setzt eine Totally Stubby Area."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "area <Area> nssa",
+        "meaning": "Setzt eine NSSA Area."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "area <Area> nssa no-summary",
+        "meaning": "Setzt eine Totally NSSA Area."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "area <Area> range <Netz> <Maske>",
+        "meaning": "Fasst OSPF-Routen an Area-Grenzen zusammen."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf cost <Kosten>",
+        "meaning": "Setzt Interface-Kosten für OSPF."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf priority <Priorität>",
+        "meaning": "Setzt DR/BDR-Priorität."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf network <Typ>",
+        "meaning": "Setzt den OSPF-Netzwerktyp."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf authentication message-digest",
+        "meaning": "Aktiviert MD5-Authentifizierung auf dem Interface."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf message-digest-key 1 md5 <Key>",
+        "meaning": "Setzt den MD5-Schlüssel für OSPF."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf authentication",
+        "meaning": "Aktiviert einfache OSPF-Authentifizierung."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf authentication-key <Key>",
+        "meaning": "Setzt den einfachen OSPF-Authentifizierungsschlüssel."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf hello-interval <Sekunden>",
+        "meaning": "Setzt den OSPF-Hello-Timer."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf dead-interval <Sekunden>",
+        "meaning": "Setzt den OSPF-Dead-Timer."
+      },
+      {
+        "module": "IS-IS",
+        "mode": "Global",
+        "command": "router isis <Tag>",
+        "meaning": "Öffnet den IS-IS-Prozess."
+      },
+      {
+        "module": "IS-IS",
+        "mode": "Router",
+        "command": "net <NET-Adresse>",
+        "meaning": "Setzt die IS-IS NET-Adresse."
+      },
+      {
+        "module": "IS-IS",
+        "mode": "Interface",
+        "command": "ip router isis <Tag>",
+        "meaning": "Aktiviert IS-IS IPv4 auf dem Interface."
+      },
+      {
+        "module": "BGP",
+        "mode": "Global",
+        "command": "router bgp <AS>",
+        "meaning": "Öffnet den BGP-Prozess."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "bgp router-id <Router-ID>",
+        "meaning": "Setzt die BGP-Router-ID."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> remote-as <AS>",
+        "meaning": "Definiert einen BGP-Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> update-source <Interface>",
+        "meaning": "Setzt die Quelladresse für BGP."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> ebgp-multihop <Hops>",
+        "meaning": "Erlaubt eBGP über mehrere Hops."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> next-hop-self",
+        "meaning": "Setzt den lokalen Router als Next-Hop."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> password <Passwort>",
+        "meaning": "Setzt ein BGP-MD5-Passwort."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> maximum-prefix <Anzahl>",
+        "meaning": "Begrenzt empfangene Prefixe."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> soft-reconfiguration inbound",
+        "meaning": "Erlaubt inbound Soft-Reconfiguration."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> default-originate",
+        "meaning": "Sendet eine Default Route an den Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "network <Netz> mask <Maske>",
+        "meaning": "Inseriert ein IPv4-Netz in BGP."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> route-map <Route-Map> in",
+        "meaning": "Wendet eine eingehende Route-Map an."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> route-map <Route-Map> out",
+        "meaning": "Wendet eine ausgehende Route-Map an."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> prefix-list <Prefix-List> in",
+        "meaning": "Wendet eine eingehende Prefix-List an."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> prefix-list <Prefix-List> out",
+        "meaning": "Wendet eine ausgehende Prefix-List an."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> timers <Keepalive> <Holdtime>",
+        "meaning": "Setzt BGP-Timer."
+      },
+      {
+        "module": "FHRP",
+        "mode": "Interface",
+        "command": "standby <Gruppe> ip <Virtuelle-IP>",
+        "meaning": "Konfiguriert HSRP Virtual IP."
+      },
+      {
+        "module": "FHRP",
+        "mode": "Interface",
+        "command": "standby <Gruppe> priority <Priorität>",
+        "meaning": "Setzt HSRP-Priorität."
+      },
+      {
+        "module": "FHRP",
+        "mode": "Interface",
+        "command": "standby <Gruppe> preempt",
+        "meaning": "Aktiviert HSRP Preemption."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: VRF",
+    "rows": [
+      {
+        "module": "VRF-Lite",
+        "mode": "Global",
+        "command": "ip vrf <VRF-Name>",
+        "meaning": "Erstellt oder öffnet eine klassische VRF."
+      },
+      {
+        "module": "VRF-Lite",
+        "mode": "VRF",
+        "command": "rd <Route-Distinguisher>",
+        "meaning": "Setzt den Route Distinguisher."
+      },
+      {
+        "module": "VRF-Lite",
+        "mode": "VRF",
+        "command": "description <Beschreibung>",
+        "meaning": "Beschreibt die VRF."
+      },
+      {
+        "module": "VRF Interface",
+        "mode": "Interface",
+        "command": "ip vrf forwarding <VRF-Name>",
+        "meaning": "Ordnet ein Interface einer VRF zu; vorhandene IP-Adresse wird dabei entfernt."
+      },
+      {
+        "module": "VRF Interface",
+        "mode": "Interface",
+        "command": "ip address <IP> <Maske>",
+        "meaning": "Setzt die IPv4-Adresse nach der VRF-Zuordnung neu."
+      },
+      {
+        "module": "VRF Route",
+        "mode": "Global",
+        "command": "ip route vrf <VRF> <Zielnetz> <Maske> <Next-Hop>",
+        "meaning": "Erstellt eine statische IPv4-Route innerhalb einer VRF."
+      },
+      {
+        "module": "VRF Route",
+        "mode": "Global",
+        "command": "ipv6 route vrf <VRF> <IPv6-Präfix> <Next-Hop>",
+        "meaning": "Erstellt eine statische IPv6-Route innerhalb einer VRF."
+      },
+      {
+        "module": "VRF OSPF",
+        "mode": "Global",
+        "command": "router ospf <OSPF-Prozess> vrf <VRF>",
+        "meaning": "Öffnet OSPFv2 innerhalb einer VRF."
+      },
+      {
+        "module": "VRF OSPF",
+        "mode": "Router",
+        "command": "network <Netz> <Wildcard> area <Area>",
+        "meaning": "Aktiviert OSPFv2-Netze innerhalb einer VRF."
+      },
+      {
+        "module": "VRF OSPFv3",
+        "mode": "Global",
+        "command": "router ospfv3 <Prozess>",
+        "meaning": "Öffnet den OSPFv3-Prozess."
+      },
+      {
+        "module": "VRF OSPFv3",
+        "mode": "Router",
+        "command": "address-family ipv6 vrf <VRF>",
+        "meaning": "Öffnet die OSPFv3 IPv6 Address-Family einer VRF."
+      },
+      {
+        "module": "VRF OSPFv3",
+        "mode": "Address-Family",
+        "command": "router-id <Router-ID>",
+        "meaning": "Setzt die Router-ID für die OSPFv3 VRF Address-Family."
+      },
+      {
+        "module": "VRF OSPFv3",
+        "mode": "Interface",
+        "command": "ospfv3 <Prozess> ipv6 area <Area>",
+        "meaning": "Aktiviert OSPFv3 IPv6 auf einem Interface."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Global",
+        "command": "router bgp <AS>",
+        "meaning": "Öffnet den BGP-Prozess für VRF Address-Families."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Address-Family",
+        "command": "address-family ipv4 vrf <VRF>",
+        "meaning": "Öffnet die BGP IPv4 VRF Address-Family."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Address-Family",
+        "command": "address-family ipv6 vrf <VRF>",
+        "meaning": "Öffnet die BGP IPv6 VRF Address-Family."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Address-Family",
+        "command": "neighbor <IP> remote-as <AS>",
+        "meaning": "Definiert einen VRF-BGP-Nachbarn."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Address-Family",
+        "command": "neighbor <IP> activate",
+        "meaning": "Aktiviert den Nachbarn in der Address-Family."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Address-Family",
+        "command": "network <Netz> mask <Maske>",
+        "meaning": "Inseriert ein IPv4-Netz in die VRF-BGP-AF."
+      },
+      {
+        "module": "VRF BGP",
+        "mode": "Address-Family",
+        "command": "network <IPv6-Präfix>",
+        "meaning": "Inseriert ein IPv6-Präfix in die VRF-BGP-AF."
+      },
+      {
+        "module": "VRF",
+        "mode": "Address-Family",
+        "command": "exit-address-family",
+        "meaning": "Verlässt die aktuelle Address-Family."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: IPv6",
+    "rows": [
+      {
+        "module": "IPv6",
+        "mode": "Global",
+        "command": "ipv6 unicast-routing",
+        "meaning": "Aktiviert IPv6-Routing global."
+      },
+      {
+        "module": "IPv6",
+        "mode": "Interface",
+        "command": "ipv6 address <IPv6-Adresse/Präfix>",
+        "meaning": "Setzt eine IPv6-Adresse."
+      },
+      {
+        "module": "IPv6",
+        "mode": "Interface",
+        "command": "ipv6 address <Link-Local-Adresse> link-local",
+        "meaning": "Setzt eine manuelle Link-Local-Adresse."
+      },
+      {
+        "module": "IPv6",
+        "mode": "Interface",
+        "command": "ipv6 enable",
+        "meaning": "Aktiviert IPv6 auf einem Interface ohne globale Adresse."
+      },
+      {
+        "module": "IPv6 Route",
+        "mode": "Global",
+        "command": "ipv6 route <Präfix> <Next-Hop|Interface>",
+        "meaning": "Erstellt eine statische IPv6-Route."
+      },
+      {
+        "module": "IPv6 ACL",
+        "mode": "Global",
+        "command": "ipv6 access-list <ACL-Name>",
+        "meaning": "Erstellt oder öffnet eine IPv6-ACL."
+      },
+      {
+        "module": "IPv6 ACL",
+        "mode": "IPv6-ACL",
+        "command": "<permit|deny> <Protokoll> <Quelle> <Ziel>",
+        "meaning": "Erstellt eine IPv6-ACL-Regel."
+      },
+      {
+        "module": "IPv6 ACL",
+        "mode": "Interface",
+        "command": "ipv6 traffic-filter <ACL-Name> <in|out>",
+        "meaning": "Wendet eine IPv6-ACL auf ein Interface an."
+      },
+      {
+        "module": "IPv6 RA",
+        "mode": "Interface",
+        "command": "ipv6 nd ra suppress all",
+        "meaning": "Unterdrückt Router Advertisements auf dem Interface."
+      },
+      {
+        "module": "DHCPv6 Relay",
+        "mode": "Interface",
+        "command": "ipv6 dhcp relay destination <IPv6-Adresse>",
+        "meaning": "Leitet DHCPv6-Anfragen weiter."
+      },
+      {
+        "module": "OSPFv3",
+        "mode": "Global",
+        "command": "router ospfv3 <Prozess>",
+        "meaning": "Öffnet den OSPFv3-Prozess."
+      },
+      {
+        "module": "OSPFv3",
+        "mode": "Router",
+        "command": "address-family ipv6 unicast",
+        "meaning": "Öffnet die OSPFv3 IPv6 Unicast Address-Family."
+      },
+      {
+        "module": "OSPFv3",
+        "mode": "Router",
+        "command": "router-id <Router-ID>",
+        "meaning": "Setzt die OSPFv3-Router-ID."
+      },
+      {
+        "module": "OSPFv3",
+        "mode": "Interface",
+        "command": "ospfv3 <Prozess> ipv6 area <Area>",
+        "meaning": "Aktiviert OSPFv3 IPv6 auf dem Interface."
+      },
+      {
+        "module": "IPv6 BGP",
+        "mode": "Router",
+        "command": "address-family ipv6 unicast",
+        "meaning": "Öffnet die BGP IPv6 Address-Family."
+      },
+      {
+        "module": "IPv6 BGP",
+        "mode": "Address-Family",
+        "command": "neighbor <IPv6> remote-as <AS>",
+        "meaning": "Definiert einen IPv6-BGP-Nachbarn."
+      },
+      {
+        "module": "IPv6 BGP",
+        "mode": "Address-Family",
+        "command": "neighbor <IPv6> activate",
+        "meaning": "Aktiviert den IPv6-BGP-Nachbarn."
+      },
+      {
+        "module": "IPv6 BGP",
+        "mode": "Address-Family",
+        "command": "network <IPv6-Präfix>",
+        "meaning": "Inseriert ein IPv6-Präfix in BGP."
+      },
+      {
+        "module": "IPv6 EIGRP",
+        "mode": "Global",
+        "command": "ipv6 router eigrp <AS>",
+        "meaning": "Öffnet den IPv6-EIGRP-Prozess."
+      },
+      {
+        "module": "IPv6 EIGRP",
+        "mode": "Router",
+        "command": "eigrp router-id <Router-ID>",
+        "meaning": "Setzt die EIGRP-Router-ID."
+      },
+      {
+        "module": "IPv6 EIGRP",
+        "mode": "Router",
+        "command": "no shutdown",
+        "meaning": "Aktiviert den EIGRP-Prozess."
+      },
+      {
+        "module": "IPv6 EIGRP",
+        "mode": "Interface",
+        "command": "ipv6 eigrp <AS>",
+        "meaning": "Aktiviert IPv6-EIGRP auf dem Interface."
+      },
+      {
+        "module": "IPv6 IS-IS",
+        "mode": "Router",
+        "command": "address-family ipv6",
+        "meaning": "Öffnet die IS-IS IPv6 Address-Family."
+      },
+      {
+        "module": "IPv6 IS-IS",
+        "mode": "Router",
+        "command": "multi-topology",
+        "meaning": "Aktiviert Multi-Topology für IPv6."
+      },
+      {
+        "module": "IPv6 IS-IS",
+        "mode": "Interface",
+        "command": "ipv6 router isis <Tag>",
+        "meaning": "Aktiviert IS-IS IPv6 auf dem Interface."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: DHCP / ACL / NAT",
+    "rows": [
+      {
+        "module": "DHCP",
+        "mode": "Global",
+        "command": "ip dhcp pool <Pool-Name>",
+        "meaning": "Erstellt oder öffnet einen DHCP-Pool."
+      },
+      {
+        "module": "DHCP",
+        "mode": "DHCP-Pool",
+        "command": "network <Netz> <Maske>",
+        "meaning": "Setzt das DHCP-Netz."
+      },
+      {
+        "module": "DHCP",
+        "mode": "DHCP-Pool",
+        "command": "default-router <Gateway-IP>",
+        "meaning": "Setzt den Default Router für Clients."
+      },
+      {
+        "module": "DHCP",
+        "mode": "DHCP-Pool",
+        "command": "dns-server <DNS-IP>",
+        "meaning": "Setzt DNS-Server für Clients."
+      },
+      {
+        "module": "DHCP",
+        "mode": "DHCP-Pool",
+        "command": "domain-name <Domain>",
+        "meaning": "Setzt die DHCP-Domain."
+      },
+      {
+        "module": "DHCP",
+        "mode": "DHCP-Pool",
+        "command": "lease <Tage|Tage Stunden Minuten>",
+        "meaning": "Setzt die Lease-Dauer."
+      },
+      {
+        "module": "DHCP",
+        "mode": "DHCP-Pool",
+        "command": "option 150 ip <TFTP-IP>",
+        "meaning": "Setzt Option 150 für VoIP/TFTP."
+      },
+      {
+        "module": "DHCP",
+        "mode": "Global",
+        "command": "ip dhcp excluded-address <Start-IP> [End-IP]",
+        "meaning": "Schließt Adressen vom DHCP-Pool aus."
+      },
+      {
+        "module": "ACL",
+        "mode": "Global",
+        "command": "ip access-list extended <ACL-Name>",
+        "meaning": "Erstellt oder öffnet eine benannte Extended IPv4-ACL."
+      },
+      {
+        "module": "ACL",
+        "mode": "IPv4-ACL",
+        "command": "<permit|deny> <Protokoll> <Quelle> <Ziel> [eq <Port>]",
+        "meaning": "Erstellt eine Extended-ACL-Regel."
+      },
+      {
+        "module": "ACL",
+        "mode": "Global",
+        "command": "access-list <Nummer> <permit|deny> <Quelle>",
+        "meaning": "Erstellt eine klassische Standard-ACL."
+      },
+      {
+        "module": "ACL",
+        "mode": "Interface",
+        "command": "ip access-group <ACL-Name|Nummer> <in|out>",
+        "meaning": "Wendet eine IPv4-ACL am Interface an."
+      },
+      {
+        "module": "NAT",
+        "mode": "Interface",
+        "command": "ip nat inside",
+        "meaning": "Markiert ein Interface als NAT inside."
+      },
+      {
+        "module": "NAT",
+        "mode": "Interface",
+        "command": "ip nat outside",
+        "meaning": "Markiert ein Interface als NAT outside."
+      },
+      {
+        "module": "NAT",
+        "mode": "Global",
+        "command": "ip nat inside source list <ACL> interface <Interface> overload",
+        "meaning": "Konfiguriert PAT/Overload über ein Interface."
+      },
+      {
+        "module": "NAT",
+        "mode": "Global",
+        "command": "ip nat inside source static <Inside-IP> <Outside-IP>",
+        "meaning": "Konfiguriert statisches 1:1-NAT."
+      },
+      {
+        "module": "NAT",
+        "mode": "Global",
+        "command": "ip nat inside source static <Protokoll> <Inside-IP> <Inside-Port> <Outside-IP> <Outside-Port>",
+        "meaning": "Konfiguriert statisches Port-Forwarding."
+      },
+      {
+        "module": "NAT",
+        "mode": "Global",
+        "command": "ip nat pool <Name> <Start-IP> <End-IP> netmask <Maske>",
+        "meaning": "Erstellt einen NAT-Adresspool."
+      },
+      {
+        "module": "NAT",
+        "mode": "Global",
+        "command": "ip nat inside source list <ACL> pool <Pool-Name> overload",
+        "meaning": "Nutzt einen NAT-Pool mit Overload."
+      },
+      {
+        "module": "NAT Exempt",
+        "mode": "Global",
+        "command": "route-map <Name> permit 10",
+        "meaning": "Erstellt eine Route-Map für NAT-Ausnahmen oder Policy-NAT."
+      },
+      {
+        "module": "NAT Exempt",
+        "mode": "Route-Map",
+        "command": "match ip address <ACL>",
+        "meaning": "Matcht eine ACL innerhalb einer Route-Map."
+      },
+      {
+        "module": "NAT Exempt",
+        "mode": "Route-Map",
+        "command": "set interface <Interface>",
+        "meaning": "Setzt ein Interface als Route-Map-Aktion."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: VPN / Firewall / QoS",
+    "rows": [
+      {
+        "module": "GRE",
+        "mode": "Global",
+        "command": "interface tunnel <ID>",
+        "meaning": "Erstellt oder öffnet ein Tunnelinterface."
+      },
+      {
+        "module": "GRE",
+        "mode": "Tunnel",
+        "command": "ip address <Tunnel-IP> <Maske>",
+        "meaning": "Setzt die Tunnel-IP-Adresse."
+      },
+      {
+        "module": "GRE",
+        "mode": "Tunnel",
+        "command": "tunnel source <Interface|IP>",
+        "meaning": "Setzt die Tunnelquelle."
+      },
+      {
+        "module": "GRE",
+        "mode": "Tunnel",
+        "command": "tunnel destination <Peer-IP>",
+        "meaning": "Setzt das Tunnelziel."
+      },
+      {
+        "module": "GRE",
+        "mode": "Tunnel",
+        "command": "tunnel mode gre ip",
+        "meaning": "Setzt GRE over IPv4."
+      },
+      {
+        "module": "GRE",
+        "mode": "Tunnel",
+        "command": "ip mtu 1400",
+        "meaning": "Reduziert die MTU für GRE/IPsec."
+      },
+      {
+        "module": "GRE",
+        "mode": "Tunnel",
+        "command": "ip tcp adjust-mss 1360",
+        "meaning": "Reduziert TCP MSS gegen Fragmentierung."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Global",
+        "command": "crypto isakmp policy <Priorität>",
+        "meaning": "Erstellt eine IKEv1 Policy."
+      },
+      {
+        "module": "IPsec",
+        "mode": "ISAKMP-Policy",
+        "command": "encr aes 256",
+        "meaning": "Setzt AES-256 als Verschlüsselung."
+      },
+      {
+        "module": "IPsec",
+        "mode": "ISAKMP-Policy",
+        "command": "hash sha256",
+        "meaning": "Setzt SHA-256 als Hash."
+      },
+      {
+        "module": "IPsec",
+        "mode": "ISAKMP-Policy",
+        "command": "authentication pre-share",
+        "meaning": "Nutzt Pre-Shared-Key-Authentifizierung."
+      },
+      {
+        "module": "IPsec",
+        "mode": "ISAKMP-Policy",
+        "command": "group 14",
+        "meaning": "Setzt Diffie-Hellman-Gruppe 14."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Global",
+        "command": "crypto isakmp key <PSK> address <Peer-IP>",
+        "meaning": "Setzt den IKEv1 Pre-Shared Key für den Peer."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Global",
+        "command": "crypto ipsec transform-set <Name> esp-aes 256 esp-sha-hmac",
+        "meaning": "Erstellt ein IPsec Transform-Set."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Transform-Set",
+        "command": "mode transport",
+        "meaning": "Setzt Transport Mode, typisch bei GRE over IPsec."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Global",
+        "command": "crypto map <Name> 10 ipsec-isakmp",
+        "meaning": "Erstellt eine Crypto Map."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Crypto-Map",
+        "command": "set peer <Peer-IP>",
+        "meaning": "Setzt den IPsec-Peer."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Crypto-Map",
+        "command": "set transform-set <Transform-Set>",
+        "meaning": "Verknüpft ein Transform-Set."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Crypto-Map",
+        "command": "match address <ACL>",
+        "meaning": "Definiert den interessanten Traffic."
+      },
+      {
+        "module": "IPsec",
+        "mode": "Interface",
+        "command": "crypto map <Name>",
+        "meaning": "Bindet die Crypto Map an ein Interface."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Global",
+        "command": "zone security <Zone>",
+        "meaning": "Erstellt eine Security Zone."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Interface",
+        "command": "zone-member security <Zone>",
+        "meaning": "Ordnet ein Interface einer Zone zu."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Global",
+        "command": "class-map type inspect match-any <Class-Map>",
+        "meaning": "Erstellt eine Inspect-Class-Map."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Class-Map",
+        "command": "match protocol <Protokoll>",
+        "meaning": "Matcht ein Protokoll in der Class-Map."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Global",
+        "command": "policy-map type inspect <Policy-Map>",
+        "meaning": "Erstellt eine Inspect-Policy."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Policy-Map",
+        "command": "class type inspect <Class-Map>",
+        "meaning": "Verknüpft Class-Map und Policy-Map."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Policy-Map",
+        "command": "<inspect|pass|drop>",
+        "meaning": "Setzt die Aktion für den gematchten Traffic."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Global",
+        "command": "zone-pair security <Name> source <Zone> destination <Zone>",
+        "meaning": "Erstellt ein Zone-Pair."
+      },
+      {
+        "module": "Zone Firewall",
+        "mode": "Zone-Pair",
+        "command": "service-policy type inspect <Policy-Map>",
+        "meaning": "Wendet eine Policy auf ein Zone-Pair an."
+      },
+      {
+        "module": "DMZ",
+        "mode": "IPv4-ACL",
+        "command": "permit tcp any host <Server-IP> eq 443",
+        "meaning": "Erlaubt HTTPS-Zugriff auf einen DMZ-Server."
+      },
+      {
+        "module": "DMZ",
+        "mode": "IPv4-ACL",
+        "command": "deny ip any any log",
+        "meaning": "Blockiert sonstigen Traffic und loggt Treffer."
+      },
+      {
+        "module": "QoS",
+        "mode": "Interface",
+        "command": "mls qos trust dscp",
+        "meaning": "Vertraut DSCP-Markierungen auf dem Interface."
+      },
+      {
+        "module": "QoS",
+        "mode": "Interface",
+        "command": "auto qos trust",
+        "meaning": "Aktiviert Auto-QoS Trust."
+      },
+      {
+        "module": "QoS",
+        "mode": "Global",
+        "command": "class-map match-any <Class-Map>",
+        "meaning": "Erstellt eine QoS-Class-Map."
+      },
+      {
+        "module": "QoS",
+        "mode": "Class-Map",
+        "command": "match dscp <DSCP-Wert>",
+        "meaning": "Matcht DSCP-Werte."
+      },
+      {
+        "module": "QoS",
+        "mode": "Global",
+        "command": "policy-map <Policy-Map>",
+        "meaning": "Erstellt eine QoS-Policy-Map."
+      },
+      {
+        "module": "QoS",
+        "mode": "Policy-Map",
+        "command": "class <Class-Map>",
+        "meaning": "Öffnet eine Klasse in der Policy."
+      },
+      {
+        "module": "QoS",
+        "mode": "Policy-Map",
+        "command": "priority percent <Prozent>",
+        "meaning": "Reserviert priorisierte Bandbreite."
+      },
+      {
+        "module": "Eigene Befehle",
+        "mode": "Global/Submode",
+        "command": "<Eigener Cisco-Befehl>",
+        "meaning": "Wird unverändert aus dem Modul Eigene Zusatzbefehle in die Konfiguration übernommen."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: MPLS / LDP / L3VPN",
+    "rows": [
+      {
+        "module": "MPLS",
+        "mode": "Global",
+        "command": "ip cef",
+        "meaning": "Aktiviert Cisco Express Forwarding als Grundlage für MPLS Forwarding."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Global",
+        "command": "mpls ip",
+        "meaning": "Aktiviert MPLS global auf dem Gerät."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Global",
+        "command": "mpls label protocol ldp",
+        "meaning": "Setzt LDP als Label Distribution Protocol."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Global",
+        "command": "mpls ldp router-id <Interface> [force]",
+        "meaning": "Setzt die stabile LDP Router-ID, typischerweise ein Loopback-Interface."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Global",
+        "command": "mpls ldp neighbor <Neighbor-IP> password <Passwort>",
+        "meaning": "Setzt ein Passwort für einen LDP-Nachbarn."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Interface",
+        "command": "interface <Interface>",
+        "meaning": "Öffnet das Core-/Transit-Interface."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Interface",
+        "command": "mpls ip",
+        "meaning": "Aktiviert MPLS/LDP auf diesem Interface."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Interface",
+        "command": "mpls mtu <Bytes>",
+        "meaning": "Setzt optional eine MPLS-MTU. Nicht pauschal 9000 setzen."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Interface",
+        "command": "mpls ldp igp sync",
+        "meaning": "Synchronisiert LDP und IGP, um Blackholing zu vermeiden."
+      },
+      {
+        "module": "MPLS",
+        "mode": "VRF",
+        "command": "vrf definition <VRF>",
+        "meaning": "Erstellt eine VRF für MPLS L3VPN."
+      },
+      {
+        "module": "MPLS",
+        "mode": "VRF",
+        "command": "rd <RD>",
+        "meaning": "Setzt den Route Distinguisher."
+      },
+      {
+        "module": "MPLS",
+        "mode": "VRF",
+        "command": "route-target import <RT>",
+        "meaning": "Importiert VPN-Routen anhand dieses Route-Targets."
+      },
+      {
+        "module": "MPLS",
+        "mode": "VRF",
+        "command": "route-target export <RT>",
+        "meaning": "Exportiert VPN-Routen mit diesem Route-Target."
+      },
+      {
+        "module": "MPLS",
+        "mode": "BGP",
+        "command": "router bgp <AS>",
+        "meaning": "Öffnet den MP-BGP-Prozess für VPNv4."
+      },
+      {
+        "module": "MPLS",
+        "mode": "BGP",
+        "command": "neighbor <Peer-IP> remote-as <AS>",
+        "meaning": "Definiert den MP-BGP-Nachbarn."
+      },
+      {
+        "module": "MPLS",
+        "mode": "BGP",
+        "command": "neighbor <Peer-IP> update-source <Interface>",
+        "meaning": "Bindet die BGP-Session an ein Loopback-/Quellinterface."
+      },
+      {
+        "module": "MPLS",
+        "mode": "BGP VPNv4",
+        "command": "address-family vpnv4",
+        "meaning": "Öffnet die VPNv4 Address-Family."
+      },
+      {
+        "module": "MPLS",
+        "mode": "BGP VPNv4",
+        "command": "neighbor <Peer-IP> activate",
+        "meaning": "Aktiviert den Peer in VPNv4."
+      },
+      {
+        "module": "MPLS",
+        "mode": "BGP VPNv4",
+        "command": "neighbor <Peer-IP> send-community extended",
+        "meaning": "Sendet Extended Communities, notwendig für Route-Targets."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: VoIP / Voice VLAN",
+    "rows": [
+      {
+        "module": "VoIP",
+        "mode": "Global",
+        "command": "vlan <Data-VLAN>",
+        "meaning": "Erstellt das Daten-VLAN für Clients hinter IP-Telefonen."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Global",
+        "command": "vlan <Voice-VLAN>",
+        "meaning": "Erstellt das Voice-VLAN für IP-Telefone."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Global",
+        "command": "cdp run",
+        "meaning": "Aktiviert CDP für Cisco-Telefonerkennung."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Global",
+        "command": "lldp run",
+        "meaning": "Aktiviert LLDP für herstellerübergreifende Nachbarerkennung."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Global",
+        "command": "lldp med-tlv-select network-policy",
+        "meaning": "Aktiviert LLDP-MED Network Policy TLVs, sofern unterstützt."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Global",
+        "command": "mls qos",
+        "meaning": "Aktiviert QoS auf klassischen Catalyst-Plattformen."
+      },
+      {
+        "module": "VoIP",
+        "mode": "DHCP-Pool",
+        "command": "option 150 ip <TFTP-IP>",
+        "meaning": "Verteilt TFTP-/CallManager-Adresse an Cisco-IP-Telefone."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "switchport mode access",
+        "meaning": "Setzt den Telefonport als Access-Port."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "switchport access vlan <Data-VLAN>",
+        "meaning": "Setzt das Daten-VLAN für den PC-Port hinter dem Telefon."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "switchport voice vlan <Voice-VLAN>",
+        "meaning": "Setzt das Voice-VLAN für IP-Telefone."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "auto qos voip cisco-phone",
+        "meaning": "Aktiviert Cisco AutoQoS für Telefonports."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "mls qos trust <dscp|cos>",
+        "meaning": "Vertraut DSCP- oder CoS-Markierungen auf dem Telefonport."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "spanning-tree portfast",
+        "meaning": "Aktiviert schnellen Portstart für Endgeräte."
+      },
+      {
+        "module": "VoIP",
+        "mode": "Interface",
+        "command": "spanning-tree bpduguard enable",
+        "meaning": "Schützt Endgeräteports vor eingehenden BPDUs."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: QinQ / 802.1ad",
+    "rows": [
+      {
+        "module": "QinQ",
+        "mode": "Global",
+        "command": "system mtu jumbo <Bytes>",
+        "meaning": "Optional. Plattformabhängige Jumbo-/System-MTU. Nicht pauschal 9000 setzen; nur verwenden, wenn das Transportnetz die Framegröße durchgehend unterstützt."
+      },
+      {
+        "module": "QinQ",
+        "mode": "Global",
+        "command": "vlan <Provider-VLAN>",
+        "meaning": "Erstellt das Provider-/Service-VLAN für QinQ."
+      },
+      {
+        "module": "QinQ",
+        "mode": "Global",
+        "command": "name <Prefix><Provider-VLAN>",
+        "meaning": "Benennt das Provider-/Service-VLAN nachvollziehbar."
+      },
+      {
+        "module": "QinQ",
+        "mode": "Interface",
+        "command": "switchport",
+        "meaning": "Aktiviert Layer-2-Switchport-Kontext, sofern die Plattform es benötigt."
+      },
+      {
+        "module": "QinQ",
+        "mode": "Interface",
+        "command": "switchport mode dot1q-tunnel",
+        "meaning": "Aktiviert portbasiertes QinQ auf einem Customer-facing Switchport."
+      },
+      {
+        "module": "QinQ",
+        "mode": "Interface",
+        "command": "switchport access vlan <Provider-VLAN>",
+        "meaning": "Ordnet den QinQ-Port dem äußeren Provider-/Service-VLAN zu."
+      },
+      {
+        "module": "QinQ",
+        "mode": "Interface",
+        "command": "l2protocol-tunnel <cdp|stp|vtp>",
+        "meaning": "Tunnelt ausgewählte Layer-2-Protokolle durch das Provider-Netz, sofern unterstützt."
+      },
+      {
+        "module": "QinQ",
+        "mode": "L3-Switch Subinterface",
+        "command": "interface <Parent>.<SubID>",
+        "meaning": "Erstellt ein routed Subinterface für Double-Tagged QinQ auf einem L3-Switch."
+      },
+      {
+        "module": "QinQ",
+        "mode": "L3-Switch Subinterface",
+        "command": "encapsulation dot1Q <Provider-VLAN> second-dot1q <Customer-VLAN>",
+        "meaning": "Konfiguriert äußeres S-VLAN und inneres C-VLAN."
+      },
+      {
+        "module": "QinQ",
+        "mode": "L3-Switch Subinterface",
+        "command": "ip address <IP> <Maske>",
+        "meaning": "Setzt optional eine Layer-3-Adresse auf dem QinQ-Subinterface."
+      }
+    ]
+  },
+  {
+    "name": "Konfig: Routing Policies / Tracking",
+    "rows": [
+      {
+        "module": "Prefix-List",
+        "mode": "Global",
+        "command": "ip prefix-list <Name> seq <Sequenz> <permit|deny> <Präfix> [ge <Min>] [le <Max>]",
+        "meaning": "Erstellt eine sequenzierte IPv4-Prefix-List für Routing-Filter."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Global",
+        "command": "route-map <Name> <permit|deny> <Sequenz>",
+        "meaning": "Erstellt oder öffnet einen Route-Map-Eintrag."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Route-Map",
+        "command": "match ip address prefix-list <Prefix-List>",
+        "meaning": "Verknüpft eine Prefix-List mit einer Route-Map."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Route-Map",
+        "command": "match ip address <ACL>",
+        "meaning": "Verknüpft eine IPv4-ACL mit einer Route-Map."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Route-Map",
+        "command": "set metric <Metrik>",
+        "meaning": "Setzt eine Routingmetrik für gematchte Routen."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Route-Map",
+        "command": "set local-preference <Wert>",
+        "meaning": "Setzt die BGP Local Preference."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Route-Map",
+        "command": "set community <Community> [additive]",
+        "meaning": "Setzt oder ergänzt BGP Communities."
+      },
+      {
+        "module": "Route-Map",
+        "mode": "Route-Map",
+        "command": "set ip next-hop <IP>",
+        "meaning": "Setzt den IPv4-Next-Hop für Policy Based Routing oder Routing-Policies."
+      },
+      {
+        "module": "Distribute-List",
+        "mode": "Router",
+        "command": "distribute-list <ACL|Prefix-List> <in|out> [Interface]",
+        "meaning": "Filtert Routingupdates innerhalb eines Routingprozesses."
+      },
+      {
+        "module": "IP SLA",
+        "mode": "Global",
+        "command": "ip sla <ID>",
+        "meaning": "Erstellt oder öffnet eine IP-SLA-Operation."
+      },
+      {
+        "module": "IP SLA",
+        "mode": "IP-SLA",
+        "command": "icmp-echo <Ziel-IP> source-interface <Interface>",
+        "meaning": "Konfiguriert einen ICMP-Echo-Test mit festem Quellinterface."
+      },
+      {
+        "module": "IP SLA",
+        "mode": "IP-SLA",
+        "command": "frequency <Sekunden>",
+        "meaning": "Setzt das Messintervall einer IP-SLA-Operation."
+      },
+      {
+        "module": "IP SLA",
+        "mode": "Global",
+        "command": "ip sla schedule <ID> life forever start-time now",
+        "meaning": "Startet eine IP-SLA-Operation dauerhaft und sofort."
+      },
+      {
+        "module": "Object Tracking",
+        "mode": "Global",
+        "command": "track <ID> ip sla <SLA-ID> reachability",
+        "meaning": "Verknüpft ein Trackingobjekt mit der Erreichbarkeit einer IP-SLA-Operation."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "maximum-paths <Anzahl>",
+        "meaning": "Begrenzt die Anzahl gleichwertiger OSPF-Pfade."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "distance <Administrative-Distanz>",
+        "meaning": "Setzt die administrative Distanz für OSPF-Routen."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "timers throttle spf <Start> <Hold> <Max>",
+        "meaning": "Optimiert die OSPF-SPF-Berechnungstimer."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "timers throttle lsa all <Start> <Hold> <Max>",
+        "meaning": "Optimiert die Erzeugung von OSPF-LSAs."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Interface",
+        "command": "ip ospf network point-to-point",
+        "meaning": "Setzt den OSPF-Netzwerktyp Point-to-Point."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Router",
+        "command": "default-information originate always",
+        "meaning": "Inseriert unabhängig vom Vorhandensein einer lokalen Default Route eine OSPF-Default Route."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "bgp log-neighbor-changes",
+        "meaning": "Protokolliert Zustandsänderungen von BGP-Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> description <Text>",
+        "meaning": "Hinterlegt eine Beschreibung für einen BGP-Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> route-map <Route-Map> <in|out>",
+        "meaning": "Wendet eine Route-Map auf einen BGP-Nachbarn an."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> prefix-list <Prefix-List> <in|out>",
+        "meaning": "Wendet eine Prefix-List auf einen BGP-Nachbarn an."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> timers <Keepalive> <Holdtime>",
+        "meaning": "Setzt Keepalive- und Hold-Timer für einen BGP-Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Router",
+        "command": "neighbor <IP> maximum-prefix <Anzahl>",
+        "meaning": "Begrenzt die maximale Anzahl empfangener BGP-Präfixe."
+      }
+    ]
+  },
+  {
+    "name": "Betrieb: Prüfung / Wartung",
+    "rows": [
+      {
+        "module": "Konfiguration",
+        "mode": "Privileged EXEC",
+        "command": "copy running-config startup-config",
+        "meaning": "Speichert die Running-Config als Startup-Config."
+      },
+      {
+        "module": "Konfiguration",
+        "mode": "Privileged EXEC",
+        "command": "show running-config | section <Abschnitt>",
+        "meaning": "Zeigt gezielt einen Konfigurationsabschnitt."
+      },
+      {
+        "module": "Konfiguration",
+        "mode": "Privileged EXEC",
+        "command": "show running-config | include <Muster>",
+        "meaning": "Filtert die laufende Konfiguration nach einem Muster."
+      },
+      {
+        "module": "Routing",
+        "mode": "Privileged EXEC",
+        "command": "show ip route <Präfix>",
+        "meaning": "Zeigt die Routingentscheidung für ein bestimmtes IPv4-Präfix."
+      },
+      {
+        "module": "Routing",
+        "mode": "Privileged EXEC",
+        "command": "show ipv6 route <Präfix>",
+        "meaning": "Zeigt die Routingentscheidung für ein bestimmtes IPv6-Präfix."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Privileged EXEC",
+        "command": "show ip ospf interface brief",
+        "meaning": "Zeigt OSPF-aktivierte Interfaces kompakt."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Privileged EXEC",
+        "command": "show ip ospf database",
+        "meaning": "Zeigt die OSPF Link-State Database."
+      },
+      {
+        "module": "OSPF",
+        "mode": "Privileged EXEC",
+        "command": "clear ip ospf process",
+        "meaning": "Startet den OSPF-Prozess nach Bestätigung neu."
+      },
+      {
+        "module": "BGP",
+        "mode": "Privileged EXEC",
+        "command": "show ip bgp summary",
+        "meaning": "Zeigt den Zustand aller IPv4-BGP-Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Privileged EXEC",
+        "command": "show bgp ipv6 unicast summary",
+        "meaning": "Zeigt den Zustand aller IPv6-BGP-Nachbarn."
+      },
+      {
+        "module": "BGP",
+        "mode": "Privileged EXEC",
+        "command": "clear ip bgp <Nachbar> soft <in|out>",
+        "meaning": "Lädt BGP-Richtlinien für einen Nachbarn ohne vollständigen Session-Neustart neu."
+      },
+      {
+        "module": "IP SLA",
+        "mode": "Privileged EXEC",
+        "command": "show ip sla statistics",
+        "meaning": "Zeigt Ergebnisse und Status der IP-SLA-Operationen."
+      },
+      {
+        "module": "Tracking",
+        "mode": "Privileged EXEC",
+        "command": "show track",
+        "meaning": "Zeigt den Zustand aller Trackingobjekte."
+      },
+      {
+        "module": "NAT",
+        "mode": "Privileged EXEC",
+        "command": "show ip nat translations",
+        "meaning": "Zeigt aktive NAT-Übersetzungen."
+      },
+      {
+        "module": "NAT",
+        "mode": "Privileged EXEC",
+        "command": "show ip nat statistics",
+        "meaning": "Zeigt NAT-Zähler und konfigurierte Inside-/Outside-Interfaces."
+      },
+      {
+        "module": "ACL",
+        "mode": "Privileged EXEC",
+        "command": "show access-lists",
+        "meaning": "Zeigt IPv4- und IPv6-ACLs einschließlich Trefferzählern."
+      },
+      {
+        "module": "SSH",
+        "mode": "Privileged EXEC",
+        "command": "show ip ssh",
+        "meaning": "Zeigt SSH-Version und Serverparameter."
+      },
+      {
+        "module": "AAA",
+        "mode": "Privileged EXEC",
+        "command": "test aaa group <Gruppe> <Benutzer> <Passwort> legacy",
+        "meaning": "Prüft die Erreichbarkeit und Authentifizierung einer AAA-Servergruppe."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Privileged EXEC",
+        "command": "show mpls ldp neighbor",
+        "meaning": "Zeigt LDP-Nachbarschaften."
+      },
+      {
+        "module": "MPLS",
+        "mode": "Privileged EXEC",
+        "command": "show mpls forwarding-table",
+        "meaning": "Zeigt die MPLS Label Forwarding Information Base."
+      },
+      {
+        "module": "VPN",
+        "mode": "Privileged EXEC",
+        "command": "show crypto isakmp sa",
+        "meaning": "Zeigt IKEv1 Security Associations."
+      },
+      {
+        "module": "VPN",
+        "mode": "Privileged EXEC",
+        "command": "show crypto ipsec sa",
+        "meaning": "Zeigt IPsec Security Associations und Paketstatistiken."
+      },
+      {
+        "module": "Tunnel",
+        "mode": "Privileged EXEC",
+        "command": "show interfaces tunnel <ID>",
+        "meaning": "Zeigt Status und Zähler eines Tunnelinterfaces."
+      },
+      {
+        "module": "Nachbarn",
+        "mode": "Privileged EXEC",
+        "command": "show cdp neighbors detail",
+        "meaning": "Zeigt detaillierte Cisco-Nachbarinformationen."
+      },
+      {
+        "module": "Nachbarn",
+        "mode": "Privileged EXEC",
+        "command": "show lldp neighbors detail",
+        "meaning": "Zeigt detaillierte LLDP-Nachbarinformationen."
+      }
+    ]
+  }
+]

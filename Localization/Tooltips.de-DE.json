@@ -1,0 +1,327 @@
+{
+  "texts": {
+    "developer.fieldDetails": "Entwicklerdetails:\nFeld-ID: {0}\nTyp: {1}\nAbhängigkeit: {2}\nSichtbar bei: {3}\nAktiv bei: {4}",
+    "developer.moduleDetails": "Entwicklerdetails:\nModul-ID: {0}\nRegister: {1}\nGeräte: {2}\nFelder: {3}",
+    "module.generic": "Abschnitt:\n{0}\n\nZweck:\nDieses Modul erzeugt Cisco IOS/IOS-XE-Konfigurationsbefehle für diesen Bereich.\n\nBedienung:\nLinks aktivieren, Felder ausfüllen und anschließend über Kopieren oder TXT Export die Konfiguration erzeugen.\n\nHinweis:\nDropdowns begrenzen feste Auswahlwerte. IPs, Interfaces, VLAN-Listen, ACL-Namen und Beschreibungen bleiben Freitext.",
+    "field.noDescription": "Keine Detailbeschreibung hinterlegt. Feld nur ausfüllen, wenn dieser Befehl für die Zielkonfiguration benötigt wird.",
+    "heading.purpose": "Zweck:",
+    "heading.format": "Format:",
+    "heading.separator": "Trennzeichen:",
+    "field.separatorDescription": "Jede Zeile ist ein eigener Eintrag. Spalten werden mit | getrennt.",
+    "heading.possibleCommands": "Mögliche Befehle / Syntax:",
+    "command.more": "• ... weitere {0} Befehle im Tab Befehle.",
+    "heading.commandParts": "Befehlsteile:",
+    "heading.optionalParts": "Optionale Teile:",
+    "optionalPart.description": "optionaler Befehlsanteil; nur setzen, wenn benötigt oder vom IOS unterstützt.",
+    "heading.exampleSyntax": "Beispiel-Syntax:",
+    "parameter.choice": "Auswahlwert. Einer der angegebenen Werte wird eingesetzt, z. B. {0}."
+  },
+  "moduleHelp": {
+    "basic": "Zweck:\nGrundidentität, Basisschutz und Zeitzone des Geräts.\n\nErzeugte Befehle:\nhostname, ip domain-name, enable secret, no ip domain-lookup, service password-encryption, clock timezone und clock summer-time.\n\nHinweis:\nDomain ist besonders für SSH/RSA-Key wichtig. Clock-Einstellungen liegen bewusst im Basisbereich.",
+    "routingBase": "Zweck:\nAllgemeine globale Routingfunktionen konfigurieren.\n\nErzeugte Befehle:\nip routing oder no ip routing.\n\nHinweis:\nDer Befehl ist besonders auf Layer-3-Switches relevant und wird beim Import nicht mehr als Zusatzbefehl behandelt.",
+    "ssh": "Zweck:\nSSH-Zugriff und line vty zentral konfigurieren.\n\nErzeugte Befehle:\ncrypto key generate rsa, ip ssh version 2, line vty, login local/AAA, transport input ssh, exec-timeout.\n\nWichtig:\nVTY wird nur hier erzeugt, damit keine doppelte line-vty-Konfiguration entsteht.",
+    "aaa": "Zweck:\nAuthentifizierung und Autorisierung vorbereiten.\n\nErzeugte Befehle:\naaa new-model, aaa authentication login default, aaa authorization exec default.\n\nHinweis:\nBei RADIUS/TACACS lokale Benutzer als Fallback einplanen.",
+    "vlans": "Zweck:\nVLANs und SVIs ohne VRF konfigurieren.\n\nErzeugte Befehle:\nvlan, name, interface vlan, ip address, ipv6 address.\n\nHinweis:\nIm VRF-Modus stattdessen VLAN / SVI VRF nutzen.",
+    "vrfDefs": "Zweck:\nVRFs als getrennte Routingtabellen definieren.\n\nErzeugte Befehle:\nip vrf <Name>, rd <ASN:Nummer>, description.\n\nHinweis:\nAndere VRF-Module referenzieren diese Namen exakt.",
+    "vrfSvi": "Zweck:\nSVIs einer VRF zuordnen.\n\nErzeugte Befehle:\ninterface vlan, ip vrf forwarding, ip address, ipv6 address.\n\nWichtig:\nip vrf forwarding muss vor ip address stehen.",
+    "vrfStaticRoutes": "Zweck:\nStatische IPv4- und IPv6-Routen pro VRF erzeugen.\n\nErzeugte Befehle:\nip route vrf ..., ipv6 route vrf ...",
+    "ospf": "Zweck:\nOSPFv2 ohne VRF für IPv4 konfigurieren.\n\nErzeugte Befehle:\nrouter ospf, router-id, log-adjacency-changes, network ... area ... oder interfacebasiert ip ospf <Prozess> area <Area>.\n\nHinweis:\nDie Konfigurationsart kann prozessbasiert, interfacebasiert oder gemischt gewählt werden.",
+    "stpExtended": "Zweck:\nDynamische Spanning-Tree-Konfiguration für PVST+, Rapid-PVST+ und MST. Nach Auswahl des Modus werden nur gültige Eingabebereiche angezeigt und exportiert.\n\nErzeugte Befehle:\nGlobale STP-Optionen, VLAN-Root/Priority/Timer, Interfaceprofile, PortFast, BPDU Guard/Filter, Root/Loop Guard, Link-Type, Cost, Port-Priority, MST-Region/Instanzen, Errdisable-Recovery und Rücksetzbefehle.\n\nPrüfungen:\nPrioritätsraster, VLAN-/MST-Zuordnungen, Guard-Konflikte, Port-Channel-Konsistenz, MST-Regionsvergleich und Plattformhinweise.\n\nLive-Vorschau:\nDer erzeugte STP-Abschnitt wird direkt im Modul angezeigt.",
+    "bgp": "Zweck:\nBGP ohne VRF für IPv4/IPv6 konfigurieren.\n\nErzeugte Befehle:\nrouter bgp, neighbor remote-as, network, address-family ipv6.",
+    "nat": "Zweck:\nNAT/PAT auf Routern konfigurieren.\n\nErzeugte Befehle:\nip nat inside/outside, ip nat inside source ...\n\nWichtig:\nInside/Outside Interfaces müssen korrekt gesetzt sein."
+  },
+  "commandAliases": {
+    "basic": [
+      "Grunddaten",
+      "General settings",
+      "Abschluss",
+      "Completion"
+    ],
+    "banner": [
+      "Banner"
+    ],
+    "ssh": [
+      "SSH",
+      "VTY"
+    ],
+    "aaa": [
+      "AAA",
+      "Console"
+    ],
+    "radiusTacacs": [
+      "RADIUS",
+      "TACACS+",
+      "AAA"
+    ],
+    "monitoringBase": [
+      "NTP",
+      "Syslog",
+      "SNMP",
+      "Archive",
+      "Login-Audit"
+    ],
+    "userRights": [
+      "Benutzer",
+      "user",
+      "Users",
+      "Parser View"
+    ],
+    "interfaces": [
+      "Interface"
+    ],
+    "ranges": [
+      "Interface"
+    ],
+    "subinterfaces": [
+      "Subinterface"
+    ],
+    "routerStick": [
+      "Subinterface",
+      "VLAN"
+    ],
+    "qosBasic": [
+      "QoS"
+    ],
+    "interfaceProfiles": [
+      "Interface",
+      "Switchport",
+      "QoS",
+      "Port-Security",
+      "STP"
+    ],
+    "trunkUplink": [
+      "Switchport",
+      "VLAN"
+    ],
+    "etherChannelExt": [
+      "EtherChannel",
+      "Switchport"
+    ],
+    "interfaceRoles": [
+      "Switchport",
+      "STP",
+      "QoS"
+    ],
+    "voip": [
+      "VoIP",
+      "DHCP",
+      "Switchport",
+      "QoS",
+      "STP"
+    ],
+    "qinq": [
+      "QinQ",
+      "Switchport",
+      "Subinterface",
+      "VLAN"
+    ],
+    "vlans": [
+      "VLAN",
+      "SVI",
+      "Switch"
+    ],
+    "switchSec": [
+      "DHCP Snooping",
+      "DAI"
+    ],
+    "accessBaseline": [
+      "Switchport",
+      "Port-Security",
+      "STP",
+      "Storm-Control"
+    ],
+    "errdisableRecovery": [
+      "Errdisable"
+    ],
+    "stpExtended": [
+      "STP"
+    ],
+    "switchSecExt": [
+      "DHCP Snooping",
+      "DAI",
+      "IPSG"
+    ],
+    "portSecurityExt": [
+      "Port-Security"
+    ],
+    "vlanIpPlan": [
+      "VLAN",
+      "SVI"
+    ],
+    "staticRoutes": [
+      "Static Route",
+      "Backup Route",
+      "Tracked Route"
+    ],
+    "ospf": [
+      "OSPF"
+    ],
+    "isis": [
+      "IS-IS"
+    ],
+    "bgp": [
+      "BGP"
+    ],
+    "fhrp": [
+      "FHRP"
+    ],
+    "vrfLite": [
+      "VRF-Lite",
+      "VRF",
+      "VRF Interface",
+      "VRF Route"
+    ],
+    "routeMapFilter": [
+      "Route-Map",
+      "Prefix-List"
+    ],
+    "ipSlaTracking": [
+      "Tracked Route",
+      "Backup Route"
+    ],
+    "ospfAdvanced": [
+      "OSPF"
+    ],
+    "bgpAdvanced": [
+      "BGP",
+      "IPv6 BGP"
+    ],
+    "mpls": [
+      "MPLS"
+    ],
+    "vrfDefs": [
+      "VRF"
+    ],
+    "vrfSvi": [
+      "VRF Interface",
+      "SVI"
+    ],
+    "vrfStaticRoutes": [
+      "VRF Route"
+    ],
+    "vrfOspf": [
+      "VRF OSPF"
+    ],
+    "vrfOspfv3": [
+      "VRF OSPFv3"
+    ],
+    "vrfBgp": [
+      "VRF BGP"
+    ],
+    "ipv6": [
+      "IPv6",
+      "IPv6 RA"
+    ],
+    "dhcp": [
+      "DHCP",
+      "DHCPv6 Relay"
+    ],
+    "acl": [
+      "ACL"
+    ],
+    "ipv6Extended": [
+      "IPv6 Route",
+      "IPv6 ACL",
+      "IPv6 RA",
+      "DHCPv6 Relay"
+    ],
+    "ospfv3": [
+      "OSPFv3"
+    ],
+    "ipv6RoutingProtocols": [
+      "IPv6 BGP",
+      "IPv6 EIGRP",
+      "IPv6 IS-IS"
+    ],
+    "aclAssistant": [
+      "ACL"
+    ],
+    "security": [
+      "Login-Audit",
+      "Switch"
+    ],
+    "nat": [
+      "NAT",
+      "NAT Exempt"
+    ],
+    "vpn": [
+      "GRE"
+    ],
+    "customCommands": [
+      "Eigene Befehle",
+      "custom commands",
+      "Custom commands"
+    ],
+    "greIpsec": [
+      "GRE",
+      "IPsec"
+    ],
+    "wanFailover": [
+      "Tracked Route",
+      "Backup Route"
+    ],
+    "zoneFirewall": [
+      "Zone Firewall"
+    ],
+    "dmzAssistant": [
+      "DMZ",
+      "ACL",
+      "NAT"
+    ],
+    "vpnAdvanced": [
+      "IPsec"
+    ]
+  },
+  "parameterHelp": {
+    "hostname": "Gerätename im Cisco-Prompt und in Logs.",
+    "domain": "DNS-Domainname; relevant für SSH/RSA-Schlüssel.",
+    "secret": "geheimer Schlüssel oder Passwort; nicht im Klartext dokumentieren.",
+    "password": "Passwortwert für Login, Line oder Parser View.",
+    "user": "lokaler Benutzername oder Accountname.",
+    "interface": "Cisco-Interface, z. B. GigabitEthernet0/1, Vlan99 oder Loopback0.",
+    "interfaceRange": "Interfacebereich, z. B. Gi0/1-24 oder Fa0/1,Fa0/3.",
+    "ip": "IPv4-/IPv6-Adresse oder erreichbarer Next-Hop, abhängig vom Befehl.",
+    "network": "Netzadresse, z. B. 192.168.10.0 oder 2001:db8::/64.",
+    "mask": "Subnetzmaske, z. B. 255.255.255.0.",
+    "wildcard": "OSPF-/ACL-Wildcard, z. B. 0.0.0.255.",
+    "vlanList": "VLAN-Liste, z. B. 10,20,30 oder 10-20.",
+    "voiceVlan": "Voice-VLAN für IP-Telefone; wird mit switchport voice vlan gesetzt.",
+    "dataVlan": "Daten-VLAN für Clients/PCs hinter dem Telefon.",
+    "providerVlan": "äußeres Service-/Provider-VLAN bei QinQ.",
+    "customerVlan": "inneres Kunden-VLAN bei QinQ.",
+    "tftp": "TFTP- oder CallManager-IP für Telefon-Provisionierung.",
+    "nativeVlan": "Native VLAN auf einem 802.1Q-Trunk.",
+    "vlan": "VLAN-ID im Bereich 1–4094, abhängig von Plattform und Design.",
+    "vrf": "Name der VRF/Routingtabelle; muss exakt zur VRF-Definition passen.",
+    "rd": "Route Distinguisher, meistens im Format ASN:Nummer.",
+    "routeTarget": "Route-Target/Extended Community, meistens im Format ASN:Nummer.",
+    "neighbor": "Nachbaradresse, z. B. LDP- oder BGP-Peer-IP.",
+    "label": "MPLS Label oder Label-Protokoll, abhängig vom Befehl.",
+    "asn": "BGP Autonomous-System-Nummer.",
+    "ospfProcess": "lokale OSPF-Prozess-ID; muss nicht zwischen Geräten identisch sein.",
+    "routerId": "eindeutige Router-ID im Format einer IPv4-Adresse.",
+    "area": "OSPF-Area, z. B. 0 oder 0.0.0.0.",
+    "acl": "ACL-Name oder ACL-Nummer, die vorher erstellt oder referenziert wird.",
+    "routeMap": "Name einer Route-Map für Policy Routing, NAT-Ausnahme oder Routingfilter.",
+    "prefixList": "Name einer Prefix-List für Routingfilter.",
+    "port": "TCP-/UDP-Port oder Dienst, z. B. 22, 80, 443, 53.",
+    "protocol": "Protokollwert, z. B. ip, tcp, udp, icmp, ospf oder ein inspect-Protokoll.",
+    "source": "Quelladresse, Quellnetz oder Quellobjekt.",
+    "destination": "Zieladresse, Zielnetz oder Zielobjekt.",
+    "zone": "Security-Zone der Zone-Based Firewall.",
+    "classMap": "Name einer Class-Map für QoS oder Firewall-Inspection.",
+    "policyMap": "Name einer Policy-Map für QoS oder Firewall-Inspection.",
+    "transformSet": "IPsec Transform-Set mit Verschlüsselungs-/Hash-Parametern.",
+    "pool": "Name eines DHCP- oder NAT-Pools.",
+    "seconds": "Zeitwert in Sekunden.",
+    "minutes": "Zeitwert in Minuten.",
+    "bytes": "Speichergröße oder Puffergröße in Byte.",
+    "level": "Privilege-, Logging- oder Security-Level, abhängig vom Befehl.",
+    "priority": "Priorität oder Sequenznummer; niedriger ist oft bevorzugt.",
+    "percent": "Prozentwert für Bandbreiten- oder QoS-Reservierung.",
+    "dscp": "DSCP-Wert oder DSCP-Klasse für QoS-Matching.",
+    "description": "frei wählbarer Beschreibungstext für Dokumentation.",
+    "name": "frei wählbarer Name, ID oder Nummer passend zum jeweiligen Modul.",
+    "default": "Platzhalter. Dieser Wert wird durch deine Eingabe im Modul ersetzt."
+  }
+}

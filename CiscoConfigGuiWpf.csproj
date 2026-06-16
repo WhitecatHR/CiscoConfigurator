@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Cisco Konfigurator</AssemblyName>
+    <RootNamespace>CiscoConfigGuiWpf</RootNamespace>
     <Product>Cisco Konfigurator</Product>
     <AssemblyTitle>Cisco Konfigurator</AssemblyTitle>
     <FileDescription>Cisco Konfigurator</FileDescription>
@@ -26,8 +27,26 @@
 
   <ItemGroup>
     <None Remove="Assets/network.ico" />
+    <None Remove="Localization\*.json" />
     <Resource Include="Assets/network.ico" />
     <Resource Include="Assets/network_icon_preview.png" />
+
+    <!--
+      Sprachdateien werden als WPF-Ressourcen in die Assembly eingebettet.
+      Application.GetResourceStream kann sie dadurch auch bei Single-File-Publish
+      zuverlässig laden, ohne dass separate JSON-Dateien neben der EXE liegen.
+    -->
+    <Resource Include="Localization\Strings.de-DE.json" />
+    <Resource Include="Localization\Strings.en-US.json" />
+    <Resource Include="Localization\Modules.de-DE.json" />
+    <Resource Include="Localization\Modules.en-US.json" />
+    <Resource Include="Localization\Tooltips.de-DE.json" />
+    <Resource Include="Localization\Tooltips.en-US.json" />
+    <Resource Include="Localization\Commands.Configuration.de-DE.json" />
+    <Resource Include="Localization\Commands.Configuration.en-US.json" />
+    <Resource Include="Localization\Commands.Operational.de-DE.json" />
+    <Resource Include="Localization\Commands.Operational.en-US.json" />
+    <Resource Include="Localization\TranslationRules.en-US.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />

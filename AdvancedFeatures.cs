@@ -86,7 +86,7 @@ public partial class MainWindow
 
     private void BuildProjectWorkspaceTab()
     {
-        var tab = new TabItem { Header = "▣  Projekt" };
+        var tab = new TabItem { Header = LocalizationService.Get("text.projekt") };
         var root = new Grid();
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -95,9 +95,9 @@ public partial class MainWindow
             "Mehrgeräte-Projekt",
             "Verwaltet mehrere Router und Switches mit gemeinsamen IPAM-, Link-, Backup- und Berichtsdaten.");
         var headerActions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-        var newButton = new Button { Content = "Neu" };
-        var openButton = new Button { Content = "Öffnen" };
-        var saveButton = new Button { Content = "Speichern", Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var newButton = new Button { Content = LocalizationService.Get("text.neu") };
+        var openButton = new Button { Content = LocalizationService.Get("text.offnen") };
+        var saveButton = new Button { Content = LocalizationService.Get("text.speichern"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         newButton.Click += (_, _) => NewNetworkProject();
         openButton.Click += (_, _) => OpenNetworkProject();
         saveButton.Click += (_, _) => SaveNetworkProject(false);
@@ -132,14 +132,14 @@ public partial class MainWindow
         content.Children.Add(deviceArea);
 
         var deviceButtons = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
-        var captureButton = new Button { Content = "Aktuelles Gerät übernehmen", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var updateButton = new Button { Content = "Ausgewähltes aktualisieren" };
-        var applyButton = new Button { Content = "Ausgewähltes laden" };
-        var duplicateButton = new Button { Content = "Duplizieren" };
-        var peerButton = new Button { Content = "Gegenstelle erzeugen" };
-        var showConfigButton = new Button { Content = "Konfiguration anzeigen" };
-        var exportConfigButton = new Button { Content = "Konfiguration exportieren" };
-        var deleteButton = new Button { Content = "Entfernen" };
+        var captureButton = new Button { Content = LocalizationService.Get("text.aktuelles_gerat_ubernehmen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var updateButton = new Button { Content = LocalizationService.Get("text.ausgewahltes_aktualisieren") };
+        var applyButton = new Button { Content = LocalizationService.Get("text.ausgewahltes_laden") };
+        var duplicateButton = new Button { Content = LocalizationService.Get("text.duplizieren") };
+        var peerButton = new Button { Content = LocalizationService.Get("text.gegenstelle_erzeugen") };
+        var showConfigButton = new Button { Content = LocalizationService.Get("text.konfiguration_anzeigen") };
+        var exportConfigButton = new Button { Content = LocalizationService.Get("text.konfiguration_exportieren") };
+        var deleteButton = new Button { Content = LocalizationService.Get("text.entfernen") };
         captureButton.Click += async (_, _) => await CaptureCurrentDeviceAsync(false);
         updateButton.Click += async (_, _) => await UpdateSelectedProjectDeviceAsync();
         applyButton.Click += (_, _) => ApplySelectedProjectDevice();
@@ -158,11 +158,11 @@ public partial class MainWindow
             SelectionMode = DataGridSelectionMode.Single,
             AutoGenerateColumns = false
         };
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(ProjectDeviceSnapshot.Name)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Typ", Binding = new Binding(nameof(ProjectDeviceSnapshot.DeviceType)), Width = 115 });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Modus", Binding = new Binding(nameof(ProjectDeviceSnapshot.ConfigMode)), Width = 120 });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Status", Binding = new Binding(nameof(ProjectDeviceSnapshot.Status)), Width = 165 });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Geändert", Binding = new Binding(nameof(ProjectDeviceSnapshot.LastUpdatedUtc)) { StringFormat = "dd.MM.yyyy HH:mm" }, Width = 145 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.device"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Name)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.typ"), Binding = new Binding(nameof(ProjectDeviceSnapshot.DeviceType)), Width = 115 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.mode"), Binding = new Binding(nameof(ProjectDeviceSnapshot.ConfigMode)), Width = 120 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.status"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Status)), Width = 165 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.geandert"), Binding = new Binding(nameof(ProjectDeviceSnapshot.LastUpdatedUtc)) { StringFormat = "dd.MM.yyyy HH:mm" }, Width = 145 });
         _projectDeviceGrid.MouseDoubleClick += (_, _) => ApplySelectedProjectDevice();
         Grid.SetRow(_projectDeviceGrid, 1);
         deviceArea.Children.Add(_projectDeviceGrid);
@@ -174,7 +174,7 @@ public partial class MainWindow
 
     private void BuildIpamAndPortPlanTab()
     {
-        var tab = new TabItem { Header = "▤  IPAM / Ports" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.ipam_ports") };
         var inner = new TabControl();
         inner.Items.Add(BuildIpamSubTab());
         inner.Items.Add(BuildPortPlanSubTab());
@@ -185,7 +185,7 @@ public partial class MainWindow
 
     private TabItem BuildIpamSubTab()
     {
-        var tab = new TabItem { Header = "IP-Adressverwaltung" };
+        var tab = new TabItem { Header = LocalizationService.Get("text.ip_adressverwaltung") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -193,12 +193,12 @@ public partial class MainWindow
 
         root.Children.Add(CreateAdvancedHeader("IPAM", "Zentrale IPv4-/IPv6-Netzplanung mit VLAN, Gateway, DHCP-Bereich, Gerät und Interface."));
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var add = new Button { Content = "Eintrag hinzufügen", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var remove = new Button { Content = "Ausgewählten entfernen" };
-        var importCurrent = new Button { Content = "Aus aktueller Konfiguration" };
-        var importProject = new Button { Content = "Aus allen Projektgeräten" };
-        var validate = new Button { Content = "Überschneidungen prüfen" };
-        var export = new Button { Content = "CSV Export" };
+        var add = new Button { Content = LocalizationService.Get("text.eintrag_hinzufugen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var remove = new Button { Content = LocalizationService.Get("text.ausgewahlten_entfernen") };
+        var importCurrent = new Button { Content = LocalizationService.Get("text.aus_aktueller_konfiguration") };
+        var importProject = new Button { Content = LocalizationService.Get("text.aus_allen_projektgeraten") };
+        var validate = new Button { Content = LocalizationService.Get("text.uberschneidungen_prufen") };
+        var export = new Button { Content = LocalizationService.Get("common.csv_export") };
         add.Click += (_, _) => { _currentProject.IpamEntries.Add(new IpamEntry()); _ipamGrid?.ScrollIntoView(_currentProject.IpamEntries.Last()); ScheduleAutoSave(); };
         remove.Click += (_, _) => { if (_ipamGrid?.SelectedItem is IpamEntry item) _currentProject.IpamEntries.Remove(item); ScheduleAutoSave(); };
         importCurrent.Click += async (_, _) => await ImportCurrentConfigIntoIpamAsync();
@@ -217,15 +217,15 @@ public partial class MainWindow
             CanUserDeleteRows = true,
             AutoGenerateColumns = false
         };
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "Netzadresse", Binding = new Binding(nameof(IpamEntry.Network)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "Präfix", Binding = new Binding(nameof(IpamEntry.PrefixLength)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 65 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "VLAN", Binding = new Binding(nameof(IpamEntry.Vlan)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 65 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "Gateway", Binding = new Binding(nameof(IpamEntry.Gateway)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "DHCP Start", Binding = new Binding(nameof(IpamEntry.DhcpStart)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "DHCP Ende", Binding = new Binding(nameof(IpamEntry.DhcpEnd)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(IpamEntry.Device)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 130 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "Interface", Binding = new Binding(nameof(IpamEntry.Interface)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 150 });
-        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = "Beschreibung", Binding = new Binding(nameof(IpamEntry.Description)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("ipam.network_address"), Binding = new Binding(nameof(IpamEntry.Network)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.prafix"), Binding = new Binding(nameof(IpamEntry.PrefixLength)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 65 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.vlan"), Binding = new Binding(nameof(IpamEntry.Vlan)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 65 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("ipam.gateway"), Binding = new Binding(nameof(IpamEntry.Gateway)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.dhcp_start"), Binding = new Binding(nameof(IpamEntry.DhcpStart)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.dhcp_ende"), Binding = new Binding(nameof(IpamEntry.DhcpEnd)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 145 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.device"), Binding = new Binding(nameof(IpamEntry.Device)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 130 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.interface"), Binding = new Binding(nameof(IpamEntry.Interface)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 150 });
+        _ipamGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.beschreibung"), Binding = new Binding(nameof(IpamEntry.Description)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         _ipamGrid.CellEditEnding += (_, _) => ScheduleAutoSave();
         Grid.SetRow(_ipamGrid, 2);
         root.Children.Add(_ipamGrid);
@@ -235,16 +235,16 @@ public partial class MainWindow
 
     private TabItem BuildPortPlanSubTab()
     {
-        var tab = new TabItem { Header = "Portplan" };
+        var tab = new TabItem { Header = LocalizationService.Get("ipam.port_plan") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader("Interface- und Portplan", "Erzeugt aus der aktuellen oder gespeicherten Konfiguration eine tabellarische Portübersicht."));
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var current = new Button { Content = "Aktuelle Konfiguration", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var selected = new Button { Content = "Ausgewähltes Projektgerät" };
-        var export = new Button { Content = "CSV Export" };
+        var current = new Button { Content = LocalizationService.Get("text.aktuelle_konfiguration"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var selected = new Button { Content = LocalizationService.Get("text.ausgewahltes_projektgerat") };
+        var export = new Button { Content = LocalizationService.Get("common.csv_export") };
         current.Click += async (_, _) => await RefreshPortPlanFromCurrentAsync();
         selected.Click += (_, _) => RefreshPortPlanFromSelectedDevice();
         export.Click += (_, _) => ExportPortPlanCsv();
@@ -260,7 +260,7 @@ public partial class MainWindow
 
     private void BuildAnalysisCenterTab()
     {
-        var tab = new TabItem { Header = "◉  Analyse" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.analysis") };
         var inner = new TabControl();
         inner.Items.Add(BuildDependencySubTab());
         inner.Items.Add(BuildSecuritySubTab());
@@ -274,16 +274,16 @@ public partial class MainWindow
 
     private TabItem BuildDependencySubTab()
     {
-        var tab = new TabItem { Header = "Abhängigkeiten" };
+        var tab = new TabItem { Header = LocalizationService.Get("text.abhangigkeiten") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader("Abhängigkeits- und Konfliktprüfung", "Prüft Modulbeziehungen, fehlende Pflichtwerte, VLAN-/Trunk-Konsistenz und Routingvoraussetzungen."));
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var refresh = new Button { Content = "Prüfen", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var fix = new Button { Content = "Alle automatisch korrigierbaren beheben" };
-        var navigate = new Button { Content = "Zum ausgewählten Feld" };
+        var refresh = new Button { Content = LocalizationService.Get("text.prufen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var fix = new Button { Content = LocalizationService.Get("text.alle_automatisch_korrigierbaren_beheben") };
+        var navigate = new Button { Content = LocalizationService.Get("text.zum_ausgewahlten_feld") };
         refresh.Click += (_, _) => RefreshAdvancedDependencies();
         fix.Click += (_, _) => AutoFixAdvancedDependencies();
         navigate.Click += (_, _) => NavigateToSelectedDependency();
@@ -291,10 +291,10 @@ public partial class MainWindow
         Grid.SetRow(actions, 1); root.Children.Add(actions);
 
         _dependencyGrid = new DataGrid { IsReadOnly = true, AutoGenerateColumns = false };
-        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = "Stufe", Binding = new Binding(nameof(DependencyFinding.Severity)), Width = 85 });
-        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = "Bereich", Binding = new Binding(nameof(DependencyFinding.Area)), Width = 115 });
-        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = "Meldung", Binding = new Binding(nameof(DependencyFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
-        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = "Auto-Fix", Binding = new Binding(nameof(DependencyFinding.FixKey)), Width = 180 });
+        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.stufe"), Binding = new Binding(nameof(DependencyFinding.Severity)), Width = 85 });
+        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.bereich"), Binding = new Binding(nameof(DependencyFinding.Area)), Width = 115 });
+        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.meldung"), Binding = new Binding(nameof(DependencyFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _dependencyGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.auto_fix"), Binding = new Binding(nameof(DependencyFinding.FixKey)), Width = 180 });
         _dependencyGrid.MouseDoubleClick += (_, _) => NavigateToSelectedDependency();
         Grid.SetRow(_dependencyGrid, 2); root.Children.Add(_dependencyGrid);
         tab.Content = root;
@@ -303,20 +303,20 @@ public partial class MainWindow
 
     private TabItem BuildSecuritySubTab()
     {
-        var tab = new TabItem { Header = "Sicherheit" };
+        var tab = new TabItem { Header = LocalizationService.Get("analysis.security") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader("Sicherheitsprüfung", "Analysiert die erzeugte Konfiguration auf typische Management-, Passwort-, SNMP-, STP- und VLAN-Risiken."));
-        var refresh = new Button { Content = "Aktuelle Konfiguration prüfen", Style = TryFindResource("PrimaryButtonStyle") as Style, Margin = new Thickness(0, 8, 0, 8), HorizontalAlignment = HorizontalAlignment.Left };
+        var refresh = new Button { Content = LocalizationService.Get("text.aktuelle_konfiguration_prufen"), Style = TryFindResource("PrimaryButtonStyle") as Style, Margin = new Thickness(0, 8, 0, 8), HorizontalAlignment = HorizontalAlignment.Left };
         refresh.Click += async (_, _) => await RefreshSecurityAuditAsync();
         Grid.SetRow(refresh, 1); root.Children.Add(refresh);
         _securityGrid = new DataGrid { IsReadOnly = true, AutoGenerateColumns = false };
-        _securityGrid.Columns.Add(new DataGridTextColumn { Header = "Stufe", Binding = new Binding(nameof(SecurityFinding.Severity)), Width = 85 });
-        _securityGrid.Columns.Add(new DataGridTextColumn { Header = "Kategorie", Binding = new Binding(nameof(SecurityFinding.Category)), Width = 120 });
-        _securityGrid.Columns.Add(new DataGridTextColumn { Header = "Feststellung", Binding = new Binding(nameof(SecurityFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
-        _securityGrid.Columns.Add(new DataGridTextColumn { Header = "Empfehlung", Binding = new Binding(nameof(SecurityFinding.Recommendation)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _securityGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.stufe"), Binding = new Binding(nameof(SecurityFinding.Severity)), Width = 85 });
+        _securityGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.kategorie"), Binding = new Binding(nameof(SecurityFinding.Category)), Width = 120 });
+        _securityGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.feststellung"), Binding = new Binding(nameof(SecurityFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _securityGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.empfehlung.61d30d48"), Binding = new Binding(nameof(SecurityFinding.Recommendation)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         Grid.SetRow(_securityGrid, 2); root.Children.Add(_securityGrid);
         tab.Content = root;
         return tab;
@@ -324,7 +324,7 @@ public partial class MainWindow
 
     private TabItem BuildDiffSubTab()
     {
-        var tab = new TabItem { Header = "Vergleich / Rollback" };
+        var tab = new TabItem { Header = LocalizationService.Get("text.vergleich_rollback") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
@@ -343,11 +343,11 @@ public partial class MainWindow
         Grid.SetRow(inputs, 1); root.Children.Add(inputs);
 
         var actions = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
-        var oldFile = new Button { Content = "Alt aus Datei" };
-        var newFile = new Button { Content = "Neu aus Datei" };
-        var currentAsNew = new Button { Content = "Aktuell als Neu" };
-        var selectedAsOld = new Button { Content = "Projektgerät als Alt" };
-        var compare = new Button { Content = "Vergleichen", Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var oldFile = new Button { Content = LocalizationService.Get("text.alt_aus_datei") };
+        var newFile = new Button { Content = LocalizationService.Get("text.neu_aus_datei") };
+        var currentAsNew = new Button { Content = LocalizationService.Get("text.aktuell_als_neu") };
+        var selectedAsOld = new Button { Content = LocalizationService.Get("text.projektgerat_als_alt") };
+        var compare = new Button { Content = LocalizationService.Get("common.compare"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         oldFile.Click += (_, _) => LoadTextIntoBox(_diffOldBox);
         newFile.Click += (_, _) => LoadTextIntoBox(_diffNewBox);
         currentAsNew.Click += async (_, _) => { if (_diffNewBox != null) _diffNewBox.Text = await GenerateConfigAsync(); };
@@ -357,11 +357,11 @@ public partial class MainWindow
         Grid.SetRow(actions, 2); root.Children.Add(actions);
 
         _diffGrid = new DataGrid { IsReadOnly = true, AutoGenerateColumns = false };
-        _diffGrid.Columns.Add(new DataGridTextColumn { Header = "Änderung", Binding = new Binding(nameof(ConfigDiffLine.Change)), Width = 100 });
-        _diffGrid.Columns.Add(new DataGridTextColumn { Header = "Kontext", Binding = new Binding(nameof(ConfigDiffLine.Context)), Width = 220 });
-        _diffGrid.Columns.Add(new DataGridTextColumn { Header = "Befehl", Binding = new Binding(nameof(ConfigDiffLine.Line)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
-        _diffGrid.Columns.Add(new DataGridTextColumn { Header = "Alt", Binding = new Binding(nameof(ConfigDiffLine.OldLine)), Width = 55 });
-        _diffGrid.Columns.Add(new DataGridTextColumn { Header = "Neu", Binding = new Binding(nameof(ConfigDiffLine.NewLine)), Width = 55 });
+        _diffGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.anderung"), Binding = new Binding(nameof(ConfigDiffLine.Change)), Width = 100 });
+        _diffGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.kontext"), Binding = new Binding(nameof(ConfigDiffLine.Context)), Width = 220 });
+        _diffGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.befehl"), Binding = new Binding(nameof(ConfigDiffLine.Line)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _diffGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("common.old"), Binding = new Binding(nameof(ConfigDiffLine.OldLine)), Width = 55 });
+        _diffGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.neu"), Binding = new Binding(nameof(ConfigDiffLine.NewLine)), Width = 55 });
         Grid.SetRow(_diffGrid, 3); root.Children.Add(_diffGrid);
         _rollbackBox = CreateCodeBox("Rollback");
         Grid.SetRow(_rollbackBox, 4); root.Children.Add(_rollbackBox);
@@ -371,14 +371,14 @@ public partial class MainWindow
 
     private TabItem BuildGlobalSearchSubTab()
     {
-        var tab = new TabItem { Header = "Globale Suche" };
+        var tab = new TabItem { Header = LocalizationService.Get("analysis.global_search") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader("Suche über Module, Felder und Befehle", "Findet Einstellungen und Cisco-Befehle und navigiert direkt zum passenden Eingabefeld."));
         var searchRow = new DockPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var button = new Button { Content = "Suchen", Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var button = new Button { Content = LocalizationService.Get("common.search"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         DockPanel.SetDock(button, Dock.Right);
         _searchBox = new TextBox { MinWidth = 420, Margin = new Thickness(0, 0, 8, 0) };
         _searchBox.KeyDown += (_, e) => { if (e.Key == Key.Enter) RefreshGlobalSearch(); };
@@ -386,9 +386,9 @@ public partial class MainWindow
         searchRow.Children.Add(button); searchRow.Children.Add(_searchBox);
         Grid.SetRow(searchRow, 1); root.Children.Add(searchRow);
         _searchGrid = new DataGrid { IsReadOnly = true, AutoGenerateColumns = false };
-        _searchGrid.Columns.Add(new DataGridTextColumn { Header = "Typ", Binding = new Binding(nameof(GlobalSearchResult.Kind)), Width = 85 });
-        _searchGrid.Columns.Add(new DataGridTextColumn { Header = "Treffer", Binding = new Binding(nameof(GlobalSearchResult.Title)), Width = 300 });
-        _searchGrid.Columns.Add(new DataGridTextColumn { Header = "Beschreibung", Binding = new Binding(nameof(GlobalSearchResult.Detail)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _searchGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.typ"), Binding = new Binding(nameof(GlobalSearchResult.Kind)), Width = 85 });
+        _searchGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("common.results"), Binding = new Binding(nameof(GlobalSearchResult.Title)), Width = 300 });
+        _searchGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.beschreibung"), Binding = new Binding(nameof(GlobalSearchResult.Detail)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         _searchGrid.MouseDoubleClick += (_, _) => NavigateToSelectedSearchResult();
         Grid.SetRow(_searchGrid, 2); root.Children.Add(_searchGrid);
         tab.Content = root;
@@ -397,14 +397,14 @@ public partial class MainWindow
 
     private TabItem BuildCommandAnalysisSubTab()
     {
-        var tab = new TabItem { Header = "Befehlsanalyse" };
+        var tab = new TabItem { Header = LocalizationService.Get("analysis.command_analysis") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader("Cisco-Befehl erklären", "Ordnet eine Befehlszeile dem Register zu und erklärt Befehlswörter sowie Parameterpositionen."));
         var inputRow = new DockPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var analyze = new Button { Content = "Analysieren", Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var analyze = new Button { Content = LocalizationService.Get("common.analyze"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         DockPanel.SetDock(analyze, Dock.Right);
         _commandInputBox = new TextBox { Margin = new Thickness(0, 0, 8, 0), Text = "ip ospf 10 area 0" };
         _commandInputBox.KeyDown += (_, e) => { if (e.Key == Key.Enter) RefreshCommandAnalysis(); };
@@ -419,7 +419,7 @@ public partial class MainWindow
 
     private void BuildOperationsTab()
     {
-        var tab = new TabItem { Header = "⇅  Betrieb" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.operations") };
         var root = new Grid();
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -438,16 +438,16 @@ public partial class MainWindow
         _sshAuthModeCombo = new ComboBox { ItemsSource = new[] { "OpenSSH + Schlüssel", "Plink + Passwort" }, SelectedIndex = 0, Width = 170, Margin = new Thickness(6), ItemTemplate = LocalizationService.CreateLocalizedStringTemplate() };
         AddAdvancedInlineControl(settingsGrid, 0, 3, "Authentifizierung", _sshAuthModeCombo);
         _sshDelayBox = AddAdvancedInlineField(settingsGrid, 0, 4, "Zeilen-Delay ms", _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture), 90);
-        _sshSaveCheck = new CheckBox { Content = "Nach Übertragung speichern", IsChecked = true, Margin = new Thickness(10, 28, 0, 0), VerticalAlignment = VerticalAlignment.Top };
+        _sshSaveCheck = new CheckBox { Content = LocalizationService.Get("text.nach_ubertragung_speichern"), IsChecked = true, Margin = new Thickness(10, 28, 0, 0), VerticalAlignment = VerticalAlignment.Top };
         Grid.SetRow(_sshSaveCheck, 0); Grid.SetColumn(_sshSaveCheck, 5); settingsGrid.Children.Add(_sshSaveCheck);
 
         _sshKeyBox = AddAdvancedInlineField(settingsGrid, 1, 0, "Private Key", "", 300, 2);
-        var browseKey = new Button { Content = "Key wählen", Margin = new Thickness(6, 27, 6, 6) };
+        var browseKey = new Button { Content = LocalizationService.Get("text.key_wahlen"), Margin = new Thickness(6, 27, 6, 6) };
         browseKey.Click += (_, _) => BrowseSshKey();
         Grid.SetRow(browseKey, 1); Grid.SetColumn(browseKey, 2); settingsGrid.Children.Add(browseKey);
         _sshPasswordBox = new PasswordBox { Width = 180, Margin = new Thickness(6), Padding = new Thickness(10, 7, 10, 7), Background = new SolidColorBrush(Color.FromRgb(14, 18, 25)), Foreground = Brushes.White, BorderBrush = new SolidColorBrush(Color.FromRgb(39, 46, 58)) };
         AddAdvancedInlineControl(settingsGrid, 1, 3, "Plink-Passwort", _sshPasswordBox);
-        var securityNote = new TextBlock { Text = "Passwörter werden weder im Projekt noch im Autosave gespeichert.", Foreground = new SolidColorBrush(Color.FromRgb(251, 191, 36)), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(10, 29, 0, 0) };
+        var securityNote = new TextBlock { Text = LocalizationService.Get("text.passworter_werden_weder_im_projekt_noch_im_autosave_gespeich"), Foreground = new SolidColorBrush(Color.FromRgb(251, 191, 36)), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(10, 29, 0, 0) };
         Grid.SetRow(securityNote, 1); Grid.SetColumn(securityNote, 4); Grid.SetColumnSpan(securityNote, 2); settingsGrid.Children.Add(securityNote);
         settingsCard.Child = settingsGrid;
         Grid.SetRow(settingsCard, 1); root.Children.Add(settingsCard);
@@ -462,10 +462,10 @@ public partial class MainWindow
         left.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         left.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         var actions = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
-        var test = new Button { Content = "Verbindung testen" };
-        var send = new Button { Content = "Konfiguration senden", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var runBackup = new Button { Content = "Running sichern" };
-        var startBackup = new Button { Content = "Startup sichern" };
+        var test = new Button { Content = LocalizationService.Get("text.verbindung_testen") };
+        var send = new Button { Content = LocalizationService.Get("text.konfiguration_senden"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var runBackup = new Button { Content = LocalizationService.Get("text.running_sichern") };
+        var startBackup = new Button { Content = LocalizationService.Get("text.startup_sichern") };
         test.Click += async (_, _) => await TestSshConnectionAsync();
         send.Click += async (_, _) => await SendCurrentConfigBySshAsync();
         runBackup.Click += async (_, _) => await CreateSshBackupAsync("Running-Config");
@@ -480,19 +480,19 @@ public partial class MainWindow
         right.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         right.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         var backupActions = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
-        var exportBackup = new Button { Content = "Backup exportieren" };
-        var compareBackup = new Button { Content = "Backup als Alt vergleichen" };
-        var deleteBackup = new Button { Content = "Backup entfernen" };
+        var exportBackup = new Button { Content = LocalizationService.Get("text.backup_exportieren") };
+        var compareBackup = new Button { Content = LocalizationService.Get("text.backup_als_alt_vergleichen") };
+        var deleteBackup = new Button { Content = LocalizationService.Get("text.backup_entfernen") };
         exportBackup.Click += (_, _) => ExportSelectedBackup();
         compareBackup.Click += (_, _) => UseSelectedBackupForDiff();
         deleteBackup.Click += (_, _) => DeleteSelectedBackup();
         backupActions.Children.Add(exportBackup); backupActions.Children.Add(compareBackup); backupActions.Children.Add(deleteBackup);
         right.Children.Add(backupActions);
         _backupGrid = new DataGrid { ItemsSource = _currentProject.Backups, IsReadOnly = true, AutoGenerateColumns = false };
-        _backupGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(BackupRecord.DeviceName)), Width = 135 });
-        _backupGrid.Columns.Add(new DataGridTextColumn { Header = "Typ", Binding = new Binding(nameof(BackupRecord.BackupType)), Width = 120 });
-        _backupGrid.Columns.Add(new DataGridTextColumn { Header = "Zeit", Binding = new Binding(nameof(BackupRecord.DisplayCreated)), Width = 145 });
-        _backupGrid.Columns.Add(new DataGridTextColumn { Header = "Quelle", Binding = new Binding(nameof(BackupRecord.Source)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _backupGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.device"), Binding = new Binding(nameof(BackupRecord.DeviceName)), Width = 135 });
+        _backupGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.typ"), Binding = new Binding(nameof(BackupRecord.BackupType)), Width = 120 });
+        _backupGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.zeit"), Binding = new Binding(nameof(BackupRecord.DisplayCreated)), Width = 145 });
+        _backupGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.quelle"), Binding = new Binding(nameof(BackupRecord.Source)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         Grid.SetRow(_backupGrid, 1); right.Children.Add(_backupGrid);
         Grid.SetColumn(right, 2); content.Children.Add(right);
 
@@ -503,7 +503,7 @@ public partial class MainWindow
 
     private void BuildDiagramAndReportTab()
     {
-        var tab = new TabItem { Header = "◇  Diagramm / Bericht" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.diagram_report") };
         var inner = new TabControl();
         inner.Items.Add(BuildDiagramSubTab());
         inner.Items.Add(BuildReportSubTab());
@@ -514,7 +514,7 @@ public partial class MainWindow
 
     private TabItem BuildDiagramSubTab()
     {
-        var tab = new TabItem { Header = "Netzwerkdiagramm" };
+        var tab = new TabItem { Header = LocalizationService.Get("text.netzwerkdiagramm") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -526,23 +526,23 @@ public partial class MainWindow
 
         var linkRow = new WrapPanel { Margin = new Thickness(0, 8, 0, 5) };
         _linkSourceCombo = new ComboBox { Width = 155, DisplayMemberPath = nameof(ProjectDeviceSnapshot.Name), ItemsSource = _currentProject.Devices };
-        _linkSourceIfBox = new TextBox { Width = 125, Text = "Gi0/0", ToolTip = "Quellinterface" };
+        _linkSourceIfBox = new TextBox { Width = 125, Text = "Gi0/0", ToolTip = LocalizationService.Get("diagram.source_interface") };
         _linkTargetCombo = new ComboBox { Width = 155, DisplayMemberPath = nameof(ProjectDeviceSnapshot.Name), ItemsSource = _currentProject.Devices };
-        _linkTargetIfBox = new TextBox { Width = 125, Text = "Gi0/0", ToolTip = "Zielinterface" };
+        _linkTargetIfBox = new TextBox { Width = 125, Text = "Gi0/0", ToolTip = LocalizationService.Get("diagram.target_interface") };
         _linkTypeCombo = new ComboBox
         {
             Width = 135,
             ItemsSource = new[] { "Ethernet", "Access", "Trunk", "Port-Channel", "Routed Link", "WAN", "Tunnel", "Serial", "Fiber", "Wireless" },
             SelectedIndex = 0,
             ItemTemplate = LocalizationService.CreateLocalizedStringTemplate(),
-            ToolTip = "Verbindungstyp. Der Typ steuert Farbe und Linienart im Diagramm."
+            ToolTip = LocalizationService.Get("text.verbindungstyp_der_typ_steuert_farbe_und_linienart_im_diagra")
         };
-        _linkDescriptionBox = new TextBox { Width = 170, ToolTip = "Optionale Bezeichnung, z. B. OSPF Transit, MPLS Core oder Internet-Uplink." };
-        var addLink = new Button { Content = "Verbindung hinzufügen", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var removeLink = new Button { Content = "Letzte entfernen" };
-        var refresh = new Button { Content = "Aktualisieren" };
-        var autoLayout = new Button { Content = "Automatisch anordnen", ToolTip = "Verwirft manuelle Positionen und ordnet alle Geräte neu an." };
-        var export = new Button { Content = "SVG Export" };
+        _linkDescriptionBox = new TextBox { Width = 170, ToolTip = LocalizationService.Get("text.optionale_bezeichnung_z_b_ospf_transit_mpls_core_oder_intern") };
+        var addLink = new Button { Content = LocalizationService.Get("text.verbindung_hinzufugen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var removeLink = new Button { Content = LocalizationService.Get("text.letzte_entfernen") };
+        var refresh = new Button { Content = LocalizationService.Get("text.aktualisieren") };
+        var autoLayout = new Button { Content = LocalizationService.Get("text.automatisch_anordnen"), ToolTip = LocalizationService.Get("text.verwirft_manuelle_positionen_und_ordnet_alle_gerate_neu_an") };
+        var export = new Button { Content = LocalizationService.Get("text.svg_export") };
         addLink.Click += (_, _) => AddProjectLink();
         removeLink.Click += (_, _) => RemoveLastProjectLink();
         refresh.Click += (_, _) => RefreshNetworkDiagram();
@@ -565,7 +565,7 @@ public partial class MainWindow
         var legend = new WrapPanel { Margin = new Thickness(3, 0, 3, 8) };
         legend.Children.Add(new TextBlock
         {
-            Text = "Geräte per Drag & Drop verschieben  ·  Verbindungstypen:",
+            Text = LocalizationService.Get("text.gerate_per_drag_drop_verschieben_verbindungstypen"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 10, 0)
@@ -577,10 +577,11 @@ public partial class MainWindow
         var scroll = new ScrollViewer
         {
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            Background = new SolidColorBrush(Color.FromRgb(11, 14, 19))
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         };
-        _diagramCanvas = new Canvas { Width = 1400, Height = 900, Background = new SolidColorBrush(Color.FromRgb(11, 14, 19)), ClipToBounds = true };
+        scroll.SetResourceReference(Control.BackgroundProperty, "WindowBg");
+        _diagramCanvas = new Canvas { Width = 1400, Height = 900, ClipToBounds = true };
+        _diagramCanvas.SetResourceReference(Panel.BackgroundProperty, "WindowBg");
         scroll.Content = _diagramCanvas;
         Grid.SetRow(scroll, 3); root.Children.Add(scroll);
         tab.Content = root;
@@ -590,16 +591,38 @@ public partial class MainWindow
     private Border CreateDiagramLegendBadge(string linkType)
     {
         var color = ParseDiagramColor(NetworkDiagramService.GetLinkColor(linkType));
-        return new Border
+        var content = new StackPanel { Orientation = Orientation.Horizontal };
+        content.Children.Add(new Border
+        {
+            Width = 12,
+            Height = 4,
+            CornerRadius = new CornerRadius(2),
+            Background = new SolidColorBrush(color),
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 6, 0)
+        });
+
+        var label = new TextBlock
+        {
+            Text = linkType,
+            FontSize = 11,
+            FontWeight = FontWeights.SemiBold,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        label.SetResourceReference(TextBlock.ForegroundProperty, "TextBrush");
+        content.Children.Add(label);
+
+        var badge = new Border
         {
             BorderBrush = new SolidColorBrush(color),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
-            Background = new SolidColorBrush(Color.FromArgb(35, color.R, color.G, color.B)),
             Padding = new Thickness(7, 3, 7, 3),
             Margin = new Thickness(0, 0, 5, 0),
-            Child = new TextBlock { Text = linkType, Foreground = new SolidColorBrush(color), FontSize = 11, FontWeight = FontWeights.SemiBold }
+            Child = content
         };
+        badge.SetResourceReference(Border.BackgroundProperty, "CardBg");
+        return badge;
     }
 
     private static Color ParseDiagramColor(string value)
@@ -610,17 +633,17 @@ public partial class MainWindow
 
     private TabItem BuildReportSubTab()
     {
-        var tab = new TabItem { Header = "Berichtsexport" };
+        var tab = new TabItem { Header = LocalizationService.Get("text.berichtsexport") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader("Projektbericht", "Erzeugt Geräteübersicht, IP-Plan, Verbindungen, Prüfungen und Testplan als HTML, DOCX oder PDF."));
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var refresh = new Button { Content = "Vorschau aktualisieren", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var html = new Button { Content = "HTML Export" };
-        var docx = new Button { Content = "DOCX Export" };
-        var pdf = new Button { Content = "PDF Export" };
+        var refresh = new Button { Content = LocalizationService.Get("text.vorschau_aktualisieren"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var html = new Button { Content = LocalizationService.Get("text.html_export") };
+        var docx = new Button { Content = LocalizationService.Get("text.docx_export") };
+        var pdf = new Button { Content = LocalizationService.Get("text.pdf_export") };
         refresh.Click += async (_, _) => await RefreshReportPreviewAsync();
         html.Click += async (_, _) => await ExportProjectReportAsync("html");
         docx.Click += async (_, _) => await ExportProjectReportAsync("docx");
@@ -720,17 +743,17 @@ public partial class MainWindow
 
     private static void AddPortPlanColumns(DataGrid grid)
     {
-        grid.Columns.Add(new DataGridTextColumn { Header = "Interface", Binding = new Binding(nameof(PortPlanEntry.Interface)), Width = 145 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Beschreibung", Binding = new Binding(nameof(PortPlanEntry.Description)), Width = 180 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Modus", Binding = new Binding(nameof(PortPlanEntry.Mode)), Width = 85 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Access", Binding = new Binding(nameof(PortPlanEntry.AccessVlan)), Width = 65 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Voice", Binding = new Binding(nameof(PortPlanEntry.VoiceVlan)), Width = 65 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Allowed VLANs", Binding = new Binding(nameof(PortPlanEntry.AllowedVlans)), Width = 135 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Native", Binding = new Binding(nameof(PortPlanEntry.NativeVlan)), Width = 65 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Port-Channel", Binding = new Binding(nameof(PortPlanEntry.ChannelGroup)), Width = 115 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "IP-Adresse", Binding = new Binding(nameof(PortPlanEntry.IpAddress)), Width = 180 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "Status", Binding = new Binding(nameof(PortPlanEntry.State)), Width = 80 });
-        grid.Columns.Add(new DataGridTextColumn { Header = "STP-Schutz", Binding = new Binding(nameof(PortPlanEntry.StpProtection)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.interface"), Binding = new Binding(nameof(PortPlanEntry.Interface)), Width = 145 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.beschreibung"), Binding = new Binding(nameof(PortPlanEntry.Description)), Width = 180 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.mode"), Binding = new Binding(nameof(PortPlanEntry.Mode)), Width = 85 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.access"), Binding = new Binding(nameof(PortPlanEntry.AccessVlan)), Width = 65 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.voice"), Binding = new Binding(nameof(PortPlanEntry.VoiceVlan)), Width = 65 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.allowed_vlans"), Binding = new Binding(nameof(PortPlanEntry.AllowedVlans)), Width = 135 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.native"), Binding = new Binding(nameof(PortPlanEntry.NativeVlan)), Width = 65 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.port_channel"), Binding = new Binding(nameof(PortPlanEntry.ChannelGroup)), Width = 115 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.ip_address"), Binding = new Binding(nameof(PortPlanEntry.IpAddress)), Width = 180 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.status"), Binding = new Binding(nameof(PortPlanEntry.State)), Width = 80 });
+        grid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("port.stp_protection"), Binding = new Binding(nameof(PortPlanEntry.StpProtection)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
     }
 
     private async Task CaptureCurrentDeviceAsync(bool silent)
@@ -754,14 +777,14 @@ public partial class MainWindow
         RefreshProjectDeviceBindings();
         RefreshNetworkDiagram();
         ScheduleAutoSave();
-        if (!silent) MessageBox.Show(this, LT($"{snapshot.Name} wurde in das Projekt übernommen.", $"{snapshot.Name} was added to the project."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
+        if (!silent) MessageBox.Show(this, LocalizationService.Format("message.device_added_to_project", snapshot.Name), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private async Task UpdateSelectedProjectDeviceAsync()
     {
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot)
         {
-            MessageBox.Show(this, L("Bitte zuerst ein Projektgerät auswählen."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.bitte_zuerst_ein_projektgerat_auswahlen"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         snapshot.Name = GetFieldValue("hostname") is { Length: > 0 } hostname ? hostname : snapshot.Name;
@@ -826,7 +849,7 @@ public partial class MainWindow
         RefreshNetworkDiagram();
         ScheduleAutoSave();
         await Task.CompletedTask;
-        MessageBox.Show(this, L("Der Gegenstellenentwurf wurde als Projektgerät angelegt. Platzhalter <...> müssen vor einer Übertragung geprüft werden."), L("Gegenstelle"), MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, T("text.der_gegenstellenentwurf_wurde_als_projektgerat_angelegt_plat"), T("navigation.peer"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
 
@@ -834,7 +857,7 @@ public partial class MainWindow
     {
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot)
         {
-            MessageBox.Show(this, L("Bitte zuerst ein Projektgerät auswählen."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.bitte_zuerst_ein_projektgerat_auswahlen"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         SetConfigurationPreviewText(string.IsNullOrWhiteSpace(snapshot.GeneratedConfiguration)
@@ -847,17 +870,17 @@ public partial class MainWindow
     {
         if (_projectDeviceGrid?.SelectedItem is not ProjectDeviceSnapshot snapshot)
         {
-            MessageBox.Show(this, L("Bitte zuerst ein Projektgerät auswählen."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.bitte_zuerst_ein_projektgerat_auswahlen"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (string.IsNullOrWhiteSpace(snapshot.GeneratedConfiguration))
         {
-            MessageBox.Show(this, L("Für dieses Projektgerät ist noch keine Konfiguration gespeichert."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.fur_dieses_projektgerat_ist_noch_keine_konfiguration_gespeic"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         var dialog = new SaveFileDialog
         {
-            Title = "Gerätekonfiguration exportieren",
+            Title = LocalizationService.Get("text.geratekonfiguration_exportieren"),
             Filter = "Cisco-Konfiguration (*.cfg)|*.cfg|Textdatei (*.txt)|*.txt",
             FileName = SanitizeFileName(snapshot.Name) + ".cfg"
         };
@@ -877,7 +900,7 @@ public partial class MainWindow
 
     private void NewNetworkProject()
     {
-        if (MessageBox.Show(this, L("Aktuelles Projekt verwerfen und ein neues Projekt beginnen?"), L("Neues Projekt"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(this, T("text.aktuelles_projekt_verwerfen_und_ein_neues_projekt_beginnen"), T("text.neues_projekt"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         _currentProject = new NetworkProject();
         _currentProjectPath = string.Empty;
         RebindProjectCollections();
@@ -888,7 +911,7 @@ public partial class MainWindow
 
     private void OpenNetworkProject()
     {
-        var dialog = new OpenFileDialog { Title = "Netzwerkprojekt öffnen", Filter = "Cisco-Projekt (*.ciscoproject.json)|*.ciscoproject.json|JSON (*.json)|*.json|Alle Dateien (*.*)|*.*" };
+        var dialog = new OpenFileDialog { Title = LocalizationService.Get("text.netzwerkprojekt_offnen"), Filter = "Cisco-Projekt (*.ciscoproject.json)|*.ciscoproject.json|JSON (*.json)|*.json|Alle Dateien (*.*)|*.*" };
         if (dialog.ShowDialog(this) != true) return;
         try
         {
@@ -898,7 +921,7 @@ public partial class MainWindow
             RefreshProjectEditors();
             RefreshNetworkDiagram();
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, L("Projekt konnte nicht geöffnet werden"), MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, T("text.projekt_konnte_nicht_geoffnet_werden"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private void SaveNetworkProject(bool saveAs)
@@ -906,16 +929,16 @@ public partial class MainWindow
         SyncProjectEditors();
         if (saveAs || string.IsNullOrWhiteSpace(_currentProjectPath))
         {
-            var dialog = new SaveFileDialog { Title = "Netzwerkprojekt speichern", Filter = "Cisco-Projekt (*.ciscoproject.json)|*.ciscoproject.json|JSON (*.json)|*.json", FileName = SanitizeFileName(_currentProject.Name) + ".ciscoproject.json" };
+            var dialog = new SaveFileDialog { Title = LocalizationService.Get("text.netzwerkprojekt_speichern"), Filter = "Cisco-Projekt (*.ciscoproject.json)|*.ciscoproject.json|JSON (*.json)|*.json", FileName = SanitizeFileName(_currentProject.Name) + ".ciscoproject.json" };
             if (dialog.ShowDialog(this) != true) return;
             _currentProjectPath = dialog.FileName;
         }
         try
         {
             ProjectService.Save(_currentProject, _currentProjectPath);
-            MessageBox.Show(this, L("Projekt wurde gespeichert."), L("Projekt"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.projekt_wurde_gespeichert"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, L("Speicherfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, T("text.speicherfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private void SyncProjectEditors()
@@ -1013,7 +1036,7 @@ public partial class MainWindow
             added++;
         }
         ScheduleAutoSave();
-        MessageBox.Show(this, LT($"{added} neue IPAM-Einträge wurden übernommen.", $"{added} new IPAM entries were added."), "IPAM", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, LocalizationService.Format("message.ipam_entries_added", added), "IPAM", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void ShowIpamValidation()
@@ -1028,7 +1051,7 @@ public partial class MainWindow
 
     private void ExportIpamCsv()
     {
-        var dialog = new SaveFileDialog { Title = "IPAM exportieren", Filter = "CSV (*.csv)|*.csv", FileName = "ip_adressplan.csv" };
+        var dialog = new SaveFileDialog { Title = LocalizationService.Get("dialog.ipam_export"), Filter = "CSV (*.csv)|*.csv", FileName = "ip_adressplan.csv" };
         if (dialog.ShowDialog(this) != true) return;
         var sb = new StringBuilder("Netz;Praefix;VLAN;Gateway;DHCP-Start;DHCP-Ende;Geraet;Interface;Beschreibung\r\n");
         foreach (var x in _currentProject.IpamEntries)
@@ -1050,7 +1073,7 @@ public partial class MainWindow
     private void ExportPortPlanCsv()
     {
         if (_portPlanGrid?.ItemsSource is not IEnumerable<PortPlanEntry> rows) return;
-        var dialog = new SaveFileDialog { Title = "Portplan exportieren", Filter = "CSV (*.csv)|*.csv", FileName = "portplan.csv" };
+        var dialog = new SaveFileDialog { Title = LocalizationService.Get("dialog.portplan_export"), Filter = "CSV (*.csv)|*.csv", FileName = "portplan.csv" };
         if (dialog.ShowDialog(this) != true) return;
         var sb = new StringBuilder("Interface;Beschreibung;Modus;Access-VLAN;Voice-VLAN;Allowed-VLANs;Native-VLAN;Port-Channel;IP-Adresse;Status;STP-Schutz\r\n");
         foreach (var x in rows)
@@ -1076,7 +1099,7 @@ public partial class MainWindow
         UpdateStatusBar();
         RefreshAdvancedDependencies();
         ScheduleAutoSave();
-        MessageBox.Show(this, LT($"{fixedCount} Korrekturen wurden angewendet. Platzhalter und sicherheitsrelevante Werte müssen geprüft werden.", $"{fixedCount} fixes were applied. Placeholders and security-relevant values must be reviewed."), L("Auto-Korrektur"), MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, LocalizationService.Format("message.fixes_applied", fixedCount), T("text.auto_korrektur"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private bool ApplyAdvancedFix(string fixKey)
@@ -1220,13 +1243,13 @@ public partial class MainWindow
 
     private void BrowseSshKey()
     {
-        var dialog = new OpenFileDialog { Title = "Private SSH-Schlüsseldatei wählen", Filter = "Schlüsseldateien (*.*)|*.*" };
+        var dialog = new OpenFileDialog { Title = LocalizationService.Get("text.private_ssh_schlusseldatei_wahlen"), Filter = "Schlüsseldateien (*.*)|*.*" };
         if (dialog.ShowDialog(this) == true && _sshKeyBox != null) _sshKeyBox.Text = dialog.FileName;
     }
 
     private async Task TestSshConnectionAsync()
     {
-        if (_operationsOutputBox != null) _operationsOutputBox.Text = "Verbindung wird geprüft ...";
+        if (_operationsOutputBox != null) _operationsOutputBox.Text = LocalizationService.Get("text.verbindung_wird_gepruft");
         var result = await SshDeviceService.TestTcpAsync(GetSshSettings());
         if (_operationsOutputBox != null) _operationsOutputBox.Text = result.Success ? result.Output : result.Error;
     }
@@ -1236,14 +1259,14 @@ public partial class MainWindow
         var settings = GetSshSettings();
         if (string.IsNullOrWhiteSpace(settings.Host) || string.IsNullOrWhiteSpace(settings.Username))
         {
-            MessageBox.Show(this, L("Host und Benutzer müssen angegeben werden."), "SSH", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, T("text.host_und_benutzer_mussen_angegeben_werden"), "SSH", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        if (MessageBox.Show(this, LT($"Konfiguration wirklich an {settings.Host}:{settings.Port} übertragen?", $"Really transfer the configuration to {settings.Host}:{settings.Port}?"), L("SSH-Übertragung"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-        if (_operationsOutputBox != null) _operationsOutputBox.Text = "Konfiguration wird übertragen ...";
+        if (MessageBox.Show(this, LocalizationService.Format("message.confirm_ssh_transfer", settings.Host, settings.Port), T("text.ssh_ubertragung"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (_operationsOutputBox != null) _operationsOutputBox.Text = LocalizationService.Get("text.konfiguration_wird_ubertragen");
         var result = await SshDeviceService.SendConfigurationAsync(settings, await GenerateConfigAsync());
         if (_operationsOutputBox != null) _operationsOutputBox.Text = result.Output + (string.IsNullOrWhiteSpace(result.Error) ? "" : "\nFEHLER:\n" + result.Error);
-        MessageBox.Show(this, result.Success ? L("Übertragung abgeschlossen.") : L("Übertragung fehlgeschlagen. Ausgabe prüfen."), "SSH", MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+        MessageBox.Show(this, result.Success ? T("text.ubertragung_abgeschlossen") : T("text.ubertragung_fehlgeschlagen_ausgabe_prufen"), "SSH", MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
     }
 
     private async Task CreateSshBackupAsync(string backupType)
@@ -1291,7 +1314,7 @@ public partial class MainWindow
     private void ExportSelectedBackup()
     {
         if (_backupGrid?.SelectedItem is not BackupRecord backup) return;
-        var dialog = new SaveFileDialog { Title = "Backup exportieren", Filter = "Cisco-Konfiguration (*.cfg)|*.cfg|Textdatei (*.txt)|*.txt", FileName = $"{SanitizeFileName(backup.DeviceName)}_{backup.BackupType.Replace("-", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.cfg" };
+        var dialog = new SaveFileDialog { Title = LocalizationService.Get("text.backup_exportieren"), Filter = "Cisco-Konfiguration (*.cfg)|*.cfg|Textdatei (*.txt)|*.txt", FileName = $"{SanitizeFileName(backup.DeviceName)}_{backup.BackupType.Replace("-", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.cfg" };
         if (dialog.ShowDialog(this) != true) return;
         File.WriteAllText(dialog.FileName, backup.Content, new UTF8Encoding(false));
         backup.FilePath = dialog.FileName;
@@ -1316,12 +1339,12 @@ public partial class MainWindow
     {
         if (_linkSourceCombo?.SelectedItem is not ProjectDeviceSnapshot source || _linkTargetCombo?.SelectedItem is not ProjectDeviceSnapshot target)
         {
-            MessageBox.Show(this, L("Quelle und Ziel müssen ausgewählt werden."), L("Verbindung"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.quelle_und_ziel_mussen_ausgewahlt_werden"), T("common.connection"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         if (source.Id == target.Id)
         {
-            MessageBox.Show(this, L("Quelle und Ziel dürfen nicht identisch sein."), L("Verbindung"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, T("text.quelle_und_ziel_durfen_nicht_identisch_sein"), T("common.connection"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -1334,7 +1357,7 @@ public partial class MainWindow
                 x.SourceInterface.Equals(sourceInterface, StringComparison.OrdinalIgnoreCase) &&
                 x.TargetInterface.Equals(targetInterface, StringComparison.OrdinalIgnoreCase)))
         {
-            MessageBox.Show(this, L("Diese Verbindung ist bereits im Projekt vorhanden."), L("Verbindung"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.diese_verbindung_ist_bereits_im_projekt_vorhanden"), T("common.connection"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -1531,23 +1554,23 @@ public partial class MainWindow
         var label = new TextBlock
         {
             Text = BuildDiagramLinkLabel(link),
-            Foreground = brush,
             FontSize = 11,
             FontWeight = FontWeights.SemiBold,
             TextWrapping = TextWrapping.Wrap,
             TextAlignment = TextAlignment.Center,
             MaxWidth = 250
         };
+        label.SetResourceReference(TextBlock.ForegroundProperty, "TextBrush");
         var labelBorder = new Border
         {
             Child = label,
-            Background = new SolidColorBrush(Color.FromArgb(235, 11, 14, 19)),
             BorderBrush = brush,
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
             Padding = new Thickness(6, 3, 6, 3),
             ToolTip = BuildDiagramLinkToolTip(link)
         };
+        labelBorder.SetResourceReference(Border.BackgroundProperty, "CardBg");
         var sourceEndpoint = new Ellipse { Width = 10, Height = 10, Fill = brush, Stroke = new SolidColorBrush(Color.FromRgb(11, 14, 19)), StrokeThickness = 1 };
         var targetEndpoint = new Ellipse { Width = 10, Height = 10, Fill = brush, Stroke = new SolidColorBrush(Color.FromRgb(11, 14, 19)), StrokeThickness = 1 };
         Panel.SetZIndex(line, 0);
@@ -1643,7 +1666,7 @@ public partial class MainWindow
 
     private void ExportNetworkDiagramSvg()
     {
-        var dialog = new SaveFileDialog { Title = "Netzwerkdiagramm exportieren", Filter = "SVG (*.svg)|*.svg", FileName = "netzwerkdiagramm.svg" };
+        var dialog = new SaveFileDialog { Title = LocalizationService.Get("text.netzwerkdiagramm_exportieren"), Filter = "SVG (*.svg)|*.svg", FileName = "netzwerkdiagramm.svg" };
         if (dialog.ShowDialog(this) != true) return;
         File.WriteAllText(dialog.FileName, NetworkDiagramService.BuildSvg(_currentProject), new UTF8Encoding(false));
     }
@@ -1666,7 +1689,7 @@ public partial class MainWindow
             "docx" => "Word-Dokument (*.docx)|*.docx",
             _ => "PDF (*.pdf)|*.pdf"
         };
-        var dialog = new SaveFileDialog { Title = "Projektbericht exportieren", Filter = filter, FileName = SanitizeFileName(_currentProject.Name) + "_Bericht." + extension };
+        var dialog = new SaveFileDialog { Title = LocalizationService.Get("text.projektbericht_exportieren"), Filter = filter, FileName = SanitizeFileName(_currentProject.Name) + "_Bericht." + extension };
         if (dialog.ShowDialog(this) != true) return;
         var plain = _reportPreviewBox?.Text ?? string.Empty;
         try
@@ -1674,9 +1697,9 @@ public partial class MainWindow
             if (extension == "html") ReportExportService.ExportHtml(dialog.FileName, _currentProject, _advancedDependencyFindings, _advancedSecurityFindings);
             else if (extension == "docx") ReportExportService.ExportDocx(dialog.FileName, plain);
             else ReportExportService.ExportPdf(dialog.FileName, plain);
-            MessageBox.Show(this, L("Bericht wurde exportiert."), L("Bericht"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, T("text.bericht_wurde_exportiert"), T("common.report"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, L("Exportfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, T("text.exportfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     private async Task EnsureProjectContainsCurrentDeviceAsync()
@@ -1773,7 +1796,7 @@ public partial class MainWindow
     {
         var box = new TextBox
         {
-            Text = "Modul aktivieren oder Vorschau aktualisieren.",
+            Text = LocalizationService.Get("preview.activate_or_refresh"),
             IsReadOnly = true,
             FontFamily = new FontFamily("Consolas"),
             FontSize = 12,
@@ -1788,7 +1811,7 @@ public partial class MainWindow
         };
         _moduleLivePreviewBoxes[module.Name] = box;
 
-        var refresh = new Button { Content = "Aktualisieren", Style = TryFindResource("SmallButtonStyle") as Style, HorizontalAlignment = HorizontalAlignment.Right };
+        var refresh = new Button { Content = LocalizationService.Get("text.aktualisieren"), Style = TryFindResource("SmallButtonStyle") as Style, HorizontalAlignment = HorizontalAlignment.Right };
         refresh.Click += async (_, _) => await RefreshModuleLivePreviewAsync(module.Name);
         var panel = new Grid();
         panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -1798,7 +1821,7 @@ public partial class MainWindow
         panel.Children.Add(box);
         return new Expander
         {
-            Header = "Live-Befehlsvorschau dieses Moduls",
+            Header = LocalizationService.Get("preview.module_commands"),
             IsExpanded = false,
             Margin = new Thickness(0, 4, 0, 0),
             Content = panel
@@ -1818,7 +1841,7 @@ public partial class MainWindow
         if (!_moduleLivePreviewBoxes.TryGetValue(moduleName, out var box)) return;
         if (!_moduleChecks.TryGetValue(moduleName, out var check) || check.IsChecked != true)
         {
-            box.Text = "Modul ist nicht aktiv.";
+            box.Text = LocalizationService.Get("preview.module_inactive");
             return;
         }
         try
@@ -1831,7 +1854,7 @@ public partial class MainWindow
             box.Text = section;
             box.ScrollToHome();
         }
-        catch (Exception ex) { box.Text = "Vorschaufehler: " + ex.Message; }
+        catch (Exception ex) { box.Text = LocalizationService.Get("preview.error_prefix") + ex.Message; }
     }
 
     private static string GetGeneratorSectionTitle(string moduleName) => moduleName switch

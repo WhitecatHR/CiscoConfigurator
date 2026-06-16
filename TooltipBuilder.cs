@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -8,106 +9,129 @@ namespace CiscoConfigGuiWpf;
 
 public static partial class TooltipBuilder
 {
-    public static ToolTip CreateFieldTip(FieldDefinition field)
+    public static ToolTip CreateFieldTip(FieldDefinition field) => CreateDynamic(() =>
     {
-        var text = Expand(field.Name, field.Label, field.Help);
+        var text = Expand(field.Label, field.Help);
         text += BuildFieldSyntaxHint(field);
-        return Create(field.Label, text);
-    }
 
-    public static ToolTip CreateModuleTip(ModuleDefinition module)
+        if (ApplicationSettingsService.Current.DeveloperMode)
+        {
+            var catalog = TooltipCatalog.Current;
+            var visibleFor = field.VisibleForValues.Count == 0 ? "-" : string.Join(", ", field.VisibleForValues);
+            var enabledFor = field.EnabledForValues.Count == 0 ? "-" : string.Join(", ", field.EnabledForValues);
+            text += "\n\n" + string.Format(
+                CultureInfo.CurrentCulture,
+                catalog.Text("developer.fieldDetails"),
+                field.Name,
+                field.Type,
+                string.IsNullOrWhiteSpace(field.DependsOnField) ? "-" : field.DependsOnField,
+                visibleFor,
+                enabledFor);
+        }
+
+        return (field.Label, text);
+    });
+
+    public static ToolTip CreateModuleTip(ModuleDefinition module) => CreateDynamic(() =>
     {
         var text = ModuleHelp(module);
-        return Create(module.Title, text);
-    }
 
-    public static ToolTip Create(string title, string body)
+        if (ApplicationSettingsService.Current.DeveloperMode)
+        {
+            var catalog = TooltipCatalog.Current;
+            text += "\n\n" + string.Format(
+                CultureInfo.CurrentCulture,
+                catalog.Text("developer.moduleDetails"),
+                module.Name,
+                module.Tab,
+                string.Join(", ", module.Devices),
+                module.Fields.Count);
+        }
+
+        return (module.Title, text);
+    });
+
+    public static ToolTip Create(string title, string body) => CreateDynamic(() => (title, body));
+
+    private static ToolTip CreateDynamic(Func<(string Title, string Body)> contentFactory)
     {
-        var panel = new StackPanel { MaxWidth = 760, Margin = new Thickness(4) };
-        panel.Children.Add(new TextBlock
+        var toolTip = new ToolTip
         {
-            Text = title,
-            Foreground = new SolidColorBrush(Color.FromRgb(248, 250, 252)),
-            FontWeight = FontWeights.Bold,
-            FontSize = 15,
-            Margin = new Thickness(0, 0, 0, 8),
-            TextWrapping = TextWrapping.Wrap
-        });
-        panel.Children.Add(new Border
-        {
-            Height = 1,
-            Background = new SolidColorBrush(Color.FromRgb(56, 189, 248)),
-            Margin = new Thickness(0, 0, 0, 10),
-            Opacity = 0.65
-        });
-        panel.Children.Add(new TextBlock
-        {
-            Text = body,
-            Foreground = new SolidColorBrush(Color.FromRgb(203, 213, 225)),
-            FontSize = 13,
-            LineHeight = 20,
-            TextWrapping = TextWrapping.Wrap
-        });
-        return new ToolTip
-        {
-            Content = panel,
             Background = new SolidColorBrush(Color.FromRgb(15, 23, 42)),
             BorderBrush = new SolidColorBrush(Color.FromRgb(56, 189, 248)),
             BorderThickness = new Thickness(1),
             Padding = new Thickness(12),
             HasDropShadow = true
         };
+
+        void Refresh()
+        {
+            var source = contentFactory();
+            var translatedTitle = LocalizationService.TranslateText(source.Title);
+            var translatedBody = LocalizationService.TranslateText(source.Body);
+
+            var panel = new StackPanel { MaxWidth = 760, Margin = new Thickness(4) };
+            panel.Children.Add(new TextBlock
+            {
+                Text = translatedTitle,
+                Tag = new LocalizationSource(source.Title),
+                Foreground = new SolidColorBrush(Color.FromRgb(248, 250, 252)),
+                FontWeight = FontWeights.Bold,
+                FontSize = 15,
+                Margin = new Thickness(0, 0, 0, 8),
+                TextWrapping = TextWrapping.Wrap
+            });
+            panel.Children.Add(new Border
+            {
+                Height = 1,
+                Background = new SolidColorBrush(Color.FromRgb(56, 189, 248)),
+                Margin = new Thickness(0, 0, 0, 10),
+                Opacity = 0.65
+            });
+            panel.Children.Add(new TextBlock
+            {
+                Text = translatedBody,
+                Tag = new LocalizationSource(source.Body),
+                Foreground = new SolidColorBrush(Color.FromRgb(203, 213, 225)),
+                FontSize = 13,
+                LineHeight = 20,
+                TextWrapping = TextWrapping.Wrap
+            });
+            toolTip.Content = panel;
+        }
+
+        toolTip.Opened += (_, _) => Refresh();
+        Refresh();
+        return toolTip;
     }
 
     private static string ModuleHelp(ModuleDefinition module)
     {
-        var specific = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["basic"] = "Zweck:\nGrundidentität, Basisschutz und Zeitzone des Geräts.\n\nErzeugte Befehle:\nhostname, ip domain-name, enable secret, no ip domain-lookup, service password-encryption, clock timezone und clock summer-time.\n\nHinweis:\nDomain ist besonders für SSH/RSA-Key wichtig. Clock-Einstellungen liegen bewusst im Basisbereich.",
-            ["routingBase"] = "Zweck:\nAllgemeine globale Routingfunktionen konfigurieren.\n\nErzeugte Befehle:\nip routing oder no ip routing.\n\nHinweis:\nDer Befehl ist besonders auf Layer-3-Switches relevant und wird beim Import nicht mehr als Zusatzbefehl behandelt.",
-            ["ssh"] = "Zweck:\nSSH-Zugriff und line vty zentral konfigurieren.\n\nErzeugte Befehle:\ncrypto key generate rsa, ip ssh version 2, line vty, login local/AAA, transport input ssh, exec-timeout.\n\nWichtig:\nVTY wird nur hier erzeugt, damit keine doppelte line-vty-Konfiguration entsteht.",
-            ["aaa"] = "Zweck:\nAuthentifizierung und Autorisierung vorbereiten.\n\nErzeugte Befehle:\naaa new-model, aaa authentication login default, aaa authorization exec default.\n\nHinweis:\nBei RADIUS/TACACS lokale Benutzer als Fallback einplanen.",
-            ["vlans"] = "Zweck:\nVLANs und SVIs ohne VRF konfigurieren.\n\nErzeugte Befehle:\nvlan, name, interface vlan, ip address, ipv6 address.\n\nHinweis:\nIm VRF-Modus stattdessen VLAN / SVI VRF nutzen.",
-            ["vrfDefs"] = "Zweck:\nVRFs als getrennte Routingtabellen definieren.\n\nErzeugte Befehle:\nip vrf <Name>, rd <ASN:Nummer>, description.\n\nHinweis:\nAndere VRF-Module referenzieren diese Namen exakt.",
-            ["vrfSvi"] = "Zweck:\nSVIs einer VRF zuordnen.\n\nErzeugte Befehle:\ninterface vlan, ip vrf forwarding, ip address, ipv6 address.\n\nWichtig:\nip vrf forwarding muss vor ip address stehen.",
-            ["vrfStaticRoutes"] = "Zweck:\nStatische IPv4- und IPv6-Routen pro VRF erzeugen.\n\nErzeugte Befehle:\nip route vrf ..., ipv6 route vrf ...",
-            ["ospf"] = "Zweck:\nOSPFv2 ohne VRF für IPv4 konfigurieren.\n\nErzeugte Befehle:\nrouter ospf, router-id, log-adjacency-changes, network ... area ... oder interfacebasiert ip ospf <Prozess> area <Area>.\n\nHinweis:\nDie Konfigurationsart kann prozessbasiert, interfacebasiert oder gemischt gewählt werden.",
-            ["stpExtended"] = "Zweck:\nDynamische Spanning-Tree-Konfiguration für PVST+, Rapid-PVST+ und MST. Nach Auswahl des Modus werden nur gültige Eingabebereiche angezeigt und exportiert.\n\nErzeugte Befehle:\nGlobale STP-Optionen, VLAN-Root/Priority/Timer, Interfaceprofile, PortFast, BPDU Guard/Filter, Root/Loop Guard, Link-Type, Cost, Port-Priority, MST-Region/Instanzen, Errdisable-Recovery und Rücksetzbefehle.\n\nPrüfungen:\nPrioritätsraster, VLAN-/MST-Zuordnungen, Guard-Konflikte, Port-Channel-Konsistenz, MST-Regionsvergleich und Plattformhinweise.\n\nLive-Vorschau:\nDer erzeugte STP-Abschnitt wird direkt im Modul angezeigt.",
-            ["bgp"] = "Zweck:\nBGP ohne VRF für IPv4/IPv6 konfigurieren.\n\nErzeugte Befehle:\nrouter bgp, neighbor remote-as, network, address-family ipv6.",
-            ["nat"] = "Zweck:\nNAT/PAT auf Routern konfigurieren.\n\nErzeugte Befehle:\nip nat inside/outside, ip nat inside source ...\n\nWichtig:\nInside/Outside Interfaces müssen korrekt gesetzt sein."
-        };
-
-        var baseText = specific.TryGetValue(module.Name, out var text)
+        var catalog = TooltipCatalog.Current;
+        var baseText = catalog.ModuleHelp.TryGetValue(module.Name, out var text)
             ? text
-            : $"Abschnitt:\n{module.Title}\n\nZweck:\nDieses Modul erzeugt Cisco IOS/IOS-XE-Konfigurationsbefehle für diesen Bereich.\n\nBedienung:\nLinks aktivieren, Felder ausfüllen und anschließend über Kopieren oder TXT Export die Konfiguration erzeugen.\n\nHinweis:\nDropdowns begrenzen feste Auswahlwerte. IPs, Interfaces, VLAN-Listen, ACL-Namen und Beschreibungen bleiben Freitext.";
+            : string.Format(CultureInfo.CurrentCulture, catalog.Text("module.generic"), module.Title);
 
         return (baseText.Trim() + BuildModuleCommandDetails(module)).Trim();
     }
 
-    private static string Expand(string name, string label, string help)
+    private static string Expand(string label, string help)
     {
+        var catalog = TooltipCatalog.Current;
         var text = string.IsNullOrWhiteSpace(help)
-            ? "Keine Detailbeschreibung hinterlegt. Feld nur ausfüllen, wenn dieser Befehl für die Zielkonfiguration benötigt wird."
+            ? catalog.Text("field.noDescription")
             : help.Trim();
 
         text = text.Replace("\r\n", "\n").Replace("\r", "\n");
-
-        if (!Regex.IsMatch(text, @"(^|\n)Zweck:", RegexOptions.IgnoreCase))
-            text = "Zweck:\n" + text;
+        var purposeHeading = catalog.Text("heading.purpose");
+        if (!text.StartsWith(purposeHeading, StringComparison.OrdinalIgnoreCase))
+            text = purposeHeading + "\n" + text;
 
         if (label.Contains('|'))
         {
-            text += "\n\nFormat:\n" + label.Replace("|", " | ");
-            text += "\n\nTrennzeichen:\nJede Zeile ist ein eigener Eintrag. Spalten werden mit | getrennt.";
+            text += "\n\n" + catalog.Text("heading.format") + "\n" + label.Replace("|", " | ");
+            text += "\n\n" + catalog.Text("heading.separator") + "\n" + catalog.Text("field.separatorDescription");
         }
-
-        text = text.Replace(". Befehl:", ".\n\nBefehl:")
-                   .Replace(". Befehle:", ".\n\nBefehle:")
-                   .Replace(". Befehlsteile:", ".\n\nBefehlsteile:")
-                   .Replace(". Format:", ".\n\nFormat:")
-                   .Replace(". Beispiel:", ".\n\nBeispiel:")
-                   .Replace(". Hinweis:", ".\n\nHinweis:")
-                   .Replace(". Empfehlung:", ".\n\nEmpfehlung:");
 
         return text.Trim();
     }
@@ -117,34 +141,35 @@ public static partial class TooltipBuilder
         var rows = GetRelatedCommandRows(module).ToList();
         if (rows.Count == 0) return string.Empty;
 
+        var catalog = TooltipCatalog.Current;
         var sb = new StringBuilder();
         sb.AppendLine();
         sb.AppendLine();
-        sb.AppendLine("Mögliche Befehle / Syntax:");
+        sb.AppendLine(catalog.Text("heading.possibleCommands"));
 
         foreach (var row in rows.Take(14))
             sb.AppendLine($"• {row.Command} — {row.Meaning}");
 
         if (rows.Count > 14)
-            sb.AppendLine($"• ... weitere {rows.Count - 14} Befehle im Tab Befehle.");
+            sb.AppendLine(string.Format(CultureInfo.CurrentCulture, catalog.Text("command.more"), rows.Count - 14));
 
         var parameterLines = rows
             .SelectMany(r => ExtractParameters(r.Command))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(18)
-            .Select(p => $"• <{p}> = {ExplainParameter(p)}")
+            .Select(parameter => $"• <{parameter}> = {ExplainParameter(parameter)}")
             .ToList();
 
         if (parameterLines.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendLine("Befehlsteile:");
+            sb.AppendLine(catalog.Text("heading.commandParts"));
             foreach (var line in parameterLines)
                 sb.AppendLine(line);
         }
 
         var optionalParts = rows
-            .SelectMany(r => ExtractOptionalParts(r.Command))
+            .SelectMany(row => ExtractOptionalParts(row.Command))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(6)
             .ToList();
@@ -152,9 +177,9 @@ public static partial class TooltipBuilder
         if (optionalParts.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendLine("Optionale Teile:");
+            sb.AppendLine(catalog.Text("heading.optionalParts"));
             foreach (var part in optionalParts)
-                sb.AppendLine($"• [{part}] = optionaler Befehlsanteil; nur setzen, wenn benötigt oder vom IOS unterstützt.");
+                sb.AppendLine($"• [{part}] = {catalog.Text("optionalPart.description")}");
         }
 
         return sb.ToString();
@@ -166,21 +191,22 @@ public static partial class TooltipBuilder
         if (placeholder.Length == 0) return string.Empty;
 
         var rows = ConfigurationCommandCatalog.All
-            .SelectMany(g => g.Rows)
-            .Where(r => r.Command.Contains("<" + placeholder + ">", StringComparison.OrdinalIgnoreCase)
-                     || ExtractParameters(r.Command).Any(p => SameParameter(p, placeholder)))
+            .SelectMany(group => group.Rows)
+            .Where(row => row.Command.Contains("<" + placeholder + ">", StringComparison.OrdinalIgnoreCase)
+                          || ExtractParameters(row.Command).Any(parameter => SameParameter(parameter, placeholder)))
             .Take(5)
             .ToList();
 
         if (rows.Count == 0) return string.Empty;
 
+        var catalog = TooltipCatalog.Current;
         var sb = new StringBuilder();
         sb.AppendLine();
         sb.AppendLine();
-        sb.AppendLine("Befehlsteile:");
+        sb.AppendLine(catalog.Text("heading.commandParts"));
         sb.AppendLine($"• <{placeholder}> = {ExplainParameter(placeholder)}");
         sb.AppendLine();
-        sb.AppendLine("Beispiel-Syntax:");
+        sb.AppendLine(catalog.Text("heading.exampleSyntax"));
         foreach (var row in rows)
             sb.AppendLine($"• {row.Command}");
         return sb.ToString();
@@ -190,78 +216,15 @@ public static partial class TooltipBuilder
     {
         var aliases = GetCommandAliases(module);
         return ConfigurationCommandCatalog.All
-            .SelectMany(g => g.Rows)
-            .Where(r => aliases.Any(a => r.Module.Equals(a, StringComparison.OrdinalIgnoreCase)))
-            .GroupBy(r => r.Command, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.First());
+            .SelectMany(group => group.Rows)
+            .Where(row => aliases.Any(alias => row.Module.Equals(alias, StringComparison.OrdinalIgnoreCase)))
+            .GroupBy(row => row.Command, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First());
     }
 
     private static string[] GetCommandAliases(ModuleDefinition module)
     {
-        var map = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["basic"] = new[] { "Grunddaten", "Abschluss" },
-            ["banner"] = new[] { "Banner" },
-            ["ssh"] = new[] { "SSH", "VTY" },
-            ["aaa"] = new[] { "AAA", "Console" },
-            ["radiusTacacs"] = new[] { "RADIUS", "TACACS+", "AAA" },
-            ["monitoringBase"] = new[] { "NTP", "Syslog", "SNMP", "Archive", "Login-Audit" },
-            ["userRights"] = new[] { "Benutzer", "Parser View" },
-            ["interfaces"] = new[] { "Interface" },
-            ["ranges"] = new[] { "Interface" },
-            ["subinterfaces"] = new[] { "Subinterface" },
-            ["routerStick"] = new[] { "Subinterface", "VLAN" },
-            ["qosBasic"] = new[] { "QoS" },
-            ["interfaceProfiles"] = new[] { "Interface", "Switchport", "QoS", "Port-Security", "STP" },
-            ["trunkUplink"] = new[] { "Switchport", "VLAN" },
-            ["etherChannelExt"] = new[] { "EtherChannel", "Switchport" },
-            ["interfaceRoles"] = new[] { "Switchport", "STP", "QoS" },
-            ["voip"] = new[] { "VoIP", "DHCP", "Switchport", "QoS", "STP" },
-            ["qinq"] = new[] { "QinQ", "Switchport", "Subinterface", "VLAN" },
-            ["vlans"] = new[] { "VLAN", "SVI", "Switch" },
-            ["switchSec"] = new[] { "DHCP Snooping", "DAI" },
-            ["accessBaseline"] = new[] { "Switchport", "Port-Security", "STP", "Storm-Control" },
-            ["errdisableRecovery"] = new[] { "Errdisable" },
-            ["stpExtended"] = new[] { "STP" },
-            ["switchSecExt"] = new[] { "DHCP Snooping", "DAI", "IPSG" },
-            ["portSecurityExt"] = new[] { "Port-Security" },
-            ["vlanIpPlan"] = new[] { "VLAN", "SVI" },
-            ["staticRoutes"] = new[] { "Static Route", "Backup Route", "Tracked Route" },
-            ["ospf"] = new[] { "OSPF" },
-            ["isis"] = new[] { "IS-IS" },
-            ["bgp"] = new[] { "BGP" },
-            ["fhrp"] = new[] { "FHRP" },
-            ["vrfLite"] = new[] { "VRF-Lite", "VRF", "VRF Interface", "VRF Route" },
-            ["routeMapFilter"] = new[] { "Route-Map", "Prefix-List" },
-            ["ipSlaTracking"] = new[] { "Tracked Route", "Backup Route" },
-            ["ospfAdvanced"] = new[] { "OSPF" },
-            ["bgpAdvanced"] = new[] { "BGP", "IPv6 BGP" },
-            ["mpls"] = new[] { "MPLS" },
-            ["vrfDefs"] = new[] { "VRF" },
-            ["vrfSvi"] = new[] { "VRF Interface", "SVI" },
-            ["vrfStaticRoutes"] = new[] { "VRF Route" },
-            ["vrfOspf"] = new[] { "VRF OSPF" },
-            ["vrfOspfv3"] = new[] { "VRF OSPFv3" },
-            ["vrfBgp"] = new[] { "VRF BGP" },
-            ["ipv6"] = new[] { "IPv6", "IPv6 RA" },
-            ["dhcp"] = new[] { "DHCP", "DHCPv6 Relay" },
-            ["acl"] = new[] { "ACL" },
-            ["ipv6Extended"] = new[] { "IPv6 Route", "IPv6 ACL", "IPv6 RA", "DHCPv6 Relay" },
-            ["ospfv3"] = new[] { "OSPFv3" },
-            ["ipv6RoutingProtocols"] = new[] { "IPv6 BGP", "IPv6 EIGRP", "IPv6 IS-IS" },
-            ["aclAssistant"] = new[] { "ACL" },
-            ["security"] = new[] { "Login-Audit", "Switch" },
-            ["nat"] = new[] { "NAT", "NAT Exempt" },
-            ["vpn"] = new[] { "GRE" },
-            ["customCommands"] = new[] { "Eigene Befehle" },
-            ["greIpsec"] = new[] { "GRE", "IPsec" },
-            ["wanFailover"] = new[] { "Tracked Route", "Backup Route" },
-            ["zoneFirewall"] = new[] { "Zone Firewall" },
-            ["dmzAssistant"] = new[] { "DMZ", "ACL", "NAT" },
-            ["vpnAdvanced"] = new[] { "IPsec" }
-        };
-
-        if (map.TryGetValue(module.Name, out var aliases))
+        if (TooltipCatalog.Current.CommandAliases.TryGetValue(module.Name, out var aliases))
             return aliases;
 
         return new[] { module.Title };
@@ -269,13 +232,13 @@ public static partial class TooltipBuilder
 
     private static IEnumerable<string> ExtractParameters(string command)
     {
-        foreach (Match match in Regex.Matches(command, "<([^>]+)>"))
+        foreach (Match match in Regex.Matches(command, "<([^>]+)>", RegexOptions.CultureInvariant))
             yield return match.Groups[1].Value.Trim();
     }
 
     private static IEnumerable<string> ExtractOptionalParts(string command)
     {
-        foreach (Match match in Regex.Matches(command, @"\[([^\]]+)\]"))
+        foreach (Match match in Regex.Matches(command, @"\[([^\]]+)\]", RegexOptions.CultureInvariant))
             yield return match.Groups[1].Value.Trim();
     }
 
@@ -287,12 +250,12 @@ public static partial class TooltipBuilder
         if (name.Contains("hostname") || label.Contains("hostname")) return "Hostname";
         if (name == "domain" || label.Contains("domain")) return "Domain";
         if (name.Contains("secret") || label.Contains("secret")) return "Secret";
-        if (name.Contains("user") || label.Contains("benutzer")) return "User";
-        if (name.Contains("password") || label.Contains("passwort")) return "Passwort";
-        if (name.Contains("vlan") && (name.Contains("list") || label.Contains("liste"))) return "VLAN-Liste";
+        if (name.Contains("user") || label.Contains("benutzer") || label.Contains("user")) return "User";
+        if (name.Contains("password") || label.Contains("passwort") || label.Contains("password")) return "Passwort";
+        if (name.Contains("vlan") && (name.Contains("list") || label.Contains("liste") || label.Contains("list"))) return "VLAN-Liste";
         if (name.Contains("vlan")) return "VLAN-ID";
         if (name.Contains("vrf")) return "VRF";
-        if (name.Contains("ospf") && (name.Contains("pid") || name.Contains("process") || label.Contains("prozess"))) return "OSPF-Prozess";
+        if (name.Contains("ospf") && (name.Contains("pid") || name.Contains("process") || label.Contains("prozess") || label.Contains("process"))) return "OSPF-Prozess";
         if (name.Contains("ospf") && name.Contains("rid")) return "Router-ID";
         if (name.Contains("bgp") && name.Contains("as")) return "AS";
         if (name.Contains("rid") || label.Contains("router-id")) return "Router-ID";
@@ -302,17 +265,17 @@ public static partial class TooltipBuilder
         if (name.Contains("source") || name.Contains("src")) return "Quelle";
         if (name.Contains("dst") || name.Contains("destination")) return "Ziel";
         if (name.Contains("port")) return "Port";
-        if (name.Contains("protocol") || label.Contains("protokoll")) return "Protokoll";
+        if (name.Contains("protocol") || label.Contains("protokoll") || label.Contains("protocol")) return "Protokoll";
         if (name.Contains("if") || label.Contains("interface")) return "Interface";
         if (name.Contains("ip") || label.Contains("ip")) return "IP";
-        if (name.Contains("mask") || label.Contains("maske")) return "Maske";
+        if (name.Contains("mask") || label.Contains("maske") || label.Contains("mask")) return "Maske";
         if (name.Contains("wildcard")) return "Wildcard";
         if (name.Contains("area")) return "Area";
         if (name.Contains("zone")) return "Zone";
         if (name.Contains("pool")) return "Pool-Name";
         if (name.Contains("policy")) return "Policy-Map";
         if (name.Contains("class")) return "Class-Map";
-        if (name.Contains("seconds") || label.Contains("sek")) return "Sekunden";
+        if (name.Contains("seconds") || label.Contains("sek") || label.Contains("seconds")) return "Sekunden";
         if (name.Contains("timeout")) return "Sekunden";
         if (name.Contains("level")) return "Level";
         if (name.Contains("name")) return "Name";
@@ -320,71 +283,79 @@ public static partial class TooltipBuilder
         return string.Empty;
     }
 
-    private static bool SameParameter(string a, string b) => NormalizeParameter(a) == NormalizeParameter(b);
+    private static bool SameParameter(string first, string second) =>
+        NormalizeParameter(first) == NormalizeParameter(second);
 
-    private static string NormalizeParameter(string text)
-    {
-        return Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9äöüß]+", "");
-    }
+    private static string NormalizeParameter(string text) =>
+        Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9äöüß]+", string.Empty, RegexOptions.CultureInvariant);
 
     private static string ExplainParameter(string parameter)
     {
-        var p = parameter.Trim();
-        var n = NormalizeParameter(p);
+        var catalog = TooltipCatalog.Current;
+        var original = parameter.Trim();
+        var normalized = NormalizeParameter(original);
 
-        if (p.Contains('|'))
-            return "Auswahlwert. Einer der angegebenen Werte wird eingesetzt, z. B. " + p.Replace("|", " oder ") + ".";
+        if (original.Contains('|'))
+        {
+            var choice = original.Replace("|", LocalizationService.IsEnglish ? " or " : " oder ");
+            return string.Format(CultureInfo.CurrentCulture, catalog.Text("parameter.choice"), choice);
+        }
 
-        if (n.Contains("hostname")) return "Gerätename im Cisco-Prompt und in Logs.";
-        if (n.Contains("domain")) return "DNS-Domainname; relevant für SSH/RSA-Schlüssel.";
-        if (n.Contains("secret") || n.Contains("psk") || n.Contains("sharedsecret")) return "geheimer Schlüssel oder Passwort; nicht im Klartext dokumentieren.";
-        if (n.Contains("password") || n.Contains("passwort")) return "Passwortwert für Login, Line oder Parser View.";
-        if (n == "user" || n.Contains("username")) return "lokaler Benutzername oder Accountname.";
-        if (n.Contains("interface") || n == "if" || n.EndsWith("if")) return "Cisco-Interface, z. B. GigabitEthernet0/1, Vlan99 oder Loopback0.";
-        if (n.Contains("interfacerange")) return "Interfacebereich, z. B. Gi0/1-24 oder Fa0/1,Fa0/3.";
-        if (n.Contains("ip") || n.Contains("peer") || n.Contains("next") || n.Contains("gateway") || n.Contains("server")) return "IPv4-/IPv6-Adresse oder erreichbarer Next-Hop, abhängig vom Befehl.";
-        if (n.Contains("netz") || n.Contains("network") || n.Contains("zielnetz")) return "Netzadresse, z. B. 192.168.10.0 oder 2001:db8::/64.";
-        if (n.Contains("maske") || n.Contains("mask")) return "Subnetzmaske, z. B. 255.255.255.0.";
-        if (n.Contains("wildcard")) return "OSPF-/ACL-Wildcard, z. B. 0.0.0.255.";
-        if (n.Contains("vlanliste")) return "VLAN-Liste, z. B. 10,20,30 oder 10-20.";
-        if (n.Contains("voicevlan")) return "Voice-VLAN für IP-Telefone; wird mit switchport voice vlan gesetzt.";
-        if (n.Contains("datavlan")) return "Daten-VLAN für Clients/PCs hinter dem Telefon.";
-        if (n.Contains("providervlan")) return "äußeres Service-/Provider-VLAN bei QinQ.";
-        if (n.Contains("customervlan")) return "inneres Kunden-VLAN bei QinQ.";
-        if (n.Contains("tftp")) return "TFTP- oder CallManager-IP für Telefon-Provisionierung.";
-        if (n.Contains("nativevlan")) return "Native VLAN auf einem 802.1Q-Trunk.";
-        if (n.Contains("vlan")) return "VLAN-ID im Bereich 1–4094, abhängig von Plattform und Design.";
-        if (n.Contains("vrf")) return "Name der VRF/Routingtabelle; muss exakt zur VRF-Definition passen.";
-        if (n.Contains("rd")) return "Route Distinguisher, meistens im Format ASN:Nummer.";
-        if (n.Contains("routetarget") || n == "rt") return "Route-Target/Extended Community, meistens im Format ASN:Nummer.";
-        if (n.Contains("neighbor")) return "Nachbaradresse, z. B. LDP- oder BGP-Peer-IP.";
-        if (n.Contains("label")) return "MPLS Label oder Label-Protokoll, abhängig vom Befehl.";
-        if (n == "as" || n.Contains("asn") || n.Contains("remoteas")) return "BGP Autonomous-System-Nummer.";
-        if (n.Contains("ospfprozess")) return "lokale OSPF-Prozess-ID; muss nicht zwischen Geräten identisch sein.";
-        if (n.Contains("routerid")) return "eindeutige Router-ID im Format einer IPv4-Adresse.";
-        if (n.Contains("area")) return "OSPF-Area, z. B. 0 oder 0.0.0.0.";
-        if (n.Contains("acl")) return "ACL-Name oder ACL-Nummer, die vorher erstellt oder referenziert wird.";
-        if (n.Contains("routemap")) return "Name einer Route-Map für Policy Routing, NAT-Ausnahme oder Routingfilter.";
-        if (n.Contains("prefixlist")) return "Name einer Prefix-List für Routingfilter.";
-        if (n.Contains("port")) return "TCP-/UDP-Port oder Dienst, z. B. 22, 80, 443, 53.";
-        if (n.Contains("protokoll") || n.Contains("protocol")) return "Protokollwert, z. B. ip, tcp, udp, icmp, ospf oder ein inspect-Protokoll.";
-        if (n.Contains("quelle") || n.Contains("source") || n.Contains("src")) return "Quelladresse, Quellnetz oder Quellobjekt.";
-        if (n.Contains("ziel") || n.Contains("destination") || n.Contains("dst")) return "Zieladresse, Zielnetz oder Zielobjekt.";
-        if (n.Contains("zone")) return "Security-Zone der Zone-Based Firewall.";
-        if (n.Contains("classmap")) return "Name einer Class-Map für QoS oder Firewall-Inspection.";
-        if (n.Contains("policymap")) return "Name einer Policy-Map für QoS oder Firewall-Inspection.";
-        if (n.Contains("transformset")) return "IPsec Transform-Set mit Verschlüsselungs-/Hash-Parametern.";
-        if (n.Contains("pool")) return "Name eines DHCP- oder NAT-Pools.";
-        if (n.Contains("sekunden") || n.Contains("seconds")) return "Zeitwert in Sekunden.";
-        if (n.Contains("minuten") || n.Contains("minutes")) return "Zeitwert in Minuten.";
-        if (n.Contains("bytes")) return "Speichergröße oder Puffergröße in Byte.";
-        if (n.Contains("level")) return "Privilege-, Logging- oder Security-Level, abhängig vom Befehl.";
-        if (n.Contains("prioritaet") || n.Contains("priority")) return "Priorität oder Sequenznummer; niedriger ist oft bevorzugt.";
-        if (n.Contains("prozent") || n.Contains("percent")) return "Prozentwert für Bandbreiten- oder QoS-Reservierung.";
-        if (n.Contains("dscp")) return "DSCP-Wert oder DSCP-Klasse für QoS-Matching.";
-        if (n.Contains("beschreibung") || n.Contains("description")) return "frei wählbarer Beschreibungstext für Dokumentation.";
-        if (n.Contains("name") || n.Contains("id") || n.Contains("nummer")) return "frei wählbarer Name, ID oder Nummer passend zum jeweiligen Modul.";
+        var key = ClassifyParameter(normalized);
+        return catalog.Parameter(key);
+    }
 
-        return "Platzhalter. Dieser Wert wird durch deine Eingabe im Modul ersetzt.";
+    private static string ClassifyParameter(string normalized)
+    {
+        if (normalized.Contains("hostname")) return "hostname";
+        if (normalized.Contains("domain")) return "domain";
+        if (normalized.Contains("secret") || normalized.Contains("psk") || normalized.Contains("sharedsecret")) return "secret";
+        if (normalized.Contains("password") || normalized.Contains("passwort")) return "password";
+        if (normalized == "user" || normalized.Contains("username")) return "user";
+        if (normalized.Contains("interfacerange")) return "interfaceRange";
+        if (normalized.Contains("interface") || normalized == "if" || normalized.EndsWith("if", StringComparison.Ordinal)) return "interface";
+        if (normalized.Contains("netz") || normalized.Contains("network") || normalized.Contains("zielnetz")) return "network";
+        if (normalized.Contains("maske") || normalized.Contains("mask")) return "mask";
+        if (normalized.Contains("wildcard")) return "wildcard";
+        if (normalized.Contains("vlanliste")) return "vlanList";
+        if (normalized.Contains("voicevlan")) return "voiceVlan";
+        if (normalized.Contains("datavlan")) return "dataVlan";
+        if (normalized.Contains("providervlan")) return "providerVlan";
+        if (normalized.Contains("customervlan")) return "customerVlan";
+        if (normalized.Contains("tftp")) return "tftp";
+        if (normalized.Contains("nativevlan")) return "nativeVlan";
+        if (normalized.Contains("vlan")) return "vlan";
+        if (normalized.Contains("vrf")) return "vrf";
+        if (normalized.Contains("routetarget") || normalized == "rt") return "routeTarget";
+        if (normalized.Contains("rd")) return "rd";
+        if (normalized.Contains("neighbor")) return "neighbor";
+        if (normalized.Contains("label")) return "label";
+        if (normalized == "as" || normalized.Contains("asn") || normalized.Contains("remoteas")) return "asn";
+        if (normalized.Contains("ospfprozess")) return "ospfProcess";
+        if (normalized.Contains("routerid")) return "routerId";
+        if (normalized.Contains("area")) return "area";
+        if (normalized.Contains("acl")) return "acl";
+        if (normalized.Contains("routemap")) return "routeMap";
+        if (normalized.Contains("prefixlist")) return "prefixList";
+        if (normalized.Contains("port")) return "port";
+        if (normalized.Contains("protokoll") || normalized.Contains("protocol")) return "protocol";
+        if (normalized.Contains("quelle") || normalized.Contains("source") || normalized.Contains("src")) return "source";
+        if (normalized.Contains("ziel") || normalized.Contains("destination") || normalized.Contains("dst")) return "destination";
+        if (normalized.Contains("zone")) return "zone";
+        if (normalized.Contains("classmap")) return "classMap";
+        if (normalized.Contains("policymap")) return "policyMap";
+        if (normalized.Contains("transformset")) return "transformSet";
+        if (normalized.Contains("pool")) return "pool";
+        if (normalized.Contains("sekunden") || normalized.Contains("seconds")) return "seconds";
+        if (normalized.Contains("minuten") || normalized.Contains("minutes")) return "minutes";
+        if (normalized.Contains("bytes")) return "bytes";
+        if (normalized.Contains("level")) return "level";
+        if (normalized.Contains("prioritaet") || normalized.Contains("priority")) return "priority";
+        if (normalized.Contains("prozent") || normalized.Contains("percent")) return "percent";
+        if (normalized.Contains("dscp")) return "dscp";
+        if (normalized.Contains("beschreibung") || normalized.Contains("description")) return "description";
+        if (normalized.Contains("ip") || normalized.Contains("peer") || normalized.Contains("next") || normalized.Contains("gateway") || normalized.Contains("server")) return "ip";
+        if (normalized.Contains("name") || normalized.Contains("id") || normalized.Contains("nummer")) return "name";
+        return "default";
     }
 }

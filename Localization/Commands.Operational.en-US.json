@@ -1,0 +1,853 @@
+[
+  {
+    "name": "Base configuration",
+    "rows": [
+      {
+        "command": "show running-config",
+        "meaning": "current running configuration in the RAM.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show startup-config",
+        "meaning": "stored startup configuration in the NVRAM.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show version",
+        "meaning": "IOS-Version, Uptime, Modell, Seriennummer, Lizenz.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show inventory",
+        "meaning": "Hardware-Inventory, Seriennummern, modules.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip interface brief",
+        "meaning": "Interface, IP-address, status, Protocol.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ipv6 interface brief",
+        "meaning": "IPv6-addresses and Interface-status compact.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces",
+        "meaning": "interface details, error, Drops, CRC, bandwidth.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces status",
+        "meaning": "Switchport-status, VLAN, Duplex, Speed.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces description",
+        "meaning": "interface descriptions compact.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show logging",
+        "meaning": "local log buffer.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show clock detail",
+        "meaning": "Systemzeit and time source.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ntp status",
+        "meaning": "NTP-synchronization status.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show users",
+        "meaning": "Active local/VTY-sessions.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show line vty 0 4",
+        "meaning": "VTY-Line-status and parameter.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip ssh",
+        "meaning": "SSH-status, Version and parameter.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show crypto key mypubkey rsa",
+        "meaning": "generated RSA-key validate.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  },
+  {
+    "name": "Switching",
+    "rows": [
+      {
+        "command": "show vlan brief",
+        "meaning": "VLANs and port assignment.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces trunk",
+        "meaning": "Trunks, Native VLAN, allowed VLANs.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces switchport",
+        "meaning": "switchport mode, Access/trunk details.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show mac address-table",
+        "meaning": "Gelernte MAC-addresses per VLAN/Port.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree",
+        "meaning": "STP Root, roles, status.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree vlan <vlan>",
+        "meaning": "STP-status for specific VLAN.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show etherchannel summary",
+        "meaning": "Port-Channel overview.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show pagp neighbor",
+        "meaning": "PAgP neighbors, if used.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show lacp neighbor",
+        "meaning": "LACP neighbors, if used.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show port-security interface <if>",
+        "meaning": "Port-Security status per Interface.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show port-security address",
+        "meaning": "Gelernte/sticky MAC-addresses.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip dhcp snooping",
+        "meaning": "DHCP Snooping status.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip dhcp snooping binding",
+        "meaning": "DHCP Snooping Bindings.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip arp inspection",
+        "meaning": "DAI status.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show errdisable recovery",
+        "meaning": "Errdisable Recovery status.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces <Interface> switchport",
+        "meaning": "switchport mode, Access-/Voice-VLAN and QinQ/trunk details for a Port.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show vlan id <VLAN>",
+        "meaning": "details to a specific VLAN, z. B. Data-, Voice- or provider VLAN.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show l2protocol-tunnel",
+        "meaning": "status of Layer-2-protocol-Tunneling for QinQ, if supported.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces dot1q-tunnel",
+        "meaning": "overview via dot1q-tunnel ports, if the platform the command supported.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show cdp neighbors detail",
+        "meaning": "Cisco phones and neighbor devices including platform/IP validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show lldp neighbors detail",
+        "meaning": "LLDP-/LLDP-MED neighbors and Telefoninformationen validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show mls qos interface <Interface>",
+        "meaning": "QoS Trust-status and QoS-parameter on a phone port validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show auto qos interface <Interface>",
+        "meaning": "AutoQoS-configuration on a phone port validate, if supported.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree summary",
+        "meaning": "summary the active STP mode, Root-Bridge-status and globaler Schutzfunktionen.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree root",
+        "meaning": "Displays the Root Bridge and the Root Port per VLAN or instance.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree blockedports",
+        "meaning": "Lists ports in the blocking/discarding state.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree inconsistentports",
+        "meaning": "Displays through Root Guard, Loop Guard or other consistency checks blocked ports.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree vlan <VLAN> detail",
+        "meaning": "detailed PVST/Rapid-PVST information for a VLAN.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree interface <Interface> detail",
+        "meaning": "STP-role, status, Kosten, Port-Priority and guard state a Interfaces.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree mst",
+        "meaning": "Displays CIST and MST instances including Root- and Portrollen.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree mst configuration",
+        "meaning": "Displays Regionsname, Revision, VLAN-mapping and Konfigurations-Digest.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show spanning-tree mst <Instance> detail",
+        "meaning": "Detailed state a specific MST-instance.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show interfaces status err-disabled",
+        "meaning": "Lists current err-disabled Interfaces.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  },
+  {
+    "name": "Routing",
+    "rows": [
+      {
+        "command": "show ip route",
+        "meaning": "Global IPv4 routing table.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ipv6 route",
+        "meaning": "Global IPv6 routing table.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip protocols",
+        "meaning": "Active IPv4 routing protocols and parameter.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip ospf neighbor",
+        "meaning": "OSPFv2 neighbors and states.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip ospf interface brief",
+        "meaning": "OSPFv2 Interfaces, Area, Cost.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip ospf database",
+        "meaning": "OSPFv2 LSDB validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ospfv3 neighbor",
+        "meaning": "OSPFv3 neighbors.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ospfv3 interface brief",
+        "meaning": "OSPFv3 Interfaces and Areas.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show eigrp address-family ipv4 neighbors",
+        "meaning": "EIGRP IPv4 neighbors, IOS-XE Syntax.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show eigrp address-family ipv6 neighbors",
+        "meaning": "EIGRP IPv6 neighbors, IOS-XE Syntax.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show isis neighbors",
+        "meaning": "IS-IS neighbors.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show isis database",
+        "meaning": "IS-IS Link-State-Datenbank.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv4 unicast summary",
+        "meaning": "BGP IPv4 Sessions compact.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv6 unicast summary",
+        "meaning": "BGP IPv6 Sessions compact.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv4 unicast",
+        "meaning": "BGP IPv4 table.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv6 unicast",
+        "meaning": "BGP IPv6 table.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show mpls interfaces",
+        "meaning": "Displays Interfaces with aktivem MPLS/LDP.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show mpls ldp neighbor",
+        "meaning": "Displays LDP-neighbors and Sessionstatus.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show mpls forwarding-table",
+        "meaning": "Displays the MPLS Label Forwarding Information Base.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show mpls ldp discovery",
+        "meaning": "Displays LDP Discovery and Hellos on MPLS interfaces.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp vpnv4 unicast all summary",
+        "meaning": "Displays MP-BGP VPNv4 Peer-status.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp vpnv4 unicast all",
+        "meaning": "Displays VPNv4-routes with RD/Route-Targets.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show vrf detail",
+        "meaning": "Displays VRF-definitions, RD/RT and Interfaces.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip route vrf <VRF>",
+        "meaning": "Displays the IPv4-routing table a VRF.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  },
+  {
+    "name": "VRF",
+    "rows": [
+      {
+        "command": "show ip vrf",
+        "meaning": "classic VRF-Liste for ip vrf Syntax.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show vrf",
+        "meaning": "VRF-Liste for neuerer IOS-XE Syntax.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show vrf detail",
+        "meaning": "VRF details, RD and Address-Families.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip route vrf <VRF>",
+        "meaning": "IPv4 routing table a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ipv6 route vrf <VRF>",
+        "meaning": "IPv6 routing table a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip interface brief vrf <VRF>",
+        "meaning": "IPv4 Interface-overview within a VRF, if from the IOS supported.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ipv6 interface brief vrf <VRF>",
+        "meaning": "IPv6 Interface-overview within a VRF, if from the IOS supported.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip cef vrf <VRF>",
+        "meaning": "CEF forwarding table a VRF validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "ping vrf <VRF> <destination-ip>",
+        "meaning": "reachability from a VRF test.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "traceroute vrf <VRF> <destination-ip>",
+        "meaning": "path from a VRF verfolgen.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip protocols vrf <VRF>",
+        "meaning": "routing protocols in a VRF validate, if supported.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip ospf vrf <VRF> neighbor",
+        "meaning": "OSPFv2 neighbors within a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip ospf vrf <VRF> interface brief",
+        "meaning": "OSPFv2 Interfaces within a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ospfv3 vrf <VRF> neighbor",
+        "meaning": "OSPFv3 neighbors within a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ospfv3 vrf <VRF> interface brief",
+        "meaning": "OSPFv3 Interfaces within a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp vpnv4 unicast all summary",
+        "meaning": "MP-BGP VPNv4 overview, if MPLS/VPNv4 used is.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv4 unicast vrf <VRF> summary",
+        "meaning": "BGP IPv4 Sessions within a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv4 unicast vrf <VRF>",
+        "meaning": "BGP IPv4 table a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv6 unicast vrf <VRF> summary",
+        "meaning": "BGP IPv6 Sessions within a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show bgp ipv6 unicast vrf <VRF>",
+        "meaning": "BGP IPv6 table a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show run | section ^ip vrf|^vrf definition",
+        "meaning": "VRF-configuration from Running-Config filter.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show run interface vlan <VLAN>",
+        "meaning": "validate, ob SVI really in VRF liegt: ip vrf forwarding <VRF>.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  },
+  {
+    "name": "ACL/NAT/DHCP",
+    "rows": [
+      {
+        "command": "show access-lists",
+        "meaning": "ACL-rules and hit counters.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip interface <if>",
+        "meaning": "Checks applied IPv4 ACLs on the Interface.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ipv6 interface <if>",
+        "meaning": "Checks applied IPv6 ACLs on the Interface.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip nat translations",
+        "meaning": "Active NAT-translations.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip nat statistics",
+        "meaning": "NAT statistics and inside/outside Interfaces.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show run | include ip nat",
+        "meaning": "NAT-configuration lines filter.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip dhcp binding",
+        "meaning": "DHCP leases.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip dhcp pool",
+        "meaning": "DHCP pool utilization.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show ip dhcp server statistics",
+        "meaning": "DHCP Server statistics.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  },
+  {
+    "name": "Tests",
+    "rows": [
+      {
+        "command": "ping 8.8.8.8",
+        "meaning": "simple reachability test.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "ping <destination> source <source>",
+        "meaning": "Ping with source address.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "ping vrf <VRF> <destination>",
+        "meaning": "Ping from a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "traceroute 8.8.8.8",
+        "meaning": "path to the target validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "traceroute vrf <VRF> <destination>",
+        "meaning": "path test from a VRF.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "telnet <ip> <port>",
+        "meaning": "TCP-Porttest, z. B. 22/80/443.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "test cable-diagnostics tdr interface Gi0/1",
+        "meaning": "Kupferkabeltest restart.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "show cable-diagnostics tdr interface Gi0/1",
+        "meaning": "Kabeltestergebnis show.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "debug ip icmp",
+        "meaning": "ICMP Debug, with caution produktiv.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "debug ip routing",
+        "meaning": "IPv4 routing changes debug, with caution use.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "debug ipv6 routing",
+        "meaning": "IPv6 routing changes debug, with caution use.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "debug ip ospf adj",
+        "meaning": "OSPFv2 adjacency problems untersuchen.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "debug bgp ipv4 unicast updates",
+        "meaning": "BGP IPv4 Updates debug, with caution use.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "undebug all",
+        "meaning": "all Debugs disable.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "ping <Voice-Gateway>",
+        "meaning": "gateway the Voice-VLANs test.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "ping <TFTP-IP>",
+        "meaning": "TFTP/CallManager reachability from the network validate.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  },
+  {
+    "name": "Clear",
+    "rows": [
+      {
+        "command": "clear ip ospf process",
+        "meaning": "OSPFv2 process again restart.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ospfv3 process",
+        "meaning": "OSPFv3 process again restart, Syntax platform-dependent.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ip bgp *",
+        "meaning": "all BGP Sessions reset.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear bgp ipv6 unicast *",
+        "meaning": "BGP IPv6 Sessions reset, IOS-XE Syntax validate.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ip bgp vrf <VRF> *",
+        "meaning": "BGP Sessions within a VRF reset.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ip route *",
+        "meaning": "Global IPv4 routing table again rebuild.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ip route vrf <VRF> *",
+        "meaning": "IPv4 routing table a VRF again rebuild, platform-dependent.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ipv6 route *",
+        "meaning": "IPv6 routing table again rebuild.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ip nat translation *",
+        "meaning": "NAT translations delete.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear arp-cache",
+        "meaning": "ARP Cache clear.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear counters",
+        "meaning": "Interface-counters reset.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear logging",
+        "meaning": "log buffer clear.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear mac address-table dynamic",
+        "meaning": "Dynamic MAC-addresses delete.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear ip dhcp binding *",
+        "meaning": "DHCP Bindings delete.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear crypto sa",
+        "meaning": "IPsec Security Associations delete.",
+        "module": "",
+        "mode": ""
+      },
+      {
+        "command": "clear crypto isakmp sa",
+        "meaning": "IKE SAs delete.",
+        "module": "",
+        "mode": ""
+      }
+    ]
+  }
+]

@@ -102,6 +102,15 @@ public partial class MainWindow : Window
         InitializeComponent();
         InitializeApplicationSettings();
 
+        var availableModules = ModuleCatalog.All;
+        if (availableModules.Count == 0)
+        {
+            throw new InvalidDataException(
+                "The embedded module catalog could not be loaded. " +
+                "Check the localization resources and startup log.");
+        }
+        StartupDiagnostics.WriteInfo($"MainWindow uses {availableModules.Count} configuration modules.");
+
         InitTopBar();
         BuildDashboardTab();
         BuildModuleTabs();
@@ -141,7 +150,7 @@ public partial class MainWindow : Window
         ConfigModeCombo.SelectionChanged += (_, _) => { InvalidateGeneratedState(); ApplyFilters(); UpdateConditionalFieldVisibility(); RefreshStpPreview(); ScheduleAutoSave(); };
         WriteMemCombo.SelectionChanged += (_, _) => ScheduleAutoSave();
 
-        DeviceTypeCombo.ToolTip = TooltipBuilder.Create("Gerätetyp", "Zweck:\nFiltert Module passend zum Zielgerät.\n\nRouter:\nRouting, WAN, NAT, VPN, OSPF/BGP.\n\nL3-Switch:\nSwitching, SVIs, Routing.\n\nL2-Switch:\nSwitching, Management, ACL-Basis.");
+        DeviceTypeCombo.ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.geratetyp"), LocalizationService.Get("text.zweck_filtert_module_passend_zum_zielgerat_router_routing_wa"));
         ConfigModeCombo.ToolTip = TooltipBuilder.Create("Konfigurationsmodus", "Ohne VRF:\nNormale globale IPv4/IPv6-Konfiguration.\n\nMit VRF:\nVRF-Definitionen, VRF-SVIs, VRF-Routen und VRF-Routingprotokolle werden eingeblendet; globale Routingmodule werden ausgeblendet.");
         WriteMemCombo.ToolTip = TooltipBuilder.Create("write memory", "Zweck:\nFügt am Ende write memory hinzu.\n\nHinweis:\nFür Labor meist praktisch. Produktiv nur setzen, wenn die Konfiguration vorher geprüft wurde.");
         ValidationTextBlock.MouseLeftButtonUp += (_, _) => NavigateToFirstValidationIssue();
@@ -158,7 +167,7 @@ public partial class MainWindow : Window
 
     private void BuildDashboardTab()
     {
-        var tab = new TabItem { Header = "⌂  Übersicht" };
+        var tab = new TabItem { Header = "⌂  " + LocalizationService.Get("navigation.overview", "Übersicht") };
         var scroll = new ScrollViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -186,10 +195,10 @@ public partial class MainWindow : Window
             Margin = new Thickness(0, 0, 16, 0)
         });
         var heroText = new StackPanel { Margin = new Thickness(16, 0, 0, 0) };
-        heroText.Children.Add(new TextBlock { Text = "Konfigurationsübersicht", FontSize = 26, FontWeight = FontWeights.Bold });
+        heroText.Children.Add(new TextBlock { Text = LocalizationService.Get("text.konfigurationsubersicht"), FontSize = 26, FontWeight = FontWeights.Bold });
         heroText.Children.Add(new TextBlock
         {
-            Text = "Gerät auswählen, benötigte Module aktivieren, Eingaben prüfen und die fertige Cisco-Konfiguration ausgeben.",
+            Text = LocalizationService.Get("text.gerat_auswahlen_benotigte_module_aktivieren_eingaben_prufen_"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 13,
             TextWrapping = TextWrapping.Wrap,
@@ -201,9 +210,9 @@ public partial class MainWindow : Window
         root.Children.Add(hero);
 
         var stats = new UniformGrid { Columns = 3, Margin = new Thickness(0, 0, 0, 12) };
-        _dashboardDeviceText = new TextBlock { Text = "Router", FontSize = 19, FontWeight = FontWeights.Bold };
-        _dashboardActiveModulesText = new TextBlock { Text = "0 Module", FontSize = 19, FontWeight = FontWeights.Bold };
-        _dashboardValidationText = new TextBlock { Text = "Bereit", FontSize = 19, FontWeight = FontWeights.Bold };
+        _dashboardDeviceText = new TextBlock { Text = LocalizationService.Get("text.router"), FontSize = 19, FontWeight = FontWeights.Bold };
+        _dashboardActiveModulesText = new TextBlock { Text = LocalizationService.Get("status.zero_modules"), FontSize = 19, FontWeight = FontWeights.Bold };
+        _dashboardValidationText = new TextBlock { Text = LocalizationService.Get("text.bereit"), FontSize = 19, FontWeight = FontWeights.Bold };
         stats.Children.Add(CreateDashboardStatCard("Zielgerät", _dashboardDeviceText, "Wird über die Kopfzeile ausgewählt."));
         stats.Children.Add(CreateDashboardStatCard("Aktive Module", _dashboardActiveModulesText, "Nur aktive Module werden exportiert."));
         stats.Children.Add(CreateDashboardStatCard("Validierung", _dashboardValidationText, "Warnungen führen direkt zum betroffenen Feld."));
@@ -219,7 +228,7 @@ public partial class MainWindow : Window
             Margin = new Thickness(0, 0, 0, 12)
         };
         var workflowStack = new StackPanel();
-        workflowStack.Children.Add(new TextBlock { Text = "Empfohlener Ablauf", FontSize = 18, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 0, 0, 10) });
+        workflowStack.Children.Add(new TextBlock { Text = LocalizationService.Get("text.empfohlener_ablauf"), FontSize = 18, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 0, 0, 10) });
         var workflow = new UniformGrid { Columns = 4 };
         workflow.Children.Add(CreateWorkflowCard("1", "Ziel festlegen", "Router, L3- oder L2-Switch und VRF-Modus auswählen."));
         workflow.Children.Add(CreateWorkflowCard("2", "Module aktivieren", "Nur die tatsächlich benötigten Funktionsbereiche einschalten."));
@@ -238,10 +247,10 @@ public partial class MainWindow : Window
             Padding = new Thickness(16)
         };
         var quickStack = new StackPanel();
-        quickStack.Children.Add(new TextBlock { Text = "Direktzugriff", FontSize = 18, FontWeight = FontWeights.Bold });
+        quickStack.Children.Add(new TextBlock { Text = LocalizationService.Get("text.direktzugriff"), FontSize = 18, FontWeight = FontWeights.Bold });
         quickStack.Children.Add(new TextBlock
         {
-            Text = "Häufig verwendete Bereiche ohne Umweg öffnen.",
+            Text = LocalizationService.Get("text.haufig_verwendete_bereiche_ohne_umweg_offnen"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 12,
             Margin = new Thickness(0, 3, 0, 8)
@@ -342,7 +351,7 @@ public partial class MainWindow : Window
         // Dadurch bleiben Fachbereiche und Dokumentationswerkzeuge dauerhaft übersichtlich gruppiert.
         MainTabs.Items.Clear();
 
-        AddNavigationGroupHeader("KONFIGURATION");
+        AddNavigationGroupHeader(LocalizationService.Get("navigation.group.configuration", "KONFIGURATION"));
         foreach (var tabName in new[]
                  {
                      "Übersicht",
@@ -358,7 +367,7 @@ public partial class MainWindow : Window
             AddNavigationTab(tabName);
         }
 
-        AddNavigationGroupHeader("WERKZEUGE");
+        AddNavigationGroupHeader(LocalizationService.Get("navigation.group.tools", "WERKZEUGE"));
         foreach (var tabName in new[]
                  {
                      "Gegenstelle",
@@ -370,7 +379,7 @@ public partial class MainWindow : Window
             AddNavigationTab(tabName);
         }
 
-        AddNavigationGroupHeader("DOKUMENTATION");
+        AddNavigationGroupHeader(LocalizationService.Get("navigation.group.documentation", "DOKUMENTATION"));
         foreach (var tabName in new[]
                  {
                      "Projekt",
@@ -384,7 +393,7 @@ public partial class MainWindow : Window
             AddNavigationTab(tabName);
         }
 
-        AddNavigationGroupHeader("SYSTEM");
+        AddNavigationGroupHeader(LocalizationService.Get("navigation.group.system", "SYSTEM"));
         AddNavigationTab("Einstellungen");
     }
 
@@ -505,7 +514,7 @@ public partial class MainWindow : Window
         });
         stack.Children.Add(new TextBlock
         {
-            Text = "Noch kein Modul aktiviert",
+            Text = LocalizationService.Get("text.noch_kein_modul_aktiviert"),
             FontSize = 17,
             FontWeight = FontWeights.Bold,
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -513,7 +522,7 @@ public partial class MainWindow : Window
         });
         stack.Children.Add(new TextBlock
         {
-            Text = "Aktiviere links ein Modul. Die zugehörigen Eingaben erscheinen anschließend hier.",
+            Text = LocalizationService.Get("text.aktiviere_links_ein_modul_die_zugehorigen_eingaben_erscheine"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             TextAlignment = TextAlignment.Center,
             TextWrapping = TextWrapping.Wrap,
@@ -573,7 +582,7 @@ public partial class MainWindow : Window
 
         var countText = new TextBlock
         {
-            Text = "0 aktiv",
+            Text = LocalizationService.Get("status.zero_active"),
             Foreground = new SolidColorBrush(Color.FromRgb(253, 186, 116)),
             FontWeight = FontWeights.SemiBold,
             VerticalAlignment = VerticalAlignment.Center
@@ -591,8 +600,8 @@ public partial class MainWindow : Window
         _tabActiveCountTexts[tabName] = countText;
         actions.Children.Add(countBadge);
 
-        var open = new Button { Content = "Alle öffnen", Style = TryFindResource("SmallButtonStyle") as Style };
-        var close = new Button { Content = "Alle schließen", Style = TryFindResource("SmallButtonStyle") as Style };
+        var open = new Button { Content = LocalizationService.Get("text.alle_offnen"), Style = TryFindResource("SmallButtonStyle") as Style };
+        var close = new Button { Content = LocalizationService.Get("text.alle_schlie_en"), Style = TryFindResource("SmallButtonStyle") as Style };
         open.Click += (_, _) =>
         {
             foreach (var module in modules.Where(m => _moduleChecks.TryGetValue(m.Name, out var cb) && cb.IsChecked == true))
@@ -665,8 +674,8 @@ public partial class MainWindow : Window
         {
             Children =
             {
-                new TextBlock { Text = "Module", FontSize = 17, FontWeight = FontWeights.Bold },
-                new TextBlock { Text = "Auswählen und konfigurieren", FontSize = 11, Foreground = new SolidColorBrush(Color.FromRgb(139, 150, 166)), Margin = new Thickness(0, 2, 0, 0) }
+                new TextBlock { Text = LocalizationService.Get("common.modules"), FontSize = 17, FontWeight = FontWeights.Bold },
+                new TextBlock { Text = LocalizationService.Get("text.auswahlen_und_konfigurieren"), FontSize = 11, Foreground = new SolidColorBrush(Color.FromRgb(139, 150, 166)), Margin = new Thickness(0, 2, 0, 0) }
             }
         });
         var moduleCount = new TextBlock
@@ -691,7 +700,7 @@ public partial class MainWindow : Window
 
         var searchLabel = new TextBlock
         {
-            Text = "Module durchsuchen",
+            Text = LocalizationService.Get("text.module_durchsuchen"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 11,
             Margin = new Thickness(2, 0, 0, 4)
@@ -703,16 +712,16 @@ public partial class MainWindow : Window
         {
             MinHeight = 34,
             Margin = new Thickness(0, 0, 0, 9),
-            ToolTip = TooltipBuilder.Create("Modulsuche", "Durchsucht die Module dieses Bereichs.\n\nGesucht wird in Modulname, interner Modul-ID, Feldnamen und Hilfetexten.")
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.modulsuche"), LocalizationService.Get("text.durchsucht_die_module_dieses_bereichs_gesucht_wird_in_moduln"))
         };
         searchBox.TextChanged += (_, _) => { _tabSearchText[tabName] = searchBox.Text ?? string.Empty; ApplyFilters(); };
         DockPanel.SetDock(searchBox, Dock.Top);
         dock.Children.Add(searchBox);
 
         var buttons = new UniformGrid { Columns = 3, Margin = new Thickness(0, 0, 0, 10) };
-        var all = new Button { Content = "Alle", Style = TryFindResource("SmallButtonStyle") as Style, ToolTip = "Aktiviert alle sichtbaren Module." };
-        var none = new Button { Content = "Keine", Style = TryFindResource("SmallButtonStyle") as Style, ToolTip = "Deaktiviert alle Module dieses Bereichs." };
-        var favOnly = new Button { Content = "Favoriten", Style = TryFindResource("SmallButtonStyle") as Style, ToolTip = "Aktiviert nur die markierten Favoritenmodule." };
+        var all = new Button { Content = LocalizationService.Get("text.alle"), Style = TryFindResource("SmallButtonStyle") as Style, ToolTip = LocalizationService.Get("tooltip.enable_visible_modules") };
+        var none = new Button { Content = LocalizationService.Get("text.keine"), Style = TryFindResource("SmallButtonStyle") as Style, ToolTip = LocalizationService.Get("tooltip.disable_section_modules") };
+        var favOnly = new Button { Content = LocalizationService.Get("text.favoriten"), Style = TryFindResource("SmallButtonStyle") as Style, ToolTip = LocalizationService.Get("text.aktiviert_nur_die_markierten_favoritenmodule") };
         all.Click += (_, _) => SetTabChecks(tabName, true);
         none.Click += (_, _) => SetTabChecks(tabName, false);
         favOnly.Click += (_, _) => ApplyModulePreset("Favoriten");
@@ -770,7 +779,7 @@ public partial class MainWindow : Window
                 Padding = new Thickness(0),
                 Margin = new Thickness(3, 0, 0, 0),
                 Style = TryFindResource("SmallButtonStyle") as Style,
-                ToolTip = "Als Favorit markieren oder entfernen."
+                ToolTip = LocalizationService.Get("text.als_favorit_markieren_oder_entfernen")
             };
             fav.Click += (_, _) =>
             {
@@ -917,7 +926,7 @@ public partial class MainWindow : Window
 
         var statusText = new TextBlock
         {
-            Text = "Aus",
+            Text = LocalizationService.Get("text.aus"),
             FontSize = 11,
             Foreground = Brushes.White,
             VerticalAlignment = VerticalAlignment.Center
@@ -930,7 +939,7 @@ public partial class MainWindow : Window
             CornerRadius = new CornerRadius(7),
             Padding = new Thickness(8, 3, 8, 3),
             Margin = new Thickness(5, 0, 0, 0),
-            ToolTip = "Validierungsstatus dieses Moduls.",
+            ToolTip = LocalizationService.Get("text.validierungsstatus_dieses_moduls"),
             Child = statusText
         };
         _moduleStatusBadges[module.Name] = statusBadge;
@@ -1012,7 +1021,7 @@ public partial class MainWindow : Window
             {
                 text.Background = new SolidColorBrush(Color.FromRgb(8, 11, 16));
                 text.Foreground = new SolidColorBrush(Color.FromRgb(226, 232, 240));
-                text.Text = "STP-Modul aktivieren, um die Live-Vorschau anzuzeigen.";
+                text.Text = LocalizationService.Get("text.stp_modul_aktivieren_um_die_live_vorschau_anzuzeigen");
                 _previewControls[field.Name] = text;
             }
 
@@ -1132,7 +1141,7 @@ public partial class MainWindow : Window
         {
             if (!_moduleChecks.TryGetValue("stpExtended", out var moduleCheck) || moduleCheck.IsChecked != true)
             {
-                preview.Text = "STP-Modul aktivieren, um die Live-Vorschau anzuzeigen.";
+                preview.Text = LocalizationService.Get("text.stp_modul_aktivieren_um_die_live_vorschau_anzuzeigen");
                 return;
             }
 
@@ -1142,7 +1151,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            preview.Text = "Vorschau konnte nicht erzeugt werden: " + ex.Message;
+            preview.Text = LocalizationService.Get("text.vorschau_konnte_nicht_erzeugt_werden.0009bf22") + ex.Message;
         }
         finally
         {
@@ -1172,7 +1181,7 @@ public partial class MainWindow : Window
 
     private void BuildConfigurationTab()
     {
-        var tab = new TabItem { Header = "📄  Ausgabe" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.output") };
         var root = new Grid { Margin = new Thickness(0) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -1195,13 +1204,13 @@ public partial class MainWindow : Window
         var info = new StackPanel();
         info.Children.Add(new TextBlock
         {
-            Text = "Konfiguration erzeugen",
+            Text = LocalizationService.Get("text.konfiguration_erzeugen"),
             FontSize = 19,
             FontWeight = FontWeights.Bold
         });
         info.Children.Add(new TextBlock
         {
-            Text = "Aktive Module zusammenführen, prüfen, kopieren oder direkt über die serielle Konsole übertragen.",
+            Text = LocalizationService.Get("text.aktive_module_zusammenfuhren_prufen_kopieren_oder_direkt_ube"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 12,
             Margin = new Thickness(0, 3, 0, 0)
@@ -1217,30 +1226,30 @@ public partial class MainWindow : Window
 
         var refreshButton = new Button
         {
-            Content = "Vorschau aktualisieren",
+            Content = LocalizationService.Get("text.vorschau_aktualisieren"),
             Style = TryFindResource("PrimaryButtonStyle") as Style,
-            ToolTip = TooltipBuilder.Create("Vorschau aktualisieren", "Erzeugt die Cisco-Konfiguration anhand der aktuell gesetzten Werte und Module.\n\nDie Vorschau wird nicht automatisch dauerhaft unter der Eingabemaske angezeigt.")
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.vorschau_aktualisieren"), LocalizationService.Get("text.erzeugt_die_cisco_konfiguration_anhand_der_aktuell_gesetzten"))
         };
         refreshButton.Click += async (_, _) => await RefreshConfigurationPreviewAsync();
 
         var copyButton = new Button
         {
-            Content = "Vorschau kopieren",
-            ToolTip = TooltipBuilder.Create("Vorschau kopieren", "Kopiert den Inhalt des Vorschau-Feldes in die Zwischenablage.\n\nIst die Vorschau leer, wird sie vorher neu erzeugt.")
+            Content = LocalizationService.Get("text.vorschau_kopieren"),
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.vorschau_kopieren"), LocalizationService.Get("text.kopiert_den_inhalt_des_vorschau_feldes_in_die_zwischenablage"))
         };
         copyButton.Click += async (_, _) => await CopyPreviewAsync();
 
         var exportButton = new Button
         {
-            Content = "TXT Export",
-            ToolTip = TooltipBuilder.Create("TXT Export", "Erzeugt die Konfiguration im Hintergrund und speichert sie als Textdatei.")
+            Content = LocalizationService.Get("header.txt_export"),
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("header.txt_export"), LocalizationService.Get("text.erzeugt_die_konfiguration_im_hintergrund_und_speichert_sie_a"))
         };
         exportButton.Click += async (_, _) => await SaveTextExportAsync();
 
         var peerButton = new Button
         {
-            Content = "Gegenstelle anzeigen",
-            ToolTip = TooltipBuilder.Create("Gegenstelle anzeigen", "Öffnet die automatisch abgeleiteten Anforderungen und Beispielbefehle für das jeweils andere Gerät.")
+            Content = LocalizationService.Get("text.gegenstelle_anzeigen"),
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.gegenstelle_anzeigen"), LocalizationService.Get("text.offnet_die_automatisch_abgeleiteten_anforderungen_und_beispi"))
         };
         peerButton.Click += (_, _) =>
         {
@@ -1250,18 +1259,18 @@ public partial class MainWindow : Window
 
         var comMenuButton = new Button
         {
-            Content = "COM / Konsole",
-            ToolTip = TooltipBuilder.Create("COM / Konsole", "Fasst die serielle Ausgabe zusammen.\n\nOptionen:\nCOM-Port wählen\nCOM-Testmodus aktivieren\nKonfiguration an COM senden\n\nDer Testmodus benötigt keinen echten COM-Port und schreibt die Ausgabe in eine Logdatei.")
+            Content = LocalizationService.Get("text.com_konsole"),
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.com_konsole"), LocalizationService.Get("text.fasst_die_serielle_ausgabe_zusammen_optionen_com_port_wahlen"))
         };
 
         var comMenu = new ContextMenu();
-        var comSelectItem = new MenuItem { Header = "COM-Port wählen" };
+        var comSelectItem = new MenuItem { Header = LocalizationService.Get("text.com_port_wahlen") };
         comSelectItem.Click += (_, _) => SelectComPort();
 
-        var comTestItem = new MenuItem { Header = "COM-Testmodus aktivieren" };
+        var comTestItem = new MenuItem { Header = LocalizationService.Get("text.com_testmodus_aktivieren") };
         comTestItem.Click += (_, _) => EnableComTestMode();
 
-        var comSendItem = new MenuItem { Header = "Konfiguration senden" };
+        var comSendItem = new MenuItem { Header = LocalizationService.Get("text.konfiguration_senden") };
         comSendItem.Click += async (_, _) => await SendConfigToComPortAsync();
 
         comMenu.Items.Add(comSelectItem);
@@ -1357,14 +1366,14 @@ public partial class MainWindow : Window
         }
 
         Clipboard.SetText(_configurationPreviewText ?? string.Empty);
-        MessageBox.Show(this, "Vorschau wurde in die Zwischenablage kopiert.", "Kopiert", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(this, LocalizationService.Get("text.vorschau_wurde_in_die_zwischenablage_kopiert"), LocalizationService.Get("text.kopiert"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
 
 
     private void BuildPeerRequirementsTab()
     {
-        var tab = new TabItem { Header = "⇄  Gegenstelle" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.peer") };
         var root = new Grid { Margin = new Thickness(0) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -1386,13 +1395,13 @@ public partial class MainWindow : Window
         var info = new StackPanel();
         info.Children.Add(new TextBlock
         {
-            Text = "Anforderungen der Gegenstelle",
+            Text = LocalizationService.Get("text.anforderungen_der_gegenstelle"),
             FontSize = 19,
             FontWeight = FontWeights.Bold
         });
         info.Children.Add(new TextBlock
         {
-            Text = "Zeigt zu aktiven Trunks, EtherChannels und Routing-/VPN-Protokollen die erforderlichen Parameter und Beispielbefehle für das Nachbargerät.",
+            Text = LocalizationService.Get("text.zeigt_zu_aktiven_trunks_etherchannels_und_routing_vpn_protok"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 12,
             Margin = new Thickness(0, 3, 0, 0),
@@ -1408,28 +1417,28 @@ public partial class MainWindow : Window
         };
         var refreshButton = new Button
         {
-            Content = "Gegenstelle aktualisieren",
+            Content = LocalizationService.Get("peer.refresh"),
             Style = TryFindResource("PrimaryButtonStyle") as Style,
-            ToolTip = "Leitet die Anforderungen erneut aus allen aktuellen Eingaben und aktiven Modulen ab."
+            ToolTip = LocalizationService.Get("text.leitet_die_anforderungen_erneut_aus_allen_aktuellen_eingaben")
         };
         refreshButton.Click += (_, _) => RefreshPeerRequirements();
 
         var copyButton = new Button
         {
-            Content = "Kopieren",
-            ToolTip = "Kopiert die Gegenstellenanforderungen in die Zwischenablage."
+            Content = LocalizationService.Get("common.copy"),
+            ToolTip = LocalizationService.Get("text.kopiert_die_gegenstellenanforderungen_in_die_zwischenablage")
         };
         copyButton.Click += (_, _) =>
         {
             if (string.IsNullOrWhiteSpace(_peerRequirementsText)) RefreshPeerRequirements();
             Clipboard.SetText(_peerRequirementsText);
-            MessageBox.Show(this, "Gegenstellenanforderungen wurden kopiert.", "Kopiert", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, LocalizationService.Get("text.gegenstellenanforderungen_wurden_kopiert"), LocalizationService.Get("text.kopiert"), MessageBoxButton.OK, MessageBoxImage.Information);
         };
 
         var saveButton = new Button
         {
-            Content = "TXT Export",
-            ToolTip = "Speichert die Gegenstellenanforderungen als Textdatei."
+            Content = LocalizationService.Get("header.txt_export"),
+            ToolTip = LocalizationService.Get("text.speichert_die_gegenstellenanforderungen_als_textdatei")
         };
         saveButton.Click += (_, _) => SavePeerRequirements();
 
@@ -1442,7 +1451,7 @@ public partial class MainWindow : Window
 
         _peerRequirementsBox = new TextBox
         {
-            Text = "Klicke auf 'Gegenstelle aktualisieren', um die Anforderungen des Nachbargeräts zu erzeugen.",
+            Text = LocalizationService.Get("text.klicke_auf_gegenstelle_aktualisieren_um_die_anforderungen_de"),
             FontFamily = new FontFamily("Consolas"),
             FontSize = 13,
             IsReadOnly = true,
@@ -1504,7 +1513,7 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(_peerRequirementsText)) RefreshPeerRequirements();
         var dialog = new SaveFileDialog
         {
-            Title = "Gegenstellenanforderungen speichern",
+            Title = LocalizationService.Get("text.gegenstellenanforderungen_speichern"),
             Filter = "Textdatei (*.txt)|*.txt|Cisco-Konfiguration (*.cfg)|*.cfg|Alle Dateien (*.*)|*.*",
             FileName = "gegenstelle_anforderungen.txt"
         };
@@ -1514,7 +1523,7 @@ public partial class MainWindow : Window
 
     private void BuildImportConfigTab()
     {
-        var tab = new TabItem { Header = "📥  Import" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.import") };
         var root = new Grid { Margin = new Thickness(0) };
         root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -1539,10 +1548,10 @@ public partial class MainWindow : Window
             Margin = new Thickness(0, 0, 0, 10)
         };
         var importInfoStack = new StackPanel();
-        importInfoStack.Children.Add(new TextBlock { Text = "Cisco-Konfiguration importieren", FontSize = 19, FontWeight = FontWeights.Bold });
+        importInfoStack.Children.Add(new TextBlock { Text = LocalizationService.Get("text.cisco_konfiguration_importieren"), FontSize = 19, FontWeight = FontWeights.Bold });
         importInfoStack.Children.Add(new TextBlock
         {
-            Text = "Komplette Running-Config oder Teilkonfiguration einfügen. Bekannte Werte werden übernommen; nicht unterstützte Befehle musst du nicht löschen, sie werden separat notiert.",
+            Text = LocalizationService.Get("text.komplette_running_config_oder_teilkonfiguration_einfugen_bek"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 5, 0, 0)
@@ -1552,10 +1561,10 @@ public partial class MainWindow : Window
         left.Children.Add(importInfo);
 
         var importButtons = new WrapPanel { Margin = new Thickness(0, 0, 0, 10) };
-        var loadButton = new Button { Content = "Config-Datei laden", ToolTip = "Lädt eine vorhandene TXT/CFG-Konfiguration in das Importfeld." };
-        var analyzeButton = new Button { Content = "Analysieren", Style = TryFindResource("PrimaryButtonStyle") as Style, ToolTip = "Analysiert komplette Konfigurationen. Bekannte Werte werden erkannt, unbekannte Befehle werden mit Kontext notiert." };
-        var applyButton = new Button { Content = "Daten übernehmen", Style = TryFindResource("PrimaryButtonStyle") as Style, ToolTip = "Übernimmt erkannte Werte in die vorhandenen Module und aktiviert passende Module." };
-        var exportUnknownButton = new Button { Content = "Unbekannte exportieren", ToolTip = "Exportiert alle nicht zugeordneten Befehle als Textdatei." };
+        var loadButton = new Button { Content = LocalizationService.Get("import.load_config"), ToolTip = LocalizationService.Get("text.ladt_eine_vorhandene_txt_cfg_konfiguration_in_das_importfeld") };
+        var analyzeButton = new Button { Content = LocalizationService.Get("common.analyze"), Style = TryFindResource("PrimaryButtonStyle") as Style, ToolTip = LocalizationService.Get("text.analysiert_komplette_konfigurationen_bekannte_werte_werden_e") };
+        var applyButton = new Button { Content = LocalizationService.Get("text.daten_ubernehmen"), Style = TryFindResource("PrimaryButtonStyle") as Style, ToolTip = LocalizationService.Get("text.ubernimmt_erkannte_werte_in_die_vorhandenen_module_und_aktiv") };
+        var exportUnknownButton = new Button { Content = LocalizationService.Get("import.export_unknown"), ToolTip = LocalizationService.Get("import.export_unknown_tooltip") };
 
         loadButton.Click += (_, _) => LoadConfigForImport();
         analyzeButton.Click += (_, _) => AnalyzeImportedConfig();
@@ -1578,7 +1587,7 @@ public partial class MainWindow : Window
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             FontFamily = new FontFamily("Consolas"),
             FontSize = 13,
-            Text = "! running-config hier einfügen\nhostname R1\ninterface GigabitEthernet0/0\n ip address 192.168.1.1 255.255.255.0\n no shutdown\nrouter ospf 1\n network 192.168.1.0 0.0.0.255 area 0"
+            Text = LocalizationService.Get("text.running_config_hier_einfugen_hostname_r1_interface_gigabitet")
         };
         var importBorder = new Border
         {
@@ -1602,10 +1611,10 @@ public partial class MainWindow : Window
             Margin = new Thickness(0, 0, 0, 10)
         };
         var resultInfoStack = new StackPanel();
-        resultInfoStack.Children.Add(new TextBlock { Text = "Import-Ergebnis", FontSize = 19, FontWeight = FontWeights.Bold });
+        resultInfoStack.Children.Add(new TextBlock { Text = LocalizationService.Get("import.result"), FontSize = 19, FontWeight = FontWeights.Bold });
         resultInfoStack.Children.Add(new TextBlock
         {
-            Text = "Rechts stehen Zusammenfassung, übernehmbare Felder, aktivierte Module und unbekannte Befehle.",
+            Text = LocalizationService.Get("text.rechts_stehen_zusammenfassung_ubernehmbare_felder_aktivierte"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 5, 0, 0)
@@ -1615,8 +1624,8 @@ public partial class MainWindow : Window
         right.Children.Add(resultInfo);
 
         var resultButtons = new WrapPanel { Margin = new Thickness(0, 0, 0, 10) };
-        var copyUnknownButton = new Button { Content = "Unbekannte kopieren", ToolTip = "Kopiert die unbekannten Befehle in die Zwischenablage." };
-        var copySummaryButton = new Button { Content = "Zusammenfassung kopieren", ToolTip = "Kopiert das gesamte Import-Ergebnis in die Zwischenablage." };
+        var copyUnknownButton = new Button { Content = LocalizationService.Get("import.copy_unknown"), ToolTip = LocalizationService.Get("text.kopiert_die_unbekannten_befehle_in_die_zwischenablage") };
+        var copySummaryButton = new Button { Content = LocalizationService.Get("import.copy_summary"), ToolTip = LocalizationService.Get("text.kopiert_das_gesamte_import_ergebnis_in_die_zwischenablage") };
         copyUnknownButton.Click += (_, _) => CopyUnknownImportedCommands();
         copySummaryButton.Click += (_, _) => Clipboard.SetText(_importResultBox?.Text ?? string.Empty);
         resultButtons.Children.Add(copyUnknownButton);
@@ -1633,7 +1642,7 @@ public partial class MainWindow : Window
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             FontFamily = new FontFamily("Consolas"),
             FontSize = 13,
-            Text = "Noch keine Analyse ausgeführt."
+            Text = LocalizationService.Get("text.noch_keine_analyse_ausgefuhrt")
         };
         var resultBorder = new Border
         {
@@ -1661,7 +1670,7 @@ public partial class MainWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Cisco-Konfiguration laden",
+            Title = LocalizationService.Get("text.cisco_konfiguration_laden"),
             Filter = "Cisco/Text (*.txt;*.cfg;*.conf)|*.txt;*.cfg;*.conf|Alle Dateien (*.*)|*.*"
         };
         if (dialog.ShowDialog(this) != true) return;
@@ -1677,8 +1686,12 @@ public partial class MainWindow : Window
         _lastImportAnalysis = ImportedConfigAnalyzer.Analyze(_importConfigBox.Text);
         _importResultBox.Text = FormatImportAnalysis(_lastImportAnalysis);
         ValidationTextBlock.Text = _lastImportAnalysis.UnknownCommands.Count == 0
-            ? $"Importanalyse: {_lastImportAnalysis.AppliedFields} Felder erkannt · keine unbekannten Befehle"
-            : $"Importanalyse: {_lastImportAnalysis.AppliedFields} Felder erkannt · {_lastImportAnalysis.UnknownCommands.Count} unbekannte Befehle";
+            ? (LocalizationService.IsEnglish
+                ? $"Import analysis: {_lastImportAnalysis.AppliedFields} fields recognized · no unknown commands"
+                : $"Importanalyse: {_lastImportAnalysis.AppliedFields} Felder erkannt · keine unbekannten Befehle")
+            : (LocalizationService.IsEnglish
+                ? $"Import analysis: {_lastImportAnalysis.AppliedFields} fields recognized · {_lastImportAnalysis.UnknownCommands.Count} unknown commands"
+                : $"Importanalyse: {_lastImportAnalysis.AppliedFields} Felder erkannt · {_lastImportAnalysis.UnknownCommands.Count} unbekannte Befehle");
         ValidationTextBlock.Foreground = _lastImportAnalysis.UnknownCommands.Count == 0
             ? new SolidColorBrush(Color.FromRgb(134, 239, 172))
             : new SolidColorBrush(Color.FromRgb(251, 191, 36));
@@ -1759,7 +1772,7 @@ public partial class MainWindow : Window
 
         var dialog = new SaveFileDialog
         {
-            Title = "Unbekannte Importbefehle speichern",
+            Title = LocalizationService.Get("text.unbekannte_importbefehle_speichern"),
             Filter = "Textdatei (*.txt)|*.txt|Alle Dateien (*.*)|*.*",
             FileName = "unbekannte_cisco_befehle.txt"
         };
@@ -1909,7 +1922,7 @@ public partial class MainWindow : Window
 
     private void BuildCommandTab()
     {
-        var tab = new TabItem { Header = "⌨  Befehlsregister" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.command_registry") };
         var outer = new Grid { Margin = new Thickness(0) };
         outer.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         outer.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -1938,13 +1951,13 @@ public partial class MainWindow : Window
         var info = new StackPanel();
         info.Children.Add(new TextBlock
         {
-            Text = "Befehlsregister",
+            Text = LocalizationService.Get("navigation.command_registry"),
             FontSize = 19,
             FontWeight = FontWeights.Bold
         });
         info.Children.Add(new TextBlock
         {
-            Text = "Aktualisierte Cisco-Konfigurations-, Diagnose-, Prüf- und Wartungsbefehle durchsuchen.",
+            Text = LocalizationService.Get("text.aktualisierte_cisco_konfigurations_diagnose_pruf_und_wartung"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 12,
             Margin = new Thickness(0, 3, 0, 0)
@@ -1954,7 +1967,7 @@ public partial class MainWindow : Window
         var groupPanel = new StackPanel();
         groupPanel.Children.Add(new TextBlock
         {
-            Text = "Bereich",
+            Text = LocalizationService.Get("text.bereich"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 11,
             Margin = new Thickness(0, 0, 0, 4)
@@ -1964,11 +1977,12 @@ public partial class MainWindow : Window
         {
             MinHeight = 34,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            ToolTip = TooltipBuilder.Create("Bereich auswählen", "Zeigt alle Befehle oder nur die Befehle einer bestimmten Gruppe an.")
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.bereich_auswahlen"), LocalizationService.Get("text.zeigt_alle_befehle_oder_nur_die_befehle_einer_bestimmten_gru"))
         };
         groupSelector.Items.Add("Alle Bereiche");
         foreach (var group in commandGroups)
             groupSelector.Items.Add(group.Name);
+        groupSelector.ItemTemplate = LocalizationService.CreateLocalizedStringTemplate();
         groupSelector.SelectedIndex = 0;
         groupPanel.Children.Add(groupSelector);
         Grid.SetColumn(groupPanel, 1);
@@ -1977,7 +1991,7 @@ public partial class MainWindow : Window
         var searchPanel = new StackPanel();
         searchPanel.Children.Add(new TextBlock
         {
-            Text = "Suche",
+            Text = LocalizationService.Get("text.suche"),
             Foreground = new SolidColorBrush(Color.FromRgb(156, 166, 181)),
             FontSize = 11,
             Margin = new Thickness(0, 0, 0, 4)
@@ -1988,7 +2002,7 @@ public partial class MainWindow : Window
             MinHeight = 34,
             VerticalContentAlignment = VerticalAlignment.Center,
             TextWrapping = TextWrapping.NoWrap,
-            ToolTip = TooltipBuilder.Create("Suche", "Durchsucht Modul, Modus, Befehl und Beschreibung.\n\nBeispiele:\nOSPF\nVRF\ninterface\nssh\n<ACL>\nroute-map")
+            ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.suche"), LocalizationService.Get("text.durchsucht_modul_modus_befehl_und_beschreibung_beispiele_osp"))
         };
         searchPanel.Children.Add(searchBox);
         Grid.SetColumn(searchPanel, 3);
@@ -2039,29 +2053,29 @@ public partial class MainWindow : Window
 
         commandGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Modul",
-            Binding = new System.Windows.Data.Binding("Module"),
+            Header = LocalizationService.Get("text.modul"),
+            Binding = new System.Windows.Data.Binding("Module") { Converter = new LocalizedTextConverter() },
             Width = new DataGridLength(150),
             ElementStyle = wrapStyle
         });
         commandGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Modus",
-            Binding = new System.Windows.Data.Binding("Mode"),
+            Header = LocalizationService.Get("header.mode"),
+            Binding = new System.Windows.Data.Binding("Mode") { Converter = new LocalizedTextConverter() },
             Width = new DataGridLength(135),
             ElementStyle = wrapStyle
         });
         commandGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Befehl / Syntax",
+            Header = LocalizationService.Get("text.befehl_syntax"),
             Binding = new System.Windows.Data.Binding("Command"),
             Width = new DataGridLength(430),
             ElementStyle = wrapStyle
         });
         commandGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Beschreibung",
-            Binding = new System.Windows.Data.Binding("Meaning"),
+            Header = LocalizationService.Get("text.beschreibung"),
+            Binding = new System.Windows.Data.Binding("Meaning") { Converter = new CommandDescriptionConverter() },
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             ElementStyle = wrapStyle
         });
@@ -2091,7 +2105,10 @@ public partial class MainWindow : Window
                     Contains(r.Module, q) ||
                     Contains(r.Mode, q) ||
                     Contains(r.Command, q) ||
-                    Contains(r.Meaning, q));
+                    Contains(r.Meaning, q) ||
+                    Contains(LocalizationService.TranslateText(r.Module), q) ||
+                    Contains(LocalizationService.TranslateText(r.Mode), q) ||
+                    Contains(LocalizationService.TranslateNaturalLanguageText(r.Meaning), q));
             }
 
             var filtered = rows
@@ -2102,7 +2119,9 @@ public partial class MainWindow : Window
                 .ToList();
             commandGrid.ItemsSource = filtered;
             var selectedArea = groupSelector.SelectedItem?.ToString() ?? "Alle Bereiche";
-            resultText.Text = $"{selectedArea} · {filtered.Count} Befehle";
+            resultText.Text = LocalizationService.IsEnglish
+                ? $"{LocalizationService.TranslateText(selectedArea)} · {filtered.Count} commands"
+                : $"{selectedArea} · {filtered.Count} Befehle";
         }
 
         static bool Contains(string source, string query) =>
@@ -2119,7 +2138,7 @@ public partial class MainWindow : Window
 
     private void BuildCheckTab()
     {
-        var tab = new TabItem { Header = "▦  Subnetting" };
+        var tab = new TabItem { Header = LocalizationService.Get("tab.subnetting") };
         var grid = new Grid
         {
             Margin = new Thickness(4),
@@ -2142,14 +2161,14 @@ public partial class MainWindow : Window
 
         stack.Children.Add(new TextBlock
         {
-            Text = "Subnetting / Subnetzrechner",
+            Text = LocalizationService.Get("text.subnetting_subnetzrechner"),
             FontSize = 20,
             FontWeight = FontWeights.Bold,
             Margin = new Thickness(0, 0, 0, 8)
         });
         stack.Children.Add(new TextBlock
         {
-            Text = "Unterstützt IPv4 und IPv6 automatisch anhand der eingegebenen Adresse. Netz eingeben, Zielpräfix setzen und rechts die berechneten Subnetze prüfen.",
+            Text = LocalizationService.Get("text.unterstutzt_ipv4_und_ipv6_automatisch_anhand_der_eingegebene"),
             TextWrapping = TextWrapping.Wrap,
             Foreground = new SolidColorBrush(Color.FromRgb(174, 184, 197)),
             Margin = new Thickness(0, 0, 0, 14)
@@ -2161,7 +2180,7 @@ public partial class MainWindow : Window
 
         stack.Children.Add(new TextBlock
         {
-            Text = "IPv6-Beispiel: 2001:db8:10::/48 mit neuem Präfix 64",
+            Text = LocalizationService.Get("text.ipv6_beispiel_2001_db8_10_48_mit_neuem_prafix_64"),
             TextWrapping = TextWrapping.Wrap,
             FontSize = 12,
             Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)),
@@ -2170,7 +2189,7 @@ public partial class MainWindow : Window
 
         var calculateButton = new Button
         {
-            Content = "Subnetze berechnen",
+            Content = LocalizationService.Get("text.subnetze_berechnen"),
             Style = TryFindResource("PrimaryButtonStyle") as Style,
             HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(0, 4, 0, 18),
@@ -2187,14 +2206,14 @@ public partial class MainWindow : Window
 
         stack.Children.Add(new TextBlock
         {
-            Text = "Einzel-IP prüfen",
+            Text = LocalizationService.Get("text.einzel_ip_prufen"),
             FontSize = 16,
             FontWeight = FontWeights.Bold,
             Margin = new Thickness(0, 0, 0, 8)
         });
         stack.Children.Add(new TextBlock
         {
-            Text = "Prüft IPv4 oder IPv6, berechnet das zugehörige Netz und zeigt Adressbereich, Präfixmaske sowie protokollspezifische Angaben an.",
+            Text = LocalizationService.Get("text.pruft_ipv4_oder_ipv6_berechnet_das_zugehorige_netz_und_zeigt"),
             TextWrapping = TextWrapping.Wrap,
             Foreground = new SolidColorBrush(Color.FromRgb(174, 184, 197)),
             Margin = new Thickness(0, 0, 0, 12)
@@ -2206,7 +2225,7 @@ public partial class MainWindow : Window
 
         stack.Children.Add(new TextBlock
         {
-            Text = "IPv6-Beispiel: 2001:db8:10::25 mit /64. Alternativ kann die Adresse direkt als 2001:db8:10::25/64 eingegeben werden.",
+            Text = LocalizationService.Get("text.ipv6_beispiel_2001_db8_10_25_mit_64_alternativ_kann_die_adre"),
             TextWrapping = TextWrapping.Wrap,
             FontSize = 12,
             Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)),
@@ -2215,7 +2234,7 @@ public partial class MainWindow : Window
 
         var checkButton = new Button
         {
-            Content = "IP prüfen",
+            Content = LocalizationService.Get("text.ip_prufen"),
             Style = TryFindResource("PrimaryButtonStyle") as Style,
             HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(0, 4, 0, 8),
@@ -2250,7 +2269,7 @@ public partial class MainWindow : Window
 
         resultGrid.Children.Add(new TextBlock
         {
-            Text = "Ergebnis",
+            Text = LocalizationService.Get("text.ergebnis"),
             FontSize = 20,
             FontWeight = FontWeights.Bold,
             Margin = new Thickness(0, 0, 0, 12)
@@ -2271,7 +2290,7 @@ public partial class MainWindow : Window
             BorderBrush = new SolidColorBrush(Color.FromRgb(51, 65, 85)),
             BorderThickness = new Thickness(1),
             Padding = new Thickness(12),
-            Text = "Bereit.\n\nIPv4-Beispiel:\nNetz / CIDR: 192.168.10.0/24\nNeuer Präfix: 26\n\nIPv6-Beispiel:\nNetz / CIDR: 2001:db8:10::/48\nNeuer Präfix: 64\n\nBeide Ergebnisbereiche sind vertikal und horizontal scrollbar."
+            Text = LocalizationService.Get("text.bereit_ipv4_beispiel_netz_cidr_192_168_10_0_24_neuer_prafix_")
         };
         Grid.SetRow(output, 1);
         resultGrid.Children.Add(output);
@@ -2282,14 +2301,14 @@ public partial class MainWindow : Window
         calculateButton.Click += (_, _) =>
         {
             SubnettingCalculator.TryCalculate(network.Text, newPrefix.Text, maxSubnets.Text, out var result);
-            output.Text = result;
+            output.Text = LocalizationService.TranslateText(result);
             output.ScrollToHome();
         };
 
         checkButton.Click += (_, _) =>
         {
             IpCalculator.TryCalculate(ip.Text, mask.Text, wildcard.Text, out var result);
-            output.Text = result;
+            output.Text = LocalizationService.TranslateText(result);
             output.ScrollToHome();
         };
 
@@ -2365,7 +2384,7 @@ public partial class MainWindow : Window
             var available = modules.Count(IsAllowed);
             var active = modules.Count(m => IsAllowed(m) && _moduleChecks.TryGetValue(m.Name, out var cb) && cb.IsChecked == true);
             if (_tabActiveCountTexts.TryGetValue(tabName, out var activeText))
-                activeText.Text = $"{active} aktiv";
+                activeText.Text = LocalizationService.IsEnglish ? $"{active} active" : $"{active} aktiv";
             if (_tabModuleCountTexts.TryGetValue(tabName, out var listText))
                 listText.Text = $"{active} / {available}";
             if (_tabEmptyStates.TryGetValue(tabName, out var emptyState))
@@ -2622,15 +2641,11 @@ public partial class MainWindow : Window
         }
         else if (_duplicateCheckHasRun && _lastDuplicateConfigIssues.Count > 0)
         {
-            ValidationTextBlock.ToolTip = TooltipBuilder.Create(
-                "Duplikate erkannt",
-                "Öffne den Bereich Ausgabe und prüfe den dort angezeigten Duplikat-Hinweis.");
+            ValidationTextBlock.ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.duplikate_erkannt"), LocalizationService.Get("text.offne_den_bereich_ausgabe_und_prufe_den_dort_angezeigten_dup"));
         }
         else
         {
-            ValidationTextBlock.ToolTip = TooltipBuilder.Create(
-                "Validierung",
-                "Für die aktuell aktivierten Module wurden keine offensichtlichen leeren Pflichtfelder erkannt.");
+            ValidationTextBlock.ToolTip = TooltipBuilder.Create(LocalizationService.Get("text.validierung"), LocalizationService.Get("text.fur_die_aktuell_aktivierten_module_wurden_keine_offensichtli"));
         }
     }
 
@@ -2674,23 +2689,26 @@ public partial class MainWindow : Window
 
     private static string DisplayNameForTab(string tab) => tab switch
     {
-        "Management" => "Management & Zugriff",
-        "Interfaces" => "Interfaces & Ports",
-        "IPv6/DHCP/ACL" => "Netzdienste",
-        "Security/WAN" => "Sicherheit & WAN",
+        "Basis" => LocalizationService.Get("navigation.base", "Basis"),
+        "Management" => LocalizationService.Get("navigation.management_access", "Management & Zugriff"),
+        "Interfaces" => LocalizationService.Get("navigation.interfaces_ports", "Interfaces & Ports"),
+        "Switching" => LocalizationService.Get("navigation.switching", "Switching"),
+        "Routing" => LocalizationService.Get("navigation.routing", "Routing"),
+        "IPv6/DHCP/ACL" => LocalizationService.Get("navigation.network_services", "Netzdienste"),
+        "Security/WAN" => LocalizationService.Get("navigation.security_wan", "Sicherheit & WAN"),
         _ => tab
     };
 
     private static string DescriptionForTab(string tab) => tab switch
     {
-        "Basis" => "Gerätegrunddaten, Zeiteinstellungen und Banner zentral festlegen.",
-        "Management" => "Administrationszugänge, Benutzer, AAA und Monitoring konfigurieren.",
-        "Interfaces" => "Physische Ports, Ranges, Trunks, EtherChannel und Subinterfaces verwalten.",
-        "Switching" => "VLANs, Spanning Tree, Access-Sicherheit und Layer-2-Schutzmechanismen.",
-        "Routing" => "IPv4-Routing, Routingprotokolle, Redundanz, VRF und MPLS.",
-        "IPv6/DHCP/ACL" => "Adressvergabe, ACLs und IPv6-Funktionen übersichtlich zusammengeführt.",
-        "Security/WAN" => "Hardening, NAT, Firewalls, WAN-Redundanz und VPN-Technologien.",
-        _ => "Module dieses Konfigurationsbereichs auswählen und bearbeiten."
+        "Basis" => LocalizationService.Get("module_tab.base.description", "Gerätegrunddaten, Zeiteinstellungen und Banner zentral festlegen."),
+        "Management" => LocalizationService.Get("module_tab.management.description", "Administrationszugänge, Benutzer, AAA und Monitoring konfigurieren."),
+        "Interfaces" => LocalizationService.Get("module_tab.interfaces.description", "Physische Ports, Ranges, Trunks, EtherChannel und Subinterfaces verwalten."),
+        "Switching" => LocalizationService.Get("module_tab.switching.description", "VLANs, Spanning Tree, Access-Sicherheit und Layer-2-Schutzmechanismen."),
+        "Routing" => LocalizationService.Get("module_tab.routing.description", "IPv4-Routing, Routingprotokolle, Redundanz, VRF und MPLS."),
+        "IPv6/DHCP/ACL" => LocalizationService.Get("module_tab.services.description", "Adressvergabe, ACLs und IPv6-Funktionen übersichtlich zusammengeführt."),
+        "Security/WAN" => LocalizationService.Get("module_tab.security.description", "Hardening, NAT, Firewalls, WAN-Redundanz und VPN-Technologien."),
+        _ => LocalizationService.Get("module_tab.default.description", "Module dieses Konfigurationsbereichs auswählen und bearbeiten.")
     };
 
     private static string IconForTab(string tab) => tab switch
@@ -2848,7 +2866,7 @@ public partial class MainWindow : Window
         _duplicateCheckHasRun = false;
         _peerRequirementsText = string.Empty;
         if (_peerRequirementsBox != null)
-            _peerRequirementsBox.Text = "Eingaben wurden geändert. Klicke auf 'Gegenstelle aktualisieren'.";
+            _peerRequirementsBox.Text = LocalizationService.Get("text.eingaben_wurden_geandert_klicke_auf_gegenstelle_aktualisiere");
     }
 
     private string AddDuplicateReportToPreview(string config)
@@ -3015,11 +3033,11 @@ public partial class MainWindow : Window
             var config = await GenerateConfigAsync();
             Clipboard.SetText(config ?? string.Empty);
             ShowDuplicateWarningIfNeeded("kopiert");
-            MessageBox.Show(this, "Konfiguration wurde in die Zwischenablage kopiert.", "Kopiert", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, LocalizationService.Get("text.konfiguration_wurde_in_die_zwischenablage_kopiert"), LocalizationService.Get("text.kopiert"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "Fehler beim Erzeugen", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("text.fehler_beim_erzeugen"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -3027,7 +3045,7 @@ public partial class MainWindow : Window
     {
         var dialog = new SaveFileDialog
         {
-            Title = LocalizationService.TranslateText("Cisco-Konfiguration speichern"),
+            Title = LocalizationService.Get("text.cisco_konfiguration_speichern"),
             Filter = LocalizationService.IsEnglish
                 ? "Text file (*.txt)|*.txt|All files (*.*)|*.*"
                 : "Textdatei (*.txt)|*.txt|Alle Dateien (*.*)|*.*",
@@ -3055,11 +3073,11 @@ public partial class MainWindow : Window
                 File.WriteAllText(Path.Combine(directory, baseName + "_report.txt"), _reportPreviewBox.Text, new UTF8Encoding(false));
 
             ShowDuplicateWarningIfNeeded(LocalizationService.IsEnglish ? "exported" : "exportiert");
-            MessageBox.Show(this, LocalizationService.TranslateText("Konfiguration wurde gespeichert."), LocalizationService.TranslateText("Export abgeschlossen"), MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, LocalizationService.Get("text.konfiguration_wurde_gespeichert"), LocalizationService.Get("text.export_abgeschlossen"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, LocalizationService.TranslateText("Fehler beim Export"), MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("text.fehler_beim_export"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -3074,7 +3092,7 @@ public partial class MainWindow : Window
 
         var dialog = new Window
         {
-            Title = "COM-Port / Testmodus auswählen",
+            Title = LocalizationService.Get("text.com_port_testmodus_auswahlen"),
             Owner = this,
             Width = 470,
             Height = 355,
@@ -3088,7 +3106,7 @@ public partial class MainWindow : Window
 
         root.Children.Add(new TextBlock
         {
-            Text = "Serielle Verbindung",
+            Text = LocalizationService.Get("text.serielle_verbindung"),
             FontSize = 18,
             FontWeight = FontWeights.Bold,
             Margin = new Thickness(0, 0, 0, 8)
@@ -3113,9 +3131,9 @@ public partial class MainWindow : Window
         var delayBox = AddSerialCombo(root, "Zeilenverzögerung", new[] { "10", "20", "35", "50", "100", "200" }, _serialSettings.LineDelayMs.ToString());
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 14, 0, 0) };
-        var ok = new Button { Content = "Übernehmen", MinWidth = 105 };
-        var test = new Button { Content = "Testmodus", MinWidth = 105 };
-        var cancel = new Button { Content = "Abbrechen", MinWidth = 95 };
+        var ok = new Button { Content = LocalizationService.Get("common.apply"), MinWidth = 105 };
+        var test = new Button { Content = LocalizationService.Get("common.test_mode"), MinWidth = 105 };
+        var cancel = new Button { Content = LocalizationService.Get("common.cancel"), MinWidth = 95 };
         buttons.Children.Add(test);
         buttons.Children.Add(ok);
         buttons.Children.Add(cancel);
@@ -3131,8 +3149,12 @@ public partial class MainWindow : Window
             _serialSettings = new SerialPortSettings(port, baud, 8, Parity.None, StopBits.One, delay);
 
             ValidationTextBlock.Text = _serialTestMode
-                ? $"COM-Testmodus aktiv · {_serialSettings.BaudRate} Baud · Delay {_serialSettings.LineDelayMs} ms · Logdatei statt echter COM-Port"
-                : $"COM-Port gewählt: {_serialSettings.PortName} · {_serialSettings.BaudRate} Baud · Delay {_serialSettings.LineDelayMs} ms";
+                ? (LocalizationService.IsEnglish
+                    ? $"COM test mode active · {_serialSettings.BaudRate} baud · delay {_serialSettings.LineDelayMs} ms · log file instead of a physical COM port"
+                    : $"COM-Testmodus aktiv · {_serialSettings.BaudRate} Baud · Delay {_serialSettings.LineDelayMs} ms · Logdatei statt echter COM-Port")
+                : (LocalizationService.IsEnglish
+                    ? $"COM port selected: {_serialSettings.PortName} · {_serialSettings.BaudRate} baud · delay {_serialSettings.LineDelayMs} ms"
+                    : $"COM-Port gewählt: {_serialSettings.PortName} · {_serialSettings.BaudRate} Baud · Delay {_serialSettings.LineDelayMs} ms");
             ValidationTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(134, 239, 172));
         }
 
@@ -3157,7 +3179,9 @@ public partial class MainWindow : Window
     {
         _serialTestMode = true;
         _serialSettings = _serialSettings with { PortName = SerialPortService.TestPortName };
-        ValidationTextBlock.Text = $"COM-Testmodus aktiv · {_serialSettings.BaudRate} Baud · Delay {_serialSettings.LineDelayMs} ms · Logdatei statt echter COM-Port";
+        ValidationTextBlock.Text = LocalizationService.IsEnglish
+            ? $"COM test mode active · {_serialSettings.BaudRate} baud · delay {_serialSettings.LineDelayMs} ms · log file instead of a physical COM port"
+            : $"COM-Testmodus aktiv · {_serialSettings.BaudRate} Baud · Delay {_serialSettings.LineDelayMs} ms · Logdatei statt echter COM-Port";
         ValidationTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(134, 239, 172));
     }
 
@@ -3217,7 +3241,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.Message, "COM-Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("text.com_fehler"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -3227,8 +3251,8 @@ public partial class MainWindow : Window
         {
             var result = MessageBox.Show(
                 this,
-                LocalizationService.TranslateText("Sollen wirklich alle Eingaben, aktivierten Module, Importdaten und Vorschauen auf die Ausgangswerte zurückgesetzt werden?"),
-                LocalizationService.TranslateText("Alles zurücksetzen"),
+                LocalizationService.Get("text.sollen_wirklich_alle_eingaben_aktivierten_module_importdaten"),
+                LocalizationService.Get("header.reset_all"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
@@ -3270,7 +3294,7 @@ public partial class MainWindow : Window
         SetConfigurationPreviewText("Klicke auf 'Vorschau aktualisieren', um die aktuelle Cisco-Konfiguration zu erzeugen.");
         _peerRequirementsText = string.Empty;
         if (_peerRequirementsBox != null)
-            _peerRequirementsBox.Text = "Klicke auf 'Gegenstelle aktualisieren', um die Anforderungen des Nachbargeräts zu erzeugen.";
+            _peerRequirementsBox.Text = LocalizationService.Get("text.klicke_auf_gegenstelle_aktualisieren_um_die_anforderungen_de");
 
         ApplyFilters();
         UpdateConditionalFieldVisibility();
@@ -3284,7 +3308,7 @@ public partial class MainWindow : Window
     {
         var dialog = new SaveFileDialog
         {
-            Title = "Vorlage speichern",
+            Title = LocalizationService.Get("text.vorlage_speichern"),
             Filter = "JSON Vorlage (*.json)|*.json|Alle Dateien (*.*)|*.*",
             FileName = "cisco_template.json"
         };
@@ -3302,7 +3326,7 @@ public partial class MainWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Vorlage laden",
+            Title = LocalizationService.Get("header.load_template"),
             Filter = "JSON Vorlage (*.json)|*.json|Alle Dateien (*.*)|*.*"
         };
         if (dialog.ShowDialog(this) != true) return;

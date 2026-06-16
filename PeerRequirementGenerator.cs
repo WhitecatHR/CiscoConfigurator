@@ -43,7 +43,7 @@ public static class PeerRequirementGenerator
                     var description = p.ElementAtOrDefault(3) ?? string.Empty;
                     sb.AppendLine($"! Lokale Seite: {localIf}{(string.IsNullOrWhiteSpace(description) ? string.Empty : " - " + description)}");
                     sb.AppendLine("interface <GEGENSTELLEN-INTERFACE>");
-                    sb.AppendLine(" description Verbindung zur lokalen Seite");
+                    sb.AppendLine(LocalizationService.IsEnglish ? " description Link to local device" : " description Verbindung zur lokalen Seite");
                     sb.AppendLine(" switchport mode trunk");
                     if (!string.IsNullOrWhiteSpace(native)) sb.AppendLine($" switchport trunk native vlan {native}");
                     if (!string.IsNullOrWhiteSpace(allowed)) sb.AppendLine($" switchport trunk allowed vlan {allowed}");

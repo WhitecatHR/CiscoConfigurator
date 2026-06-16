@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,77 +7,119 @@ namespace CiscoConfigGuiWpf;
 
 public partial class App : Application
 {
-    private static readonly string LogPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "CiscoKonfigurator",
-        "startup_error.log");
+    private bool _handlersRegistered;
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        base.OnStartup(e);
+        StartupDiagnostics.StartSession();
+        RegisterGlobalExceptionHandlers();
+        StartupDiagnostics.WriteInfo("OnStartup entered.");
+
+        try
+        {
+            base.OnStartup(e);
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+            StartupDiagnostics.WriteInfo("WPF application startup initialized.");
+
+            var settings = ApplicationSettingsService.Current;
+            StartupDiagnostics.WriteInfo("Application settings loaded.");
+
+            LocalizationService.SetLanguage(settings.Language);
+            StartupDiagnostics.WriteInfo($"Localization initialized: {LocalizationService.CurrentLanguage}.");
+
+            var window = new MainWindow();
+            MainWindow = window;
+            StartupDiagnostics.WriteInfo("MainWindow constructed.");
+
+            window.Show();
+            StartupDiagnostics.WriteInfo("MainWindow shown successfully.");
+            DeveloperDiagnosticsService.Log("STARTUP", "Application startup completed.");
+        }
+        catch (Exception ex)
+        {
+            HandleFatalStartupException("Startup", ex);
+        }
+    }
+
+    private void RegisterGlobalExceptionHandlers()
+    {
+        if (_handlersRegistered) return;
+        _handlersRegistered = true;
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
-            if (args.ExceptionObject is Exception ex)
-                WriteCrashLog("UnhandledException", ex);
+            if (args.ExceptionObject is Exception exception)
+                StartupDiagnostics.WriteError("AppDomain.UnhandledException", exception);
         };
 
         TaskScheduler.UnobservedTaskException += (_, args) =>
         {
-            WriteCrashLog("UnobservedTaskException", args.Exception);
+            StartupDiagnostics.WriteError("TaskScheduler.UnobservedTaskException", args.Exception);
             args.SetObserved();
         };
 
         DispatcherUnhandledException += (_, args) =>
         {
-            WriteCrashLog("DispatcherUnhandledException", args.Exception);
-            MessageBox.Show(
-                "Cisco Konfigurator wurde durch einen Fehler gestoppt.\n\n" +
-                args.Exception.Message + "\n\nLogdatei:\n" + LogPath,
-                "Cisco Konfigurator - Fehler",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-            args.Handled = true;
-        };
+            StartupDiagnostics.WriteError("DispatcherUnhandledException", args.Exception);
+            ShowErrorDialog(
+                SafeText("text.cisco_konfigurator_wurde_durch_einen_fehler_gestoppt", "Cisco Configurator encountered an error."),
+                args.Exception,
+                SafeText("text.cisco_konfigurator_fehler", "Cisco Configurator error"));
 
-        try
-        {
-            var window = new MainWindow();
-            MainWindow = window;
-            window.Show();
-        }
-        catch (Exception ex)
-        {
-            WriteCrashLog("Startup", ex);
-            MessageBox.Show(
-                "Cisco Konfigurator konnte nicht gestartet werden.\n\n" +
-                ex.Message + "\n\nLogdatei:\n" + LogPath,
-                "Cisco Konfigurator - Startfehler",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-            Shutdown(-1);
-        }
+            args.Handled = true;
+            if (MainWindow == null || !MainWindow.IsLoaded)
+                Shutdown(-1);
+        };
     }
 
-    private static void WriteCrashLog(string phase, Exception ex)
+    private void HandleFatalStartupException(string phase, Exception exception)
+    {
+        StartupDiagnostics.WriteError(phase, exception);
+        ShowErrorDialog(
+            SafeText("text.cisco_konfigurator_konnte_nicht_gestartet_werden", "Cisco Configurator could not be started."),
+            exception,
+            SafeText("app.startup_error_title", "Startup error"));
+        Shutdown(-1);
+    }
+
+    private static void ShowErrorDialog(string message, Exception exception, string title)
     {
         try
         {
-            var dir = Path.GetDirectoryName(LogPath);
-            if (!string.IsNullOrWhiteSpace(dir)) Directory.CreateDirectory(dir);
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Cisco Konfigurator - Fehlerprotokoll");
-            sb.AppendLine("Zeit: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-            sb.AppendLine("Phase: " + phase);
-            sb.AppendLine();
-            sb.AppendLine(ex.ToString());
-
-            File.WriteAllText(LogPath, sb.ToString(), Encoding.UTF8);
+            var details = ShouldIncludeDiagnosticDetails() ? exception.ToString() : exception.Message;
+            MessageBox.Show(
+                message + "\n\n" + details + "\n\nLog:\n" + StartupDiagnostics.StartupErrorLogPath,
+                title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
         catch
         {
-            // Logging darf den Programmstart nicht zusätzlich verhindern.
+            // The log remains available even if a dialog cannot be displayed.
+        }
+    }
+
+    private static bool ShouldIncludeDiagnosticDetails()
+    {
+        try
+        {
+            return ApplicationSettingsService.Current.IncludeDiagnosticDetails;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+    private static string SafeText(string key, string fallback)
+    {
+        try
+        {
+            return LocalizationService.Get(key, fallback);
+        }
+        catch
+        {
+            return fallback;
         }
     }
 }
