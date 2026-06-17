@@ -1,0 +1,59 @@
+{
+  "formatVersion": 1,
+  "id": "example",
+  "name": "Example module plugin",
+  "version": "1.0.0",
+  "description": "Data-only example plugin.",
+  "modules": {
+    "de-DE": [
+      {
+        "tab": "Basis",
+        "name": "example.customBanner",
+        "title": "Plugin-Beispiel",
+        "devices": ["All"],
+        "height": 220,
+        "default": false,
+        "fields": [
+          {
+            "type": "Text",
+            "label": "Kommentar",
+            "name": "examplePluginComment",
+            "value": "",
+            "help": "Wird als Cisco-Kommentar ausgegeben.",
+            "w": 500
+          }
+        ]
+      }
+    ],
+    "en-US": [
+      {
+        "tab": "Basis",
+        "name": "example.customBanner",
+        "title": "Plugin example",
+        "devices": ["All"],
+        "height": 220,
+        "default": false,
+        "fields": [
+          {
+            "type": "Text",
+            "label": "Comment",
+            "name": "examplePluginComment",
+            "value": "",
+            "help": "Emitted as a Cisco configuration comment.",
+            "w": 500
+          }
+        ]
+      }
+    ]
+  },
+  "generators": [
+    {
+      "module": "example.customBanner",
+      "section": "PLUGIN EXAMPLE",
+      "requiredFields": ["examplePluginComment"],
+      "commands": [
+        "! {examplePluginComment}"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 # Cisco Konfigurator
 
+**Current version / Aktuelle Version:** `0.15-pre.Release`  
+[Changelog](CHANGELOG.md)
+
 [Deutsch](README.de.md) | [English](README.en.md)
 
 Der Cisco Konfigurator ist eine C#-WPF-Anwendung zur strukturierten Planung, Erzeugung, Prüfung und Dokumentation von Cisco-IOS-/IOS-XE-Konfigurationen.
@@ -11,3 +14,6 @@ The Cisco Configurator is a C# WPF application for structured planning, generati
 
 - [Usage](README.en.md#usage)
 - [Disclaimer](README.en.md#disclaimer)
+
+- [Plugin-Dokumentation](Plugins/README.de.md)
+- [Plugin documentation](Plugins/README.en.md)

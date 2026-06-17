@@ -15,14 +15,16 @@ public static class ModuleCatalog
             var language = LocalizationService.CurrentLanguage;
             if (Cache.TryGetValue(language, out var cached)) return cached;
 
-            var loaded = LocalizedCatalogLoader.LoadList<ModuleDefinition>("Modules");
+            var builtIn = LocalizedCatalogLoader.LoadList<ModuleDefinition>("Modules");
+            var pluginModules = PluginModuleService.LoadModules(language, builtIn);
+            var loaded = builtIn.Concat(pluginModules).ToList();
             if (loaded.Count == 0)
             {
                 StartupDiagnostics.WriteWarning($"Module catalog is empty for language '{language}'.");
             }
             else
             {
-                StartupDiagnostics.WriteInfo($"Module catalog ready: {loaded.Count} modules for '{language}'.");
+                StartupDiagnostics.WriteInfo($"Module catalog ready: {loaded.Count} modules for '{language}' ({pluginModules.Count} plugin modules).");
             }
 
             Cache[language] = loaded;
@@ -30,5 +32,9 @@ public static class ModuleCatalog
         }
     }
 
-    public static void ClearCache() => Cache.Clear();
+    public static void ClearCache()
+    {
+        Cache.Clear();
+        PluginModuleService.ClearCache();
+    }
 }

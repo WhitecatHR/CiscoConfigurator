@@ -10,6 +10,10 @@
     <Product>Cisco Konfigurator</Product>
     <AssemblyTitle>Cisco Konfigurator</AssemblyTitle>
     <FileDescription>Cisco Konfigurator</FileDescription>
+    <Version>0.15.0-pre</Version>
+    <AssemblyVersion>0.15.0.0</AssemblyVersion>
+    <FileVersion>0.15.0.0</FileVersion>
+    <InformationalVersion>0.15-pre.Release</InformationalVersion>
     <ApplicationIcon>Assets/network.ico</ApplicationIcon>
 
     <!-- Standard-Publish ist als echte Single-File-EXE vorgesehen. -->
@@ -50,5 +54,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Plugins\README.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Plugins\README.de.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Plugins\README.en.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Plugins\Example.ciscoplugin.json.example" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

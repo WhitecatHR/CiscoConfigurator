@@ -253,6 +253,7 @@ public partial class MainWindow
             panel.Children.Add(CreateSettingsCard(string.Empty, openDiagnostics));
         }));
 
+
         var note = new Border
         {
             Background = new SolidColorBrush(Color.FromRgb(44, 26, 12)),
@@ -482,7 +483,7 @@ public partial class MainWindow
             _appSettings.GenerateRollbackFile = GetSettingCheck("generateRollback", false);
             _appSettings.ExportReportsTogether = GetSettingCheck("exportReports", false);
 
-            _appSettings.AutoSaveEnabled = GetSettingCheck("autoSave", true);
+            _appSettings.AutoSaveEnabled = GetSettingCheck("autoSave", false);
             _appSettings.AutoSaveIntervalSeconds = GetSettingInt("autoSaveInterval", 60, 10, 3600);
             _appSettings.BackupCount = GetSettingInt("backupCount", 20, 1, 500);
             _appSettings.BackupFolder = GetSettingText("backupFolder", "");

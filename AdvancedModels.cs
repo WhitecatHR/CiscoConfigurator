@@ -4,7 +4,7 @@ namespace CiscoConfigGuiWpf;
 
 public sealed class NetworkProject
 {
-    public int FormatVersion { get; set; } = 1;
+    public int FormatVersion { get; set; } = 2;
     public string Name { get; set; } = "Neues Netzwerkprojekt";
     public string Description { get; set; } = "";
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
@@ -16,6 +16,7 @@ public sealed class NetworkProject
     public ObservableCollection<ProjectAclRule> AclRules { get; set; } = new();
     public ObservableCollection<ProjectAclBinding> AclBindings { get; set; } = new();
     public ProjectPlanInfo ProjectInfo { get; set; } = new();
+    public ObservableCollection<ProjectVersionEntry> VersionHistory { get; set; } = new();
 }
 
 public sealed class ProjectPlanInfo
@@ -43,7 +44,80 @@ public sealed class ProjectDeviceSnapshot
     public double? DiagramX { get; set; }
     public double? DiagramY { get; set; }
     public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
+    public DeviceInventorySnapshot Inventory { get; set; } = new();
     public string Status => string.IsNullOrWhiteSpace(GeneratedConfiguration) ? "Entwurf" : "Konfiguration vorhanden";
+}
+
+
+public sealed class ProjectVersionEntry
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+    public string Label { get; set; } = "Version";
+    public string Comment { get; set; } = "";
+    public bool IsAutomatic { get; set; }
+    public string ContentHash { get; set; } = "";
+    public string SnapshotJson { get; set; } = "";
+    public int DeviceCount { get; set; }
+    public int LinkCount { get; set; }
+    public int IpamCount { get; set; }
+    public int AclRuleCount { get; set; }
+    public string DisplayCreated => CreatedUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss");
+    public string DisplayType => IsAutomatic ? LocalizationService.Get("versioning.type_automatic", "Automatisch") : LocalizationService.Get("versioning.type_manual", "Manuell");
+}
+
+public sealed class DeviceInventorySnapshot
+{
+    public DateTime CollectedUtc { get; set; }
+    public string SourceHost { get; set; } = "";
+    public string Hostname { get; set; } = "";
+    public string Model { get; set; } = "";
+    public string SerialNumber { get; set; } = "";
+    public string SoftwareVersion { get; set; } = "";
+    public string Uptime { get; set; } = "";
+    public string Platform { get; set; } = "";
+    public string DeviceType { get; set; } = "";
+    public ObservableCollection<InventoryInterfaceEntry> Interfaces { get; set; } = new();
+    public ObservableCollection<InventoryVlanEntry> Vlans { get; set; } = new();
+    public ObservableCollection<InventoryNeighborEntry> Neighbors { get; set; } = new();
+    public ObservableCollection<string> Trunks { get; set; } = new();
+    public ObservableCollection<string> PortChannels { get; set; } = new();
+    public ObservableCollection<string> RoutingProtocols { get; set; } = new();
+    public Dictionary<string, string> RawOutputs { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public string InterfaceConfiguration { get; set; } = "";
+    public string Summary => CollectedUtc == default
+        ? LocalizationService.Get("inventory.not_available", "Keine Inventarisierung vorhanden")
+        : $"{(string.IsNullOrWhiteSpace(Hostname) ? SourceHost : Hostname)} | {Model} | {SoftwareVersion} | {CollectedUtc.ToLocalTime():dd.MM.yyyy HH:mm}";
+}
+
+public sealed class InventoryInterfaceEntry
+{
+    public string Name { get; set; } = "";
+    public string IpAddress { get; set; } = "";
+    public string Ipv6Address { get; set; } = "";
+    public string Status { get; set; } = "";
+    public string Protocol { get; set; } = "";
+    public string Description { get; set; } = "";
+    public string Vlan { get; set; } = "";
+    public string Duplex { get; set; } = "";
+    public string Speed { get; set; } = "";
+    public string Type { get; set; } = "";
+}
+
+public sealed class InventoryVlanEntry
+{
+    public string VlanId { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Status { get; set; } = "";
+    public string Ports { get; set; } = "";
+}
+
+public sealed class InventoryNeighborEntry
+{
+    public string Protocol { get; set; } = "";
+    public string RemoteDevice { get; set; } = "";
+    public string LocalInterface { get; set; } = "";
+    public string RemoteInterface { get; set; } = "";
 }
 
 public sealed class IpamEntry
@@ -71,6 +145,14 @@ public sealed class ProjectLink
     public string LinkType { get; set; } = "Ethernet";
     public string Description { get; set; } = "";
     public string DiscoverySource { get; set; } = "";
+    public bool ManualRoute { get; set; }
+    public ObservableCollection<ProjectLinkRoutePoint> RoutePoints { get; set; } = new();
+}
+
+public sealed class ProjectLinkRoutePoint
+{
+    public double X { get; set; }
+    public double Y { get; set; }
 }
 
 

@@ -70,15 +70,18 @@ public partial class MainWindow
     private ProjectDeviceSnapshot? _draggedDiagramDevice;
     private Border? _draggedDiagramElement;
     private Point _diagramDragOffset;
+    private ProjectLink? _draggedDiagramLink;
+    private Ellipse? _draggedRouteHandle;
 
     private sealed class DiagramLinkVisual
     {
         public required ProjectLink Link { get; init; }
-        public required Line Line { get; init; }
+        public required Polyline Path { get; init; }
         public required TextBlock Label { get; init; }
         public required Border LabelBorder { get; init; }
         public required Ellipse SourceEndpoint { get; init; }
         public required Ellipse TargetEndpoint { get; init; }
+        public required Ellipse RouteHandle { get; init; }
     }
     private DispatcherTimer? _autoSaveTimer;
     private readonly Dictionary<string, TextBox> _moduleLivePreviewBoxes = new(StringComparer.OrdinalIgnoreCase);
@@ -110,14 +113,17 @@ public partial class MainWindow
         var newButton = new Button { Content = LocalizationService.Get("text.neu") };
         var openButton = new Button { Content = LocalizationService.Get("text.offnen") };
         var saveButton = new Button { Content = LocalizationService.Get("text.speichern"), Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var packageButton = new Button { Content = "Projektpaket ZIP" };
+        var versionsButton = new Button { Content = LocalizationService.Get("versioning.button", "Versionen") };
+        var packageButton = new Button { Content = LocalizationService.Get("project.package_zip", "Projektpaket ZIP") };
         newButton.Click += (_, _) => NewNetworkProject();
         openButton.Click += (_, _) => OpenNetworkProject();
         saveButton.Click += (_, _) => SaveNetworkProject(false);
+        versionsButton.Click += (_, _) => OpenProjectVersionManager();
         packageButton.Click += async (_, _) => await ExportProjectPackageAsync();
         headerActions.Children.Add(newButton);
         headerActions.Children.Add(openButton);
         headerActions.Children.Add(saveButton);
+        headerActions.Children.Add(versionsButton);
         headerActions.Children.Add(packageButton);
         AddAdvancedHeaderActions(header, headerActions);
         root.Children.Add(header);
@@ -131,17 +137,17 @@ public partial class MainWindow
 
         var detailsCard = CreateAdvancedCard();
         var details = new StackPanel();
-        details.Children.Add(AdvancedTitle("Projektinformationen"));
-        _projectNameBox = AddAdvancedTextField(details, "Projektname", _currentProject.Name);
-        _projectDescriptionBox = AddAdvancedTextField(details, "Beschreibung", _currentProject.Description, true, 100);
+        details.Children.Add(AdvancedTitle(LocalizationService.Get("project.information", "Projektinformationen")));
+        _projectNameBox = AddAdvancedTextField(details, LocalizationService.Get("project.name", "Projektname"), _currentProject.Name);
+        _projectDescriptionBox = AddAdvancedTextField(details, LocalizationService.Get("project.description", "Beschreibung"), _currentProject.Description, true, 100);
         _currentProject.ProjectInfo ??= new ProjectPlanInfo();
-        _projectNumberBox = AddAdvancedTextField(details, "Projektnummer", _currentProject.ProjectInfo.ProjectNumber);
-        _projectCustomerBox = AddAdvancedTextField(details, "Organisation / Kunde", _currentProject.ProjectInfo.Customer);
-        _projectLocationBox = AddAdvancedTextField(details, "Standort", _currentProject.ProjectInfo.Location);
-        _projectManagerBox = AddAdvancedTextField(details, "Projektleiter", _currentProject.ProjectInfo.ProjectManager);
-        _projectAuthorBox = AddAdvancedTextField(details, "Bearbeiter", _currentProject.ProjectInfo.Author);
-        _projectVersionBox = AddAdvancedTextField(details, "Version", _currentProject.ProjectInfo.Version);
-        _projectStatusBox = AddAdvancedTextField(details, "Status", _currentProject.ProjectInfo.Status);
+        _projectNumberBox = AddAdvancedTextField(details, LocalizationService.Get("project.number", "Projektnummer"), _currentProject.ProjectInfo.ProjectNumber);
+        _projectCustomerBox = AddAdvancedTextField(details, LocalizationService.Get("project.customer", "Organisation / Kunde"), _currentProject.ProjectInfo.Customer);
+        _projectLocationBox = AddAdvancedTextField(details, LocalizationService.Get("project.location", "Standort"), _currentProject.ProjectInfo.Location);
+        _projectManagerBox = AddAdvancedTextField(details, LocalizationService.Get("project.manager", "Projektleiter"), _currentProject.ProjectInfo.ProjectManager);
+        _projectAuthorBox = AddAdvancedTextField(details, LocalizationService.Get("project.author", "Bearbeiter"), _currentProject.ProjectInfo.Author);
+        _projectVersionBox = AddAdvancedTextField(details, LocalizationService.Get("project.version", "Version"), _currentProject.ProjectInfo.Version);
+        _projectStatusBox = AddAdvancedTextField(details, LocalizationService.Get("project.status", "Status"), _currentProject.ProjectInfo.Status);
         _projectNameBox.TextChanged += (_, _) => ScheduleAutoSave();
         _projectDescriptionBox.TextChanged += (_, _) => ScheduleAutoSave();
         _projectNumberBox.TextChanged += (_, _) => ScheduleAutoSave();
@@ -151,7 +157,7 @@ public partial class MainWindow
         _projectAuthorBox.TextChanged += (_, _) => ScheduleAutoSave();
         _projectVersionBox.TextChanged += (_, _) => ScheduleAutoSave();
         _projectStatusBox.TextChanged += (_, _) => ScheduleAutoSave();
-        details.Children.Add(AdvancedNote("Beim Speichern werden Geräte, IPAM, Verbindungen, Backups und Netzplan-Metadaten gemeinsam in einer .ciscoproject.json-Datei abgelegt."));
+        details.Children.Add(AdvancedNote(LocalizationService.Get("project.metadata_note", "Beim Speichern werden Geräte, IPAM, Verbindungen, Backups und Netzplan-Metadaten gemeinsam in einer .ciscoproject.json-Datei abgelegt.")));
         detailsCard.Child = details;
         content.Children.Add(detailsCard);
 
@@ -190,10 +196,15 @@ public partial class MainWindow
         };
         _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.device"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Name)), Width = new DataGridLength(1, DataGridLengthUnitType.Star), IsReadOnly = true });
         _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.typ"), Binding = new Binding(nameof(ProjectDeviceSnapshot.DeviceType)), Width = 115, IsReadOnly = true });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = "Standort", Binding = new Binding(nameof(ProjectDeviceSnapshot.Site)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
-        _projectDeviceGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Topologierolle", SelectedItemBinding = new Binding(nameof(ProjectDeviceSnapshot.TopologyRole)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "Automatisch", "WAN", "Core", "Distribution", "Access", "Other" }, Width = 125 });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("project.site", "Standort"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Site)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _projectDeviceGrid.Columns.Add(CreateDarkDataGridComboBoxColumn(
+            LocalizationService.Get("project.topology_role", "Topologierolle"),
+            nameof(ProjectDeviceSnapshot.TopologyRole),
+            new[] { "Automatisch", "WAN", "Core", "Distribution", "Access", "Other" },
+            125));
         _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("header.mode"), Binding = new Binding(nameof(ProjectDeviceSnapshot.ConfigMode)), Width = 110, IsReadOnly = true });
-        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.status"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Status)), Width = 155, IsReadOnly = true });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.status"), Binding = new Binding(nameof(ProjectDeviceSnapshot.Status)), Width = 145, IsReadOnly = true });
+        _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("inventory.inventory", "Inventar"), Binding = new Binding("Inventory.Summary"), Width = 220, IsReadOnly = true });
         _projectDeviceGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("text.geandert"), Binding = new Binding(nameof(ProjectDeviceSnapshot.LastUpdatedUtc)) { StringFormat = "dd.MM.yyyy HH:mm" }, Width = 140, IsReadOnly = true });
         _projectDeviceGrid.CellEditEnding += (_, _) => ScheduleAutoSave();
         _projectDeviceGrid.MouseDoubleClick += (_, _) => ApplySelectedProjectDevice();
@@ -431,22 +442,22 @@ public partial class MainWindow
 
     private TabItem BuildAclWorkspaceSubTab()
     {
-        var tab = new TabItem { Header = "ACL-Editor" };
+        var tab = new TabItem { Header = LocalizationService.Get("acl.editor", "ACL-Editor") };
         var root = new Grid { Margin = new Thickness(6) };
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-        root.Children.Add(CreateAdvancedHeader("ACL-Editor und Regelanalyse", "ACLs tabellarisch bearbeiten, aus Projektkonfigurationen importieren und auf Schattenregeln, Redundanzen, breite Freigaben sowie fehlende Interface-Zuordnungen prüfen."));
+        root.Children.Add(CreateAdvancedHeader(LocalizationService.Get("acl.editor_title", "ACL-Editor und Regelanalyse"), LocalizationService.Get("acl.editor_description", "ACLs tabellarisch bearbeiten, aus Projektkonfigurationen importieren und auf Schattenregeln, Redundanzen, breite Freigaben sowie fehlende Interface-Zuordnungen prüfen.")));
 
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
-        var add = new Button { Content = "Regel hinzufügen", Style = TryFindResource("PrimaryButtonStyle") as Style };
-        var remove = new Button { Content = "Regel entfernen" };
-        var addBinding = new Button { Content = "Zuordnung hinzufügen" };
-        var removeBinding = new Button { Content = "Zuordnung entfernen" };
-        var import = new Button { Content = "Aus Projekt importieren" };
-        var analyze = new Button { Content = "ACLs analysieren" };
-        var copy = new Button { Content = "Konfiguration kopieren" };
-        var export = new Button { Content = "CSV exportieren" };
+        var add = new Button { Content = LocalizationService.Get("acl.add_rule", "Regel hinzufügen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
+        var remove = new Button { Content = LocalizationService.Get("acl.remove_rule", "Regel entfernen") };
+        var addBinding = new Button { Content = LocalizationService.Get("acl.add_binding", "Zuordnung hinzufügen") };
+        var removeBinding = new Button { Content = LocalizationService.Get("acl.remove_binding", "Zuordnung entfernen") };
+        var import = new Button { Content = LocalizationService.Get("acl.import_project", "Aus Projekt importieren") };
+        var analyze = new Button { Content = LocalizationService.Get("acl.analyze", "ACLs analysieren") };
+        var copy = new Button { Content = LocalizationService.Get("acl.copy_configuration", "Konfiguration kopieren") };
+        var export = new Button { Content = LocalizationService.Get("acl.export_csv", "CSV exportieren") };
         add.Click += (_, _) => AddAclRule();
         remove.Click += (_, _) => RemoveSelectedAclRule();
         addBinding.Click += (_, _) => AddAclBinding();
@@ -475,20 +486,20 @@ public partial class MainWindow
             CanUserDeleteRows = true,
             SelectionMode = DataGridSelectionMode.Single
         };
-        _aclGrid.Columns.Add(new DataGridCheckBoxColumn { Header = "Aktiv", Binding = new Binding(nameof(ProjectAclRule.Enabled)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 55 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(ProjectAclRule.DeviceName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 110 });
+        _aclGrid.Columns.Add(new DataGridCheckBoxColumn { Header = LocalizationService.Get("acl.enabled", "Aktiv"), Binding = new Binding(nameof(ProjectAclRule.Enabled)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 55 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.device", "Gerät"), Binding = new Binding(nameof(ProjectAclRule.DeviceName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 110 });
         _aclGrid.Columns.Add(new DataGridTextColumn { Header = "ACL", Binding = new Binding(nameof(ProjectAclRule.AclName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 120 });
-        _aclGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Familie", SelectedItemBinding = new Binding(nameof(ProjectAclRule.AddressFamily)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "IPv4", "IPv6" }, Width = 70 });
-        _aclGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Typ", SelectedItemBinding = new Binding(nameof(ProjectAclRule.AclType)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "Standard", "Extended" }, Width = 80 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Seq", Binding = new Binding(nameof(ProjectAclRule.Sequence)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 55 });
-        _aclGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Aktion", SelectedItemBinding = new Binding(nameof(ProjectAclRule.Action)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "permit", "deny" }, Width = 70 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Protokoll", Binding = new Binding(nameof(ProjectAclRule.Protocol)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 75 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Quelle", Binding = new Binding(nameof(ProjectAclRule.Source)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 115 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Quell-Wildcard", Binding = new Binding(nameof(ProjectAclRule.SourceWildcard)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Ziel", Binding = new Binding(nameof(ProjectAclRule.Destination)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 115 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Ziel-Wildcard", Binding = new Binding(nameof(ProjectAclRule.DestinationWildcard)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Dienst / Ports", Binding = new Binding(nameof(ProjectAclRule.Service)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 120 });
-        _aclGrid.Columns.Add(new DataGridTextColumn { Header = "Bemerkung", Binding = new Binding(nameof(ProjectAclRule.Remark)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _aclGrid.Columns.Add(CreateDarkDataGridComboBoxColumn(LocalizationService.Get("acl.family", "Familie"), nameof(ProjectAclRule.AddressFamily), new[] { "IPv4", "IPv6" }, 70));
+        _aclGrid.Columns.Add(CreateDarkDataGridComboBoxColumn(LocalizationService.Get("acl.type", "Typ"), nameof(ProjectAclRule.AclType), new[] { "Standard", "Extended" }, 80));
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.sequence", "Seq"), Binding = new Binding(nameof(ProjectAclRule.Sequence)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 55 });
+        _aclGrid.Columns.Add(CreateDarkDataGridComboBoxColumn(LocalizationService.Get("acl.action", "Aktion"), nameof(ProjectAclRule.Action), new[] { "permit", "deny" }, 70));
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.protocol", "Protokoll"), Binding = new Binding(nameof(ProjectAclRule.Protocol)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 75 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.source", "Quelle"), Binding = new Binding(nameof(ProjectAclRule.Source)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 115 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.source_wildcard", "Quell-Wildcard"), Binding = new Binding(nameof(ProjectAclRule.SourceWildcard)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.destination", "Ziel"), Binding = new Binding(nameof(ProjectAclRule.Destination)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 115 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.destination_wildcard", "Ziel-Wildcard"), Binding = new Binding(nameof(ProjectAclRule.DestinationWildcard)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.service_ports", "Dienst / Ports"), Binding = new Binding(nameof(ProjectAclRule.Service)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 120 });
+        _aclGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.remark", "Bemerkung"), Binding = new Binding(nameof(ProjectAclRule.Remark)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         _aclGrid.CellEditEnding += (_, _) => { ScheduleAutoSave(); Dispatcher.BeginInvoke(new Action(RefreshAclAnalysis)); };
         content.Children.Add(_aclGrid);
 
@@ -502,23 +513,23 @@ public partial class MainWindow
         content.Children.Add(right);
 
         _aclFindingsGrid = new DataGrid { IsReadOnly = true, AutoGenerateColumns = false };
-        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Stufe", Binding = new Binding(nameof(AclFinding.Severity)), Width = 70 });
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.severity", "Stufe"), Binding = new Binding(nameof(AclFinding.Severity)), Width = 70 });
         _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "ACL", Binding = new Binding(nameof(AclFinding.AclName)), Width = 105 });
-        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Seq", Binding = new Binding(nameof(AclFinding.Sequence)), Width = 50 });
-        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Feststellung", Binding = new Binding(nameof(AclFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.sequence", "Seq"), Binding = new Binding(nameof(AclFinding.Sequence)), Width = 50 });
+        _aclFindingsGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.finding", "Feststellung"), Binding = new Binding(nameof(AclFinding.Message)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         right.Children.Add(_aclFindingsGrid);
 
         _aclBindingsGrid = new DataGrid { ItemsSource = _currentProject.AclBindings, IsReadOnly = false, AutoGenerateColumns = false, CanUserAddRows = true, CanUserDeleteRows = true };
-        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Gerät", Binding = new Binding(nameof(ProjectAclBinding.DeviceName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 100 });
-        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = "Interface", Binding = new Binding(nameof(ProjectAclBinding.Interface)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 110 });
+        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.device", "Gerät"), Binding = new Binding(nameof(ProjectAclBinding.DeviceName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 100 });
+        _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = LocalizationService.Get("acl.interface", "Interface"), Binding = new Binding(nameof(ProjectAclBinding.Interface)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 110 });
         _aclBindingsGrid.Columns.Add(new DataGridTextColumn { Header = "ACL", Binding = new Binding(nameof(ProjectAclBinding.AclName)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, Width = 105 });
-        _aclBindingsGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Richtung", SelectedItemBinding = new Binding(nameof(ProjectAclBinding.Direction)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "IN", "OUT" }, Width = 75 });
-        _aclBindingsGrid.Columns.Add(new DataGridComboBoxColumn { Header = "Familie", SelectedItemBinding = new Binding(nameof(ProjectAclBinding.AddressFamily)) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged }, ItemsSource = new[] { "IPv4", "IPv6" }, Width = 75 });
+        _aclBindingsGrid.Columns.Add(CreateDarkDataGridComboBoxColumn(LocalizationService.Get("acl.direction", "Richtung"), nameof(ProjectAclBinding.Direction), new[] { "IN", "OUT" }, 75));
+        _aclBindingsGrid.Columns.Add(CreateDarkDataGridComboBoxColumn(LocalizationService.Get("acl.family", "Familie"), nameof(ProjectAclBinding.AddressFamily), new[] { "IPv4", "IPv6" }, 75));
         _aclBindingsGrid.CellEditEnding += (_, _) => { ScheduleAutoSave(); Dispatcher.BeginInvoke(new Action(RefreshAclAnalysis)); };
         Grid.SetRow(_aclBindingsGrid, 2);
         right.Children.Add(_aclBindingsGrid);
 
-        _aclPreviewBox = CreateCodeBox("ACL-Konfigurationsvorschau");
+        _aclPreviewBox = CreateCodeBox(LocalizationService.Get("acl.preview", "ACL-Konfigurationsvorschau"));
         Grid.SetRow(_aclPreviewBox, 4);
         right.Children.Add(_aclPreviewBox);
 
@@ -555,7 +566,7 @@ public partial class MainWindow
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-        root.Children.Add(CreateAdvancedHeader("SSH-Übertragung und Backups", "Überträgt Konfigurationen per OpenSSH-Schlüssel oder Plink-Passwort und verwaltet Running-/Startup-Backups."));
+        root.Children.Add(CreateAdvancedHeader(LocalizationService.Get("ssh.title", "SSH-Übertragung und Backups"), LocalizationService.Get("ssh.description", "Überträgt Konfigurationen per OpenSSH-Schlüssel oder Plink-Passwort und verwaltet Running-/Startup-Backups.")));
 
         var settingsCard = CreateAdvancedCard();
         settingsCard.Margin = new Thickness(0, 10, 0, 10);
@@ -563,21 +574,21 @@ public partial class MainWindow
         for (var i = 0; i < 6; i++) settingsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = i == 5 ? new GridLength(1, GridUnitType.Star) : GridLength.Auto });
         settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        _sshHostBox = AddAdvancedInlineField(settingsGrid, 0, 0, "Host", "192.168.1.1", 145);
-        _sshPortBox = AddAdvancedInlineField(settingsGrid, 0, 1, "Port", _appSettings.DefaultSshPort.ToString(CultureInfo.InvariantCulture), 70);
-        _sshUserBox = AddAdvancedInlineField(settingsGrid, 0, 2, "Benutzer", "netadmin", 130);
+        _sshHostBox = AddAdvancedInlineField(settingsGrid, 0, 0, LocalizationService.Get("ssh.host", "Host"), "192.168.1.1", 145);
+        _sshPortBox = AddAdvancedInlineField(settingsGrid, 0, 1, LocalizationService.Get("ssh.port", "Port"), _appSettings.DefaultSshPort.ToString(CultureInfo.InvariantCulture), 70);
+        _sshUserBox = AddAdvancedInlineField(settingsGrid, 0, 2, LocalizationService.Get("ssh.user", "Benutzer"), "netadmin", 130);
         _sshAuthModeCombo = new ComboBox { ItemsSource = new[] { "OpenSSH + Schlüssel", "Plink + Passwort" }, SelectedIndex = 0, Width = 170, Margin = new Thickness(6), ItemTemplate = LocalizationService.CreateLocalizedStringTemplate() };
-        AddAdvancedInlineControl(settingsGrid, 0, 3, "Authentifizierung", _sshAuthModeCombo);
-        _sshDelayBox = AddAdvancedInlineField(settingsGrid, 0, 4, "Zeilen-Delay ms", _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture), 90);
+        AddAdvancedInlineControl(settingsGrid, 0, 3, LocalizationService.Get("ssh.authentication", "Authentifizierung"), _sshAuthModeCombo);
+        _sshDelayBox = AddAdvancedInlineField(settingsGrid, 0, 4, LocalizationService.Get("ssh.line_delay", "Zeilenverzögerung (ms)"), _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture), 90);
         _sshSaveCheck = new CheckBox { Content = LocalizationService.Get("text.nach_ubertragung_speichern"), IsChecked = true, Margin = new Thickness(10, 28, 0, 0), VerticalAlignment = VerticalAlignment.Top };
         Grid.SetRow(_sshSaveCheck, 0); Grid.SetColumn(_sshSaveCheck, 5); settingsGrid.Children.Add(_sshSaveCheck);
 
-        _sshKeyBox = AddAdvancedInlineField(settingsGrid, 1, 0, "Private Key", "", 300, 2);
+        _sshKeyBox = AddAdvancedInlineField(settingsGrid, 1, 0, LocalizationService.Get("ssh.private_key", "Privater Schlüssel"), "", 300, 2);
         var browseKey = new Button { Content = LocalizationService.Get("text.key_wahlen"), Margin = new Thickness(6, 27, 6, 6) };
         browseKey.Click += (_, _) => BrowseSshKey();
         Grid.SetRow(browseKey, 1); Grid.SetColumn(browseKey, 2); settingsGrid.Children.Add(browseKey);
         _sshPasswordBox = new PasswordBox { Width = 180, Margin = new Thickness(6), Padding = new Thickness(10, 7, 10, 7), Background = new SolidColorBrush(Color.FromRgb(14, 18, 25)), Foreground = Brushes.White, BorderBrush = new SolidColorBrush(Color.FromRgb(39, 46, 58)) };
-        AddAdvancedInlineControl(settingsGrid, 1, 3, "Plink-Passwort", _sshPasswordBox);
+        AddAdvancedInlineControl(settingsGrid, 1, 3, LocalizationService.Get("ssh.plink_password", "Plink-Passwort"), _sshPasswordBox);
         var securityNote = new TextBlock { Text = LocalizationService.Get("text.passworter_werden_weder_im_projekt_noch_im_autosave_gespeich"), Foreground = new SolidColorBrush(Color.FromRgb(251, 191, 36)), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(10, 29, 0, 0) };
         Grid.SetRow(securityNote, 1); Grid.SetColumn(securityNote, 4); Grid.SetColumnSpan(securityNote, 2); settingsGrid.Children.Add(securityNote);
         settingsCard.Child = settingsGrid;
@@ -603,7 +614,7 @@ public partial class MainWindow
         startBackup.Click += async (_, _) => await CreateSshBackupAsync("Startup-Config");
         actions.Children.Add(test); actions.Children.Add(send); actions.Children.Add(runBackup); actions.Children.Add(startBackup);
         left.Children.Add(actions);
-        _operationsOutputBox = CreateCodeBox("SSH-Ausgabe");
+        _operationsOutputBox = CreateCodeBox(LocalizationService.Get("ssh.output", "SSH-Ausgabe"));
         Grid.SetRow(_operationsOutputBox, 1); left.Children.Add(_operationsOutputBox);
         content.Children.Add(left);
 
@@ -627,7 +638,14 @@ public partial class MainWindow
         Grid.SetRow(_backupGrid, 1); right.Children.Add(_backupGrid);
         Grid.SetColumn(right, 2); content.Children.Add(right);
 
-        tab.Content = root;
+        var inner = new TabControl();
+        inner.Items.Add(new TabItem
+        {
+            Header = LocalizationService.Get("ssh.transfer_backup_tab", "Übertragung & Backups"),
+            Content = root
+        });
+        inner.Items.Add(BuildSshInventorySubTab());
+        tab.Content = inner;
         _tabsByName["Betrieb"] = tab;
         MainTabs.Items.Add(tab);
     }
@@ -652,8 +670,8 @@ public partial class MainWindow
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.Children.Add(CreateAdvancedHeader(
-            "Interaktives Netzwerkdiagramm",
-            "Geräte können mit der Maus verschoben werden. Verbindungstyp, Interfaces und optionale Beschreibung werden direkt an der Verbindung angezeigt und im Projekt gespeichert."));
+            LocalizationService.Get("diagram.title", "Interaktives Netzwerkdiagramm"),
+            LocalizationService.Get("diagram.description", "Geräte können mit der Maus verschoben werden. Verbindungen werden automatisch um andere Geräte geführt. Der Wegpunkt einer Verbindung kann manuell verschoben und im Projekt gespeichert werden.")));
 
         var linkRow = new WrapPanel { Margin = new Thickness(0, 8, 0, 5) };
         _linkSourceCombo = new ComboBox { Width = 155, DisplayMemberPath = nameof(ProjectDeviceSnapshot.Name), ItemsSource = _currentProject.Devices };
@@ -672,27 +690,29 @@ public partial class MainWindow
         var addLink = new Button { Content = LocalizationService.Get("text.verbindung_hinzufugen"), Style = TryFindResource("PrimaryButtonStyle") as Style };
         var removeLink = new Button { Content = LocalizationService.Get("text.letzte_entfernen") };
         var refresh = new Button { Content = LocalizationService.Get("text.aktualisieren") };
-        var smartLayout = new Button { Content = "Smart Layout", ToolTip = "Ordnet Geräte nach Standort und den Rollen WAN, Core, Distribution und Access an." };
-        var gridLayout = new Button { Content = "Raster", ToolTip = LocalizationService.Get("text.verwirft_manuelle_positionen_und_ordnet_alle_gerate_neu_an") };
-        var discoveryImport = new Button { Content = "CDP/LLDP importieren", ToolTip = "Ergänzt Verbindungen aus der Ausgabe von show cdp neighbors detail oder show lldp neighbors detail." };
-        _routingOverlayCheck = new CheckBox { Content = "Routing-Overlay", IsChecked = _appSettings.ShowRoutingDetails, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 3, 8, 3) };
+        var smartLayout = new Button { Content = LocalizationService.Get("diagram.smart_layout", "Smart Layout"), ToolTip = LocalizationService.Get("diagram.smart_layout_help", "Ordnet Geräte nach Standort und den Rollen WAN, Core, Distribution und Access an.") };
+        var gridLayout = new Button { Content = LocalizationService.Get("diagram.grid_layout", "Raster"), ToolTip = LocalizationService.Get("text.verwirft_manuelle_positionen_und_ordnet_alle_gerate_neu_an") };
+        var resetRoutes = new Button { Content = LocalizationService.Get("diagram.reset_routes", "Verbindungswege zurücksetzen"), ToolTip = LocalizationService.Get("diagram.reset_routes_help", "Entfernt manuelle Wegpunkte und berechnet alle Verbindungen automatisch neu.") };
+        var discoveryImport = new Button { Content = LocalizationService.Get("diagram.discovery_import", "CDP/LLDP importieren"), ToolTip = LocalizationService.Get("diagram.discovery_import_help", "Ergänzt Verbindungen aus der Ausgabe von show cdp neighbors detail oder show lldp neighbors detail.") };
+        _routingOverlayCheck = new CheckBox { Content = LocalizationService.Get("diagram.routing_overlay", "Routing-Overlay"), IsChecked = _appSettings.ShowRoutingDetails, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 3, 8, 3) };
         var export = new Button { Content = LocalizationService.Get("text.svg_export") };
         addLink.Click += (_, _) => AddProjectLink();
         removeLink.Click += (_, _) => RemoveLastProjectLink();
         refresh.Click += (_, _) => RefreshNetworkDiagram();
         smartLayout.Click += (_, _) => ApplySmartDiagramLayout();
         gridLayout.Click += (_, _) => ResetDiagramLayout();
+        resetRoutes.Click += (_, _) => ResetAllLinkRoutes();
         discoveryImport.Click += (_, _) => ImportDiscoveryNeighbors();
         _routingOverlayCheck.Checked += (_, _) => { _appSettings.ShowRoutingDetails = true; RefreshNetworkDiagram(); };
         _routingOverlayCheck.Unchecked += (_, _) => { _appSettings.ShowRoutingDetails = false; RefreshNetworkDiagram(); };
         export.Click += (_, _) => ExportNetworkDiagramSvg();
         foreach (var element in new UIElement[]
                  {
-                     AdvancedInlineLabel("Quelle"), _linkSourceCombo, _linkSourceIfBox,
-                     AdvancedInlineLabel("Ziel"), _linkTargetCombo, _linkTargetIfBox,
-                     AdvancedInlineLabel("Typ"), _linkTypeCombo,
-                     AdvancedInlineLabel("Bezeichnung"), _linkDescriptionBox,
-                     addLink, removeLink, refresh, smartLayout, gridLayout, discoveryImport, _routingOverlayCheck, export
+                     AdvancedInlineLabel(LocalizationService.Get("diagram.source", "Quelle")), _linkSourceCombo, _linkSourceIfBox,
+                     AdvancedInlineLabel(LocalizationService.Get("diagram.target", "Ziel")), _linkTargetCombo, _linkTargetIfBox,
+                     AdvancedInlineLabel(LocalizationService.Get("diagram.type", "Typ")), _linkTypeCombo,
+                     AdvancedInlineLabel(LocalizationService.Get("diagram.label", "Bezeichnung")), _linkDescriptionBox,
+                     addLink, removeLink, refresh, smartLayout, gridLayout, resetRoutes, discoveryImport, _routingOverlayCheck, export
                  })
         {
             if (element is FrameworkElement fe) fe.Margin = new Thickness(3);
@@ -794,6 +814,27 @@ public partial class MainWindow
         Grid.SetRow(_reportPreviewBox, 2); root.Children.Add(_reportPreviewBox);
         tab.Content = root;
         return tab;
+    }
+
+    private DataGridComboBoxColumn CreateDarkDataGridComboBoxColumn(string header, string propertyName, IEnumerable<string> items, double width)
+    {
+        var column = new DataGridComboBoxColumn
+        {
+            Header = header,
+            SelectedItemBinding = new Binding(propertyName) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+            ItemsSource = items.ToArray(),
+            Width = width
+        };
+
+        if (TryFindResource("DarkDataGridComboBoxStyle") is Style darkStyle)
+        {
+            var localizedDarkStyle = new Style(typeof(ComboBox), darkStyle);
+            localizedDarkStyle.Setters.Add(new Setter(ItemsControl.ItemTemplateProperty, LocalizationService.CreateLocalizedStringTemplate()));
+            column.ElementStyle = localizedDarkStyle;
+            column.EditingElementStyle = localizedDarkStyle;
+        }
+
+        return column;
     }
 
     private Border CreateAdvancedHeader(string title, string subtitle)
@@ -1079,6 +1120,16 @@ public partial class MainWindow
         }
         try
         {
+            if (_appSettings.HistoryEnabled)
+            {
+                ProjectVersioningService.CreateVersion(
+                    _currentProject,
+                    LocalizationService.Get("versioning.auto_save_label", "Automatisch vor Speichern"),
+                    LocalizationService.Get("versioning.auto_save_comment", "Automatisch erstellter Versionsstand beim Speichern des Projekts."),
+                    true,
+                    _appSettings.HistoryLimit,
+                    skipDuplicate: true);
+            }
             ProjectService.Save(_currentProject, _currentProjectPath);
             MessageBox.Show(this, T("text.projekt_wurde_gespeichert"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -1122,7 +1173,17 @@ public partial class MainWindow
         _currentProject.Backups ??= new();
         _currentProject.AclRules ??= new();
         _currentProject.AclBindings ??= new();
+        _currentProject.VersionHistory ??= new();
+        foreach (var device in _currentProject.Devices)
+        {
+            device.Values ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            device.Modules ??= new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            device.Inventory ??= new DeviceInventorySnapshot();
+        }
+        foreach (var link in _currentProject.Links)
+            link.RoutePoints ??= new ObservableCollection<ProjectLinkRoutePoint>();
         _currentProject.ProjectInfo ??= new ProjectPlanInfo();
+        _currentProject.FormatVersion = Math.Max(_currentProject.FormatVersion, 2);
     }
 
     private void RebindProjectCollections()
@@ -2030,19 +2091,18 @@ public partial class MainWindow
         if (_diagramCanvas == null) return;
         var color = ParseDiagramColor(NetworkDiagramService.GetLinkColor(link.LinkType));
         var brush = new SolidColorBrush(color);
-        var line = new Line
+        var path = new Polyline
         {
-            X1 = source.X + source.Width / 2,
-            Y1 = source.Y + source.Height / 2,
-            X2 = target.X + target.Width / 2,
-            Y2 = target.Y + target.Height / 2,
             Stroke = brush,
             StrokeThickness = NetworkDiagramService.GetLinkThickness(link.LinkType),
+            StrokeLineJoin = PenLineJoin.Round,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
             SnapsToDevicePixels = true
         };
         var dash = NetworkDiagramService.GetLinkDashArray(link.LinkType);
         if (!string.IsNullOrWhiteSpace(dash))
-            line.StrokeDashArray = new DoubleCollection(dash.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(double.Parse));
+            path.StrokeDashArray = new DoubleCollection(dash.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(double.Parse));
 
         var label = new TextBlock
         {
@@ -2064,52 +2124,150 @@ public partial class MainWindow
             ToolTip = BuildDiagramLinkToolTip(link)
         };
         labelBorder.SetResourceReference(Border.BackgroundProperty, "CardBg");
+
+        var resetMenu = new ContextMenu();
+        var resetItem = new MenuItem { Header = LocalizationService.Get("diagram.route.reset", "Automatische Route wiederherstellen") };
+        resetItem.Click += (_, _) => ResetLinkRoute(link);
+        resetMenu.Items.Add(resetItem);
+        labelBorder.ContextMenu = resetMenu;
+
         var sourceEndpoint = new Ellipse { Width = 10, Height = 10, Fill = brush, Stroke = new SolidColorBrush(Color.FromRgb(11, 14, 19)), StrokeThickness = 1 };
         var targetEndpoint = new Ellipse { Width = 10, Height = 10, Fill = brush, Stroke = new SolidColorBrush(Color.FromRgb(11, 14, 19)), StrokeThickness = 1 };
-        Panel.SetZIndex(line, 0);
+        var routeHandle = new Ellipse
+        {
+            Width = 14,
+            Height = 14,
+            Fill = new SolidColorBrush(Color.FromRgb(11, 14, 19)),
+            Stroke = brush,
+            StrokeThickness = 2,
+            Cursor = Cursors.SizeAll,
+            ToolTip = LocalizationService.Get("diagram.route.handle_help", "Ziehen, um den Verbindungsweg manuell zu verschieben. Rechtsklick stellt die automatische Route wieder her."),
+            Opacity = link.ManualRoute ? 1.0 : 0.55
+        };
+        routeHandle.MouseLeftButtonDown += (_, e) => BeginDiagramLinkRouteDrag(link, routeHandle, e);
+        routeHandle.MouseMove += (_, e) => MoveDiagramLinkRoute(link, routeHandle, e);
+        routeHandle.MouseLeftButtonUp += (_, e) => EndDiagramLinkRouteDrag(link, routeHandle, e);
+        routeHandle.MouseRightButtonUp += (_, e) => { ResetLinkRoute(link); e.Handled = true; };
+
+        Panel.SetZIndex(path, 0);
         Panel.SetZIndex(sourceEndpoint, 1);
         Panel.SetZIndex(targetEndpoint, 1);
         Panel.SetZIndex(labelBorder, 2);
-        _diagramCanvas.Children.Add(line);
+        Panel.SetZIndex(routeHandle, 3);
+        _diagramCanvas.Children.Add(path);
         _diagramCanvas.Children.Add(sourceEndpoint);
         _diagramCanvas.Children.Add(targetEndpoint);
         _diagramCanvas.Children.Add(labelBorder);
+        _diagramCanvas.Children.Add(routeHandle);
         _diagramLinkElements.Add(new DiagramLinkVisual
         {
             Link = link,
-            Line = line,
+            Path = path,
             Label = label,
             LabelBorder = labelBorder,
             SourceEndpoint = sourceEndpoint,
-            TargetEndpoint = targetEndpoint
+            TargetEndpoint = targetEndpoint,
+            RouteHandle = routeHandle
         });
+    }
+
+    private void BeginDiagramLinkRouteDrag(ProjectLink link, Ellipse handle, MouseButtonEventArgs e)
+    {
+        if (_diagramCanvas == null || e.ChangedButton != MouseButton.Left) return;
+        _draggedDiagramLink = link;
+        _draggedRouteHandle = handle;
+        handle.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void MoveDiagramLinkRoute(ProjectLink link, Ellipse handle, MouseEventArgs e)
+    {
+        if (_diagramCanvas == null || e.LeftButton != MouseButtonState.Pressed ||
+            !ReferenceEquals(_draggedDiagramLink, link) || !ReferenceEquals(_draggedRouteHandle, handle)) return;
+
+        var position = e.GetPosition(_diagramCanvas);
+        link.ManualRoute = true;
+        link.RoutePoints ??= new ObservableCollection<ProjectLinkRoutePoint>();
+        link.RoutePoints.Clear();
+        link.RoutePoints.Add(new ProjectLinkRoutePoint
+        {
+            X = Math.Clamp(position.X, 18, _diagramCanvas.Width - 18),
+            Y = Math.Clamp(position.Y, 42, _diagramCanvas.Height - 18)
+        });
+        handle.Opacity = 1.0;
+        UpdateDiagramConnections();
+        e.Handled = true;
+    }
+
+    private void EndDiagramLinkRouteDrag(ProjectLink link, Ellipse handle, MouseButtonEventArgs e)
+    {
+        if (!ReferenceEquals(_draggedDiagramLink, link) || !ReferenceEquals(_draggedRouteHandle, handle)) return;
+        handle.ReleaseMouseCapture();
+        _draggedDiagramLink = null;
+        _draggedRouteHandle = null;
+        ScheduleAutoSave();
+        e.Handled = true;
+    }
+
+    private void ResetLinkRoute(ProjectLink link)
+    {
+        link.ManualRoute = false;
+        link.RoutePoints ??= new ObservableCollection<ProjectLinkRoutePoint>();
+        link.RoutePoints.Clear();
+        UpdateDiagramConnections();
+        ScheduleAutoSave();
+    }
+
+    private void ResetAllLinkRoutes()
+    {
+        foreach (var link in _currentProject.Links)
+        {
+            link.ManualRoute = false;
+            link.RoutePoints ??= new ObservableCollection<ProjectLinkRoutePoint>();
+            link.RoutePoints.Clear();
+        }
+        RefreshNetworkDiagram();
+        ScheduleAutoSave();
     }
 
     private void UpdateDiagramConnections()
     {
+        if (_diagramCanvas == null) return;
+        var layout = _currentProject.Devices.ToDictionary(
+            device => device.Id,
+            device => new NetworkDiagramService.DiagramPoint(
+                Canvas.GetLeft(_diagramDeviceElements[device.Id]),
+                Canvas.GetTop(_diagramDeviceElements[device.Id]),
+                _diagramDeviceElements[device.Id].Width,
+                _diagramDeviceElements[device.Id].Height),
+            StringComparer.OrdinalIgnoreCase);
+
         foreach (var visual in _diagramLinkElements)
         {
-            if (!_diagramDeviceElements.TryGetValue(visual.Link.SourceDeviceId, out var source) ||
-                !_diagramDeviceElements.TryGetValue(visual.Link.TargetDeviceId, out var target)) continue;
+            var route = ConnectionRoutingService.CalculateRoute(visual.Link, layout, _diagramCanvas.Width, _diagramCanvas.Height);
+            if (route.Count < 2) continue;
 
-            var x1 = Canvas.GetLeft(source) + source.Width / 2;
-            var y1 = Canvas.GetTop(source) + source.Height / 2;
-            var x2 = Canvas.GetLeft(target) + target.Width / 2;
-            var y2 = Canvas.GetTop(target) + target.Height / 2;
-            visual.Line.X1 = x1;
-            visual.Line.Y1 = y1;
-            visual.Line.X2 = x2;
-            visual.Line.Y2 = y2;
-            Canvas.SetLeft(visual.SourceEndpoint, x1 - visual.SourceEndpoint.Width / 2);
-            Canvas.SetTop(visual.SourceEndpoint, y1 - visual.SourceEndpoint.Height / 2);
-            Canvas.SetLeft(visual.TargetEndpoint, x2 - visual.TargetEndpoint.Width / 2);
-            Canvas.SetTop(visual.TargetEndpoint, y2 - visual.TargetEndpoint.Height / 2);
+            visual.Path.Points = new PointCollection(route.Select(point => new Point(point.X, point.Y)));
+            var sourcePoint = route[0];
+            var targetPoint = route[^1];
+            Canvas.SetLeft(visual.SourceEndpoint, sourcePoint.X - visual.SourceEndpoint.Width / 2);
+            Canvas.SetTop(visual.SourceEndpoint, sourcePoint.Y - visual.SourceEndpoint.Height / 2);
+            Canvas.SetLeft(visual.TargetEndpoint, targetPoint.X - visual.TargetEndpoint.Width / 2);
+            Canvas.SetTop(visual.TargetEndpoint, targetPoint.Y - visual.TargetEndpoint.Height / 2);
 
+            var midpoint = ConnectionRoutingService.GetPathMidpoint(route);
             visual.LabelBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             var labelWidth = Math.Max(80, visual.LabelBorder.DesiredSize.Width);
             var labelHeight = Math.Max(24, visual.LabelBorder.DesiredSize.Height);
-            Canvas.SetLeft(visual.LabelBorder, (x1 + x2) / 2 - labelWidth / 2);
-            Canvas.SetTop(visual.LabelBorder, (y1 + y2) / 2 - labelHeight - 8);
+            Canvas.SetLeft(visual.LabelBorder, midpoint.X - labelWidth / 2);
+            Canvas.SetTop(visual.LabelBorder, midpoint.Y - labelHeight - 10);
+
+            var handlePoint = visual.Link.ManualRoute && visual.Link.RoutePoints is { Count: > 0 }
+                ? new RoutedLinkPoint(visual.Link.RoutePoints[0].X, visual.Link.RoutePoints[0].Y)
+                : midpoint;
+            Canvas.SetLeft(visual.RouteHandle, handlePoint.X - visual.RouteHandle.Width / 2);
+            Canvas.SetTop(visual.RouteHandle, handlePoint.Y - visual.RouteHandle.Height / 2);
+            visual.RouteHandle.Opacity = visual.Link.ManualRoute ? 1.0 : 0.55;
         }
     }
 

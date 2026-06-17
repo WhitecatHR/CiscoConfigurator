@@ -26,6 +26,12 @@ public partial class App : Application
 
             LocalizationService.SetLanguage(settings.Language);
             StartupDiagnostics.WriteInfo($"Localization initialized: {LocalizationService.CurrentLanguage}.");
+            LocalizationCatalogValidator.ValidateModuleCatalogs();
+            if (settings.ValidatePluginsOnStartup)
+            {
+                var pluginStatuses = PluginModuleService.GetPluginStatuses();
+                StartupDiagnostics.WriteInfo($"Plugin validation completed: {pluginStatuses.Count} plugin file(s), {pluginStatuses.Count(x => x.Valid && x.Enabled)} enabled.");
+            }
 
             var window = new MainWindow();
             MainWindow = window;

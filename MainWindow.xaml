@@ -226,6 +226,26 @@
             </Setter>
         </Style>
 
+        <!-- Explizite dunkle ComboBox-Stile für DataGridComboBoxColumn.
+             DataGrid erzeugt eigene ComboBox-Instanzen und kann sonst auf helle Systemstile zurückfallen. -->
+        <Style x:Key="DarkComboBoxItemStyle"
+               TargetType="ComboBoxItem"
+               BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style x:Key="DarkDataGridComboBoxStyle"
+               TargetType="ComboBox"
+               BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource InputBg}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}" />
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}" />
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="Padding" Value="8,4,34,4" />
+        </Style>
+
         <Style TargetType="Button">
             <Setter Property="FontFamily" Value="Segoe UI Semibold" />
             <Setter Property="FontSize" Value="13" />

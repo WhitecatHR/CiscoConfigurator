@@ -16,25 +16,25 @@
       },
       {
         "command": "show version",
-        "meaning": "IOS-Version, Uptime, Modell, Seriennummer, Lizenz.",
+        "meaning": "IOS version, uptime, model, serial number, and license.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show inventory",
-        "meaning": "Hardware-Inventory, Seriennummern, modules.",
+        "meaning": "Hardware inventory, serial numbers, and modules.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show ip interface brief",
-        "meaning": "Interface, IP-address, status, Protocol.",
+        "meaning": "Interface, IP address, status, and protocol.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show ipv6 interface brief",
-        "meaning": "IPv6-addresses and Interface-status compact.",
+        "meaning": "Compact IPv6 addresses and interface status.",
         "module": "",
         "mode": ""
       },
@@ -46,7 +46,7 @@
       },
       {
         "command": "show interfaces status",
-        "meaning": "Switchport-status, VLAN, Duplex, Speed.",
+        "meaning": "Switch port status, VLAN, duplex, and speed.",
         "module": "",
         "mode": ""
       },
@@ -70,7 +70,7 @@
       },
       {
         "command": "show ntp status",
-        "meaning": "NTP-synchronization status.",
+        "meaning": "NTP synchronization status.",
         "module": "",
         "mode": ""
       },
@@ -82,13 +82,13 @@
       },
       {
         "command": "show line vty 0 4",
-        "meaning": "VTY-Line-status and parameter.",
+        "meaning": "VTY line status and parameters.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show ip ssh",
-        "meaning": "SSH-status, Version and parameter.",
+        "meaning": "SSH status, version, and parameters.",
         "module": "",
         "mode": ""
       },
@@ -129,13 +129,13 @@
       },
       {
         "command": "show spanning-tree",
-        "meaning": "STP Root, roles, status.",
+        "meaning": "STP root, roles, and status.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show spanning-tree vlan <vlan>",
-        "meaning": "STP-status for specific VLAN.",
+        "meaning": "STP status for a specific VLAN.",
         "module": "",
         "mode": ""
       },
@@ -159,7 +159,7 @@
       },
       {
         "command": "show port-security interface <if>",
-        "meaning": "Port-Security status per Interface.",
+        "meaning": "Port Security status per interface.",
         "module": "",
         "mode": ""
       },
@@ -183,7 +183,7 @@
       },
       {
         "command": "show ip arp inspection",
-        "meaning": "DAI status.",
+        "meaning": "Dynamic ARP Inspection status.",
         "module": "",
         "mode": ""
       },
@@ -201,13 +201,13 @@
       },
       {
         "command": "show vlan id <VLAN>",
-        "meaning": "details to a specific VLAN, z. B. Data-, Voice- or provider VLAN.",
+        "meaning": "Shows details for a specific VLAN, for example a data, voice, or provider VLAN.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show l2protocol-tunnel",
-        "meaning": "status of Layer-2-protocol-Tunneling for QinQ, if supported.",
+        "meaning": "Status of Layer 2 protocol tunneling for QinQ, when supported.",
         "module": "",
         "mode": ""
       },
@@ -231,7 +231,7 @@
       },
       {
         "command": "show mls qos interface <Interface>",
-        "meaning": "QoS Trust-status and QoS-parameter on a phone port validate.",
+        "meaning": "Validates QoS trust status and QoS parameters on a phone port.",
         "module": "",
         "mode": ""
       },
@@ -243,7 +243,7 @@
       },
       {
         "command": "show spanning-tree summary",
-        "meaning": "summary the active STP mode, Root-Bridge-status and globaler Schutzfunktionen.",
+        "meaning": "Summarizes the active STP mode, root bridge status, and global protection features.",
         "module": "",
         "mode": ""
       },
@@ -261,7 +261,7 @@
       },
       {
         "command": "show spanning-tree inconsistentports",
-        "meaning": "Displays through Root Guard, Loop Guard or other consistency checks blocked ports.",
+        "meaning": "Displays ports blocked by Root Guard, Loop Guard, or other consistency checks.",
         "module": "",
         "mode": ""
       },
@@ -273,19 +273,19 @@
       },
       {
         "command": "show spanning-tree interface <Interface> detail",
-        "meaning": "STP-role, status, Kosten, Port-Priority and guard state a Interfaces.",
+        "meaning": "Displays the STP role, status, cost, port priority, and guard state of an interface.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show spanning-tree mst",
-        "meaning": "Displays CIST and MST instances including Root- and Portrollen.",
+        "meaning": "Displays CIST and MST instances, including root and port roles.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show spanning-tree mst configuration",
-        "meaning": "Displays Regionsname, Revision, VLAN-mapping and Konfigurations-Digest.",
+        "meaning": "Displays the region name, revision, VLAN mapping, and configuration digest.",
         "module": "",
         "mode": ""
       },
@@ -410,7 +410,7 @@
       },
       {
         "command": "show mpls ldp neighbor",
-        "meaning": "Displays LDP-neighbors and Sessionstatus.",
+        "meaning": "Displays LDP neighbors and session status.",
         "module": "",
         "mode": ""
       },
@@ -428,7 +428,7 @@
       },
       {
         "command": "show bgp vpnv4 unicast all summary",
-        "meaning": "Displays MP-BGP VPNv4 Peer-status.",
+        "meaning": "Displays MP-BGP VPNv4 peer status.",
         "module": "",
         "mode": ""
       },
@@ -457,13 +457,13 @@
     "rows": [
       {
         "command": "show ip vrf",
-        "meaning": "classic VRF-Liste for ip vrf Syntax.",
+        "meaning": "Classic VRF list using `ip vrf` syntax.",
         "module": "",
         "mode": ""
       },
       {
         "command": "show vrf",
-        "meaning": "VRF-Liste for neuerer IOS-XE Syntax.",
+        "meaning": "VRF list using modern IOS-XE syntax.",
         "module": "",
         "mode": ""
       },
@@ -683,7 +683,7 @@
       },
       {
         "command": "telnet <ip> <port>",
-        "meaning": "TCP-Porttest, z. B. 22/80/443.",
+        "meaning": "TCP port test, for example 22, 80, or 443.",
         "module": "",
         "mode": ""
       },

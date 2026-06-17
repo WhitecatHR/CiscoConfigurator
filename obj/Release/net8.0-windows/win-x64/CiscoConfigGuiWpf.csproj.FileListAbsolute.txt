@@ -1,3 +1,17 @@
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.csproj.AssemblyReference.cache
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\MainWindow.baml
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\MainWindow.g.cs
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\App.g.cs
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\Cisco Konfigurator_MarkupCompile.cache
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\Cisco Konfigurator.g.resources
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.AssemblyInfoInputs.cache
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.AssemblyInfo.cs
+C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.csproj.CoreCompileInputs.cache
+C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Plugins\Example.ciscoplugin.json.example
+C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Plugins\README.de.md
+C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Plugins\README.en.md
+C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Plugins\README.md
 C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Cisco Konfigurator.exe
 C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Cisco Konfigurator.deps.json
 C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\Cisco Konfigurator.runtimeconfig.json
@@ -462,16 +476,6 @@ C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\zh-Hant\UIAutoma
 C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\zh-Hant\UIAutomationTypes.resources.dll
 C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\zh-Hant\WindowsBase.resources.dll
 C:\Users\Norman\Desktop\Test\bin\Release\net8.0-windows\win-x64\zh-Hant\WindowsFormsIntegration.resources.dll
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.csproj.AssemblyReference.cache
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\MainWindow.baml
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\MainWindow.g.cs
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\App.g.cs
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\Cisco Konfigurator_MarkupCompile.cache
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\Cisco Konfigurator.g.resources
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.AssemblyInfoInputs.cache
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.AssemblyInfo.cs
-C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoConfigGuiWpf.csproj.CoreCompileInputs.cache
 C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\CiscoCon.03EDBBAF.Up2Date
 C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\Cisco Konfigurator.dll
 C:\Users\Norman\Desktop\Test\obj\Release\net8.0-windows\win-x64\refint\Cisco Konfigurator.dll

@@ -121,6 +121,7 @@ public partial class MainWindow : Window
         BuildCheckTab();
         BuildAdvancedFeatureTabs();
         BuildSettingsTab();
+        BuildPluginManagerTab();
         RebuildMainNavigation();
         var startPage = string.IsNullOrWhiteSpace(_appSettings.StartPage) ? "Übersicht" : _appSettings.StartPage;
         if (_tabsByName.TryGetValue(startPage, out var startTab))
@@ -392,6 +393,7 @@ public partial class MainWindow : Window
         }
 
         AddNavigationGroupHeader(LocalizationService.Get("navigation.group.system", "SYSTEM"));
+        AddNavigationTab("Plugin-Manager");
         AddNavigationTab("Einstellungen");
     }
 
@@ -2707,6 +2709,7 @@ public partial class MainWindow : Window
         "IPAM / Ports" => "IPAM",
         "Analyse" => LocalizationService.Get("navigation.analysis", "Analyse"),
         "Diagramm / Bericht" => "Diagramm",
+        "Plugin-Manager" => LocalizationService.Get("plugins.manager_title", "Plugin-Manager"),
         "Einstellungen" => LocalizationService.Get("navigation.settings", "Einstellungen"),
         _ => tab
     };
@@ -2743,6 +2746,7 @@ public partial class MainWindow : Window
         "IPAM / Ports" => "▦",
         "Analyse" => "⌕",
         "Diagramm / Bericht" => "▧",
+        "Plugin-Manager" => "⬢",
         "Einstellungen" => "⚙",
         _ => "▪"
     };

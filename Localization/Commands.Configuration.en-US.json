@@ -75,13 +75,13 @@
         "meaning": "Creates a Login-Banner before the authentication."
       },
       {
-        "module": "Abschluss",
+        "module": "Completion",
         "mode": "globally",
         "command": "end",
-        "meaning": "Exits the Konfigurationsebene."
+        "meaning": "Exits configuration mode."
       },
       {
-        "module": "Abschluss",
+        "module": "Completion",
         "mode": "Privileged EXEC",
         "command": "write memory",
         "meaning": "Saves the running configuration in the Startup-Config."
@@ -101,7 +101,7 @@
         "module": "SSH",
         "mode": "RSA-Dialog",
         "command": "modulus <Bits>",
-        "meaning": "Sets the RSA key length defined, z. B. 2048."
+        "meaning": "Sets the RSA key length, for example 2048 bits."
       },
       {
         "module": "SSH",
@@ -279,7 +279,7 @@
       },
       {
         "module": "AAA",
-        "mode": "Servergruppe",
+        "mode": "Server group",
         "command": "server name <Name>",
         "meaning": "Assigns the AAA group a named Server to."
       },
@@ -305,7 +305,7 @@
         "module": "RADIUS",
         "mode": "globally",
         "command": "ip radius source-interface <Interface>",
-        "meaning": "Sets the source interface for RADIUS-Pakete."
+        "meaning": "Sets the source interface for RADIUS packets."
       }
     ]
   },
@@ -316,7 +316,7 @@
         "module": "NTP",
         "mode": "globally",
         "command": "ntp server <IP> [prefer]",
-        "meaning": "Configures a NTP-Server, optional bevorzugt."
+        "meaning": "Configures an NTP server and optionally marks it as preferred."
       },
       {
         "module": "Syslog",
@@ -340,13 +340,13 @@
         "module": "Syslog",
         "mode": "globally",
         "command": "service timestamps debug datetime msec localtime show-timezone",
-        "meaning": "Advanced Debug-Zeitstempel to date, milliseconds and time zone."
+        "meaning": "Adds the date, milliseconds, and time zone to debug timestamps."
       },
       {
         "module": "Syslog",
         "mode": "globally",
         "command": "service timestamps log datetime msec localtime show-timezone",
-        "meaning": "Advanced Log-Zeitstempel to date, milliseconds and time zone."
+        "meaning": "Adds the date, milliseconds, and time zone to log timestamps."
       },
       {
         "module": "SNMP",
@@ -394,7 +394,7 @@
         "module": "Archive",
         "mode": "Archive",
         "command": "path <Pfad>",
-        "meaning": "Sets the Ablagepfad for Konfigurationsarchive."
+        "meaning": "Sets the destination path for configuration archives."
       },
       {
         "module": "Archive",
@@ -412,13 +412,13 @@
         "module": "Login-Audit",
         "mode": "globally",
         "command": "login on-failure log",
-        "meaning": "Logs fehlgeschlagene login attempts."
+        "meaning": "Logs failed login attempts."
       },
       {
         "module": "Login-Audit",
         "mode": "globally",
         "command": "login on-success log",
-        "meaning": "Logs erfolgreiche login attempts."
+        "meaning": "Logs successful login attempts."
       },
       {
         "module": "user",
@@ -495,7 +495,7 @@
         "module": "Switchport",
         "mode": "Interface",
         "command": "switchport mode access",
-        "meaning": "Sets the Port in the Access-Modus."
+        "meaning": "Sets the port to access mode."
       },
       {
         "module": "Switchport",
@@ -513,12 +513,12 @@
         "module": "Switchport",
         "mode": "Interface",
         "command": "switchport mode trunk",
-        "meaning": "Sets the Port in the trunk-Modus."
+        "meaning": "Sets the port to trunk mode."
       },
       {
         "module": "Switchport",
         "mode": "Interface",
-        "command": "switchport trunk allowed vlan <VLAN-Liste>",
+        "command": "switchport trunk allowed vlan <VLAN-List>",
         "meaning": "Restricts the on the trunk allowed VLANs."
       },
       {
@@ -561,7 +561,7 @@
         "module": "STP",
         "mode": "Interface",
         "command": "spanning-tree guard root",
-        "meaning": "Prevents, that the Port Root-Port is."
+        "meaning": "Prevents the port from becoming the root port."
       },
       {
         "module": "STP",
@@ -584,7 +584,7 @@
       {
         "module": "STP",
         "mode": "Interface",
-        "command": "spanning-tree cost <Kosten>",
+        "command": "spanning-tree cost <Cost>",
         "meaning": "Sets the STP-path cost the Interfaces."
       },
       {
@@ -650,13 +650,13 @@
       {
         "module": "Storm-Control",
         "mode": "Interface",
-        "command": "storm-control broadcast level <Wert>",
+        "command": "storm-control broadcast level <Value>",
         "meaning": "Limits broadcast storms."
       },
       {
         "module": "Storm-Control",
         "mode": "Interface",
-        "command": "storm-control multicast level <Wert>",
+        "command": "storm-control multicast level <Value>",
         "meaning": "Limits multicast storms."
       }
     ]
@@ -673,7 +673,7 @@
       {
         "module": "DHCP Snooping",
         "mode": "globally",
-        "command": "ip dhcp snooping vlan <VLAN-Liste>",
+        "command": "ip dhcp snooping vlan <VLAN-List>",
         "meaning": "Enables DHCP Snooping for VLANs."
       },
       {
@@ -697,7 +697,7 @@
       {
         "module": "DAI",
         "mode": "globally",
-        "command": "ip arp inspection vlan <VLAN-Liste>",
+        "command": "ip arp inspection vlan <VLAN-List>",
         "meaning": "Enables Dynamic ARP Inspection for VLANs."
       },
       {
@@ -776,13 +776,13 @@
         "module": "STP",
         "mode": "globally",
         "command": "spanning-tree pathcost method <short|long>",
-        "meaning": "Sets the verwendete STP-Pfadkostenskala."
+        "meaning": "Sets the STP path-cost scale."
       },
       {
         "module": "STP",
         "mode": "globally",
         "command": "spanning-tree vlan <VLAN> root <primary|secondary>",
-        "meaning": "Sets the Switch as STP-Root for VLANs."
+        "meaning": "Sets the switch as the STP root for VLANs."
       },
       {
         "module": "STP",
@@ -794,7 +794,7 @@
         "module": "STP",
         "mode": "globally",
         "command": "spanning-tree vlan <VLAN> hello-time <Seconds>",
-        "meaning": "Sets the STP-Hello-Timer for a VLAN."
+        "meaning": "Sets the STP hello timer for a VLAN."
       },
       {
         "module": "STP",
@@ -859,7 +859,7 @@
       {
         "module": "MST",
         "mode": "MST-configuration",
-        "command": "instance <Instance> vlan <VLAN-Liste>",
+        "command": "instance <Instance> vlan <VLAN-List>",
         "meaning": "Assigns VLANs a MST-instance to."
       },
       {
@@ -872,7 +872,7 @@
         "module": "MST",
         "mode": "globally",
         "command": "spanning-tree mst <Instance> root <primary|secondary>",
-        "meaning": "Sets the root role a MST-instance."
+        "meaning": "Sets the root role of an MST instance."
       },
       {
         "module": "PVST",
@@ -896,13 +896,13 @@
         "module": "STP",
         "mode": "Interface",
         "command": "spanning-tree port-priority <0-240>",
-        "meaning": "Sets the STP-Port-priority in Schritten of 16."
+        "meaning": "Sets the STP port priority in increments of 16."
       },
       {
         "module": "STP",
         "mode": "Interface",
-        "command": "spanning-tree cost <Kosten>",
-        "meaning": "Sets the allgemeine STP-Pfadkostenmetrik."
+        "command": "spanning-tree cost <Cost>",
+        "meaning": "Sets the general STP path-cost metric."
       },
       {
         "module": "STP",
@@ -913,7 +913,7 @@
       {
         "module": "STP",
         "mode": "Interface",
-        "command": "spanning-tree vlan <VLAN> cost <Kosten>",
+        "command": "spanning-tree vlan <VLAN> cost <Cost>",
         "meaning": "Sets the path cost for a VLAN."
       },
       {
@@ -931,7 +931,7 @@
       {
         "module": "MST",
         "mode": "Interface",
-        "command": "spanning-tree mst <Instance> cost <Kosten>",
+        "command": "spanning-tree mst <Instance> cost <Cost>",
         "meaning": "Sets the path cost for a MST-instance."
       },
       {
@@ -974,7 +974,7 @@
         "module": "STP diagnostics",
         "mode": "EXEC",
         "command": "show spanning-tree summary",
-        "meaning": "Displays Modus, Root-status and Global STP-Funktionen."
+        "meaning": "Displays the mode, root status, and global STP functions."
       },
       {
         "module": "STP diagnostics",
@@ -986,7 +986,7 @@
         "module": "MST diagnostics",
         "mode": "EXEC",
         "command": "show spanning-tree mst configuration",
-        "meaning": "Displays MST-Region, Revision, VLAN-mapping and Digest."
+        "meaning": "Displays the MST region, revision, VLAN mapping, and digest."
       }
     ]
   },
@@ -1116,8 +1116,8 @@
       {
         "module": "OSPF",
         "mode": "Interface",
-        "command": "ip ospf cost <Kosten>",
-        "meaning": "Sets Interface-Kosten for OSPF."
+        "command": "ip ospf cost <Cost>",
+        "meaning": "Sets the interface cost for OSPF."
       },
       {
         "module": "OSPF",
@@ -1159,13 +1159,13 @@
         "module": "OSPF",
         "mode": "Interface",
         "command": "ip ospf hello-interval <Seconds>",
-        "meaning": "Sets the OSPF-Hello-Timer."
+        "meaning": "Sets the OSPF hello timer."
       },
       {
         "module": "OSPF",
         "mode": "Interface",
         "command": "ip ospf dead-interval <Seconds>",
-        "meaning": "Sets the OSPF-Dead-Timer."
+        "meaning": "Sets the OSPF dead timer."
       },
       {
         "module": "IS-IS",
@@ -1176,7 +1176,7 @@
       {
         "module": "IS-IS",
         "mode": "Router",
-        "command": "net <NET-Adresse>",
+        "command": "net <NET-Address>",
         "meaning": "Sets the IS-IS NET-address."
       },
       {
@@ -1279,7 +1279,7 @@
         "module": "BGP",
         "mode": "Router",
         "command": "neighbor <IP> timers <Keepalive> <Holdtime>",
-        "meaning": "Sets BGP-Timer."
+        "meaning": "Sets the BGP timers."
       },
       {
         "module": "FHRP",
@@ -1326,7 +1326,7 @@
         "module": "VRF Interface",
         "mode": "Interface",
         "command": "ip vrf forwarding <VRF-Name>",
-        "meaning": "Assigns a Interface a VRF to; vorhandene IP-address is dabei entfernt."
+        "meaning": "Assigns an interface to a VRF. Any existing IP address is removed when the VRF is applied."
       },
       {
         "module": "VRF Interface",
@@ -1450,7 +1450,7 @@
       {
         "module": "IPv6",
         "mode": "Interface",
-        "command": "ipv6 address <Link-Local-Adresse> link-local",
+        "command": "ipv6 address <Link-Local-Address> link-local",
         "meaning": "Sets a manual Link-Local-address."
       },
       {
@@ -1492,7 +1492,7 @@
       {
         "module": "DHCPv6 Relay",
         "mode": "Interface",
-        "command": "ipv6 dhcp relay destination <IPv6-Adresse>",
+        "command": "ipv6 dhcp relay destination <IPv6-Address>",
         "meaning": "Forwards DHCPv6-queries onward."
       },
       {
@@ -1934,7 +1934,7 @@
       {
         "module": "QoS",
         "mode": "Class-Map",
-        "command": "match dscp <DSCP-Wert>",
+        "command": "match dscp <DSCP-Value>",
         "meaning": "Matches DSCP-values."
       },
       {
@@ -2012,13 +2012,13 @@
         "module": "MPLS",
         "mode": "Interface",
         "command": "mpls mtu <Bytes>",
-        "meaning": "Sets optional a MPLS-MTU. not arbitrarily 9000 set."
+        "meaning": "Optionally sets an MPLS MTU. Do not set 9000 arbitrarily."
       },
       {
         "module": "MPLS",
         "mode": "Interface",
         "command": "mpls ldp igp sync",
-        "meaning": "Synchronisiert LDP and IGP, to Blackholing to vermeiden."
+        "meaning": "Synchronizes LDP and the IGP to avoid traffic blackholing."
       },
       {
         "module": "MPLS",
@@ -2089,7 +2089,7 @@
         "module": "VoIP",
         "mode": "globally",
         "command": "vlan <Data-VLAN>",
-        "meaning": "Creates the data-VLAN for Clients behind IP-Telefonen."
+        "meaning": "Creates the data VLAN for clients connected behind IP phones."
       },
       {
         "module": "VoIP",
@@ -2137,7 +2137,7 @@
         "module": "VoIP",
         "mode": "Interface",
         "command": "switchport access vlan <Data-VLAN>",
-        "meaning": "Sets the data-VLAN for the PC-Port behind the Telefon."
+        "meaning": "Sets the data VLAN for the PC port behind the phone."
       },
       {
         "module": "VoIP",
@@ -2178,7 +2178,7 @@
         "module": "QinQ",
         "mode": "globally",
         "command": "system mtu jumbo <Bytes>",
-        "meaning": "optional. platform-dependent Jumbo-/System-MTU. not arbitrarily 9000 set; only use, when the transport network the frame size end-to-end supported."
+        "meaning": "Optional platform-dependent jumbo or system MTU. Do not set 9000 arbitrarily; use this only when the transport path supports the frame size end to end."
       },
       {
         "module": "QinQ",
@@ -2232,7 +2232,7 @@
         "module": "QinQ",
         "mode": "L3-Switch Subinterface",
         "command": "ip address <IP> <Mask>",
-        "meaning": "Sets optional a Layer-3-address on the QinQ subinterface."
+        "meaning": "Optionally sets a Layer 3 address on the QinQ subinterface."
       }
     ]
   },
@@ -2243,7 +2243,7 @@
         "module": "Prefix-List",
         "mode": "globally",
         "command": "ip prefix-list <Name> seq <Sequence> <permit|deny> <Prefix> [ge <Min>] [le <Max>]",
-        "meaning": "Creates a sequenzierte IPv4-Prefix-List for Routing-Filter."
+        "meaning": "Creates a sequenced IPv4 prefix list for route filtering."
       },
       {
         "module": "Route-Map",
@@ -2272,7 +2272,7 @@
       {
         "module": "Route-Map",
         "mode": "Route-Map",
-        "command": "set local-preference <Wert>",
+        "command": "set local-preference <Value>",
         "meaning": "Sets the BGP Local Preference."
       },
       {
@@ -2291,7 +2291,7 @@
         "module": "Distribute-List",
         "mode": "Router",
         "command": "distribute-list <ACL|Prefix-List> <in|out> [Interface]",
-        "meaning": "Filters Routingupdates within a Routingprozesses."
+        "meaning": "Filters routing updates within a routing process."
       },
       {
         "module": "IP SLA",
@@ -2369,7 +2369,7 @@
         "module": "BGP",
         "mode": "Router",
         "command": "neighbor <IP> description <Text>",
-        "meaning": "Hinterlegt a description for a BGP-neighbors."
+        "meaning": "Adds a description to a BGP neighbor."
       },
       {
         "module": "BGP",
@@ -2387,7 +2387,7 @@
         "module": "BGP",
         "mode": "Router",
         "command": "neighbor <IP> timers <Keepalive> <Holdtime>",
-        "meaning": "Sets Keepalive- and Hold-Timer for a BGP-neighbors."
+        "meaning": "Sets the keepalive and hold timers for a BGP neighbor."
       },
       {
         "module": "BGP",
@@ -2410,7 +2410,7 @@
         "module": "Configuration",
         "mode": "Privileged EXEC",
         "command": "show running-config | section <Abschnitt>",
-        "meaning": "Displays specifically a Konfigurationsabschnitt."
+        "meaning": "Displays a specific configuration section."
       },
       {
         "module": "Configuration",
@@ -2446,7 +2446,7 @@
         "module": "OSPF",
         "mode": "Privileged EXEC",
         "command": "clear ip ospf process",
-        "meaning": "Starts the OSPF-process after confirmation again."
+        "meaning": "Restarts the OSPF process after confirmation."
       },
       {
         "module": "BGP",
@@ -2470,7 +2470,7 @@
         "module": "IP SLA",
         "mode": "Privileged EXEC",
         "command": "show ip sla statistics",
-        "meaning": "Displays results and status the IP-SLA-Operationen."
+        "meaning": "Displays results and status of IP SLA operations."
       },
       {
         "module": "Tracking",
@@ -2505,7 +2505,7 @@
       {
         "module": "AAA",
         "mode": "Privileged EXEC",
-        "command": "test aaa group <Group> <Benutzer> <Password> legacy",
+        "command": "test aaa group <Group> <Username> <Password> legacy",
         "meaning": "Checks the reachability and authentication a AAA server group."
       },
       {
@@ -2536,7 +2536,7 @@
         "module": "Tunnel",
         "mode": "Privileged EXEC",
         "command": "show interfaces tunnel <ID>",
-        "meaning": "Displays status and counters a tunnel interfaces."
+        "meaning": "Displays status and counters of a tunnel interface."
       },
       {
         "module": "neighbors",

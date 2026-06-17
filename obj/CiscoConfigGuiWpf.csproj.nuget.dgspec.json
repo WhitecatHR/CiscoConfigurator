@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj": {
-      "version": "1.0.0",
+      "version": "0.15.0-pre",
       "restore": {
         "projectUniqueName": "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj",
         "projectName": "Cisco Konfigurator",

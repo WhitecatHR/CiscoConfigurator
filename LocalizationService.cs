@@ -472,7 +472,7 @@ public static class LocalizationService
 
     private static bool LooksLikeLocalizationKey(string value) =>
         Regex.IsMatch(value.Trim(),
-            @"^(app|header|common|navigation|settings|text|status|tab|import|ipam|diagram|report|validation|security|command)\.[a-z0-9_.-]+$",
+            @"^(app|header|common|navigation|settings|text|status|tab|import|ipam|diagram|project|acl|plugin|report|validation|security|command)\.[a-z0-9_.-]+$",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static string HumanizeLocalizationKey(string key)

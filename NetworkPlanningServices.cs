@@ -204,6 +204,209 @@ public static class TopologyPlanningService
     }
 }
 
+
+public sealed record RoutedLinkPoint(double X, double Y);
+
+public static class ConnectionRoutingService
+{
+    private const double ObstaclePadding = 14;
+
+    public static IReadOnlyList<RoutedLinkPoint> CalculateRoute(
+        ProjectLink link,
+        IReadOnlyDictionary<string, NetworkDiagramService.DiagramPoint> layout,
+        double canvasWidth,
+        double canvasHeight)
+    {
+        if (!layout.TryGetValue(link.SourceDeviceId, out var source) ||
+            !layout.TryGetValue(link.TargetDeviceId, out var target))
+            return Array.Empty<RoutedLinkPoint>();
+
+        if (link.ManualRoute && link.RoutePoints is { Count: > 0 })
+            return BuildManualRoute(source, target, link.RoutePoints);
+
+        var sourceCenter = Center(source);
+        var targetCenter = Center(target);
+        var midX = (sourceCenter.X + targetCenter.X) / 2;
+        var midY = (sourceCenter.Y + targetCenter.Y) / 2;
+        var leftChannel = 24.0;
+        var rightChannel = Math.Max(24, canvasWidth - 24);
+        var topChannel = 38.0;
+        var bottomChannel = Math.Max(38, canvasHeight - 24);
+
+        var candidates = new List<List<RoutedLinkPoint>>
+        {
+            new() { sourceCenter, new(midX, sourceCenter.Y), new(midX, targetCenter.Y), targetCenter },
+            new() { sourceCenter, new(sourceCenter.X, midY), new(targetCenter.X, midY), targetCenter },
+            new() { sourceCenter, new(sourceCenter.X, topChannel), new(targetCenter.X, topChannel), targetCenter },
+            new() { sourceCenter, new(sourceCenter.X, bottomChannel), new(targetCenter.X, bottomChannel), targetCenter },
+            new() { sourceCenter, new(leftChannel, sourceCenter.Y), new(leftChannel, targetCenter.Y), targetCenter },
+            new() { sourceCenter, new(rightChannel, sourceCenter.Y), new(rightChannel, targetCenter.Y), targetCenter }
+        };
+
+        var obstacles = layout
+            .Where(item => !item.Key.Equals(link.SourceDeviceId, StringComparison.OrdinalIgnoreCase) &&
+                           !item.Key.Equals(link.TargetDeviceId, StringComparison.OrdinalIgnoreCase))
+            .Select(item => Expand(item.Value, ObstaclePadding))
+            .ToList();
+
+        var best = candidates
+            .Select(candidate => FinalizeCandidate(candidate, source, target))
+            .OrderBy(candidate => Score(candidate, obstacles))
+            .First();
+
+        return best;
+    }
+
+    public static RoutedLinkPoint GetPathMidpoint(IReadOnlyList<RoutedLinkPoint> points)
+    {
+        if (points.Count == 0) return new RoutedLinkPoint(0, 0);
+        if (points.Count == 1) return points[0];
+
+        var lengths = new List<double>();
+        var total = 0.0;
+        for (var i = 1; i < points.Count; i++)
+        {
+            var length = Distance(points[i - 1], points[i]);
+            lengths.Add(length);
+            total += length;
+        }
+
+        var target = total / 2;
+        var traversed = 0.0;
+        for (var i = 0; i < lengths.Count; i++)
+        {
+            if (traversed + lengths[i] < target)
+            {
+                traversed += lengths[i];
+                continue;
+            }
+
+            var remaining = target - traversed;
+            var ratio = lengths[i] <= 0 ? 0 : remaining / lengths[i];
+            return new RoutedLinkPoint(
+                points[i].X + (points[i + 1].X - points[i].X) * ratio,
+                points[i].Y + (points[i + 1].Y - points[i].Y) * ratio);
+        }
+
+        return points[^1];
+    }
+
+    private static IReadOnlyList<RoutedLinkPoint> BuildManualRoute(
+        NetworkDiagramService.DiagramPoint source,
+        NetworkDiagramService.DiagramPoint target,
+        IEnumerable<ProjectLinkRoutePoint> routePoints)
+    {
+        var sourceCenter = Center(source);
+        var targetCenter = Center(target);
+        var manual = routePoints.Select(point => new RoutedLinkPoint(point.X, point.Y)).ToList();
+        if (manual.Count == 0) return FinalizeCandidate(new List<RoutedLinkPoint> { sourceCenter, targetCenter }, source, target);
+
+        var candidate = new List<RoutedLinkPoint> { sourceCenter };
+        var current = sourceCenter;
+        foreach (var waypoint in manual)
+        {
+            if (Math.Abs(current.X - waypoint.X) > 0.1 && Math.Abs(current.Y - waypoint.Y) > 0.1)
+                candidate.Add(new RoutedLinkPoint(waypoint.X, current.Y));
+            candidate.Add(waypoint);
+            current = waypoint;
+        }
+        if (Math.Abs(current.X - targetCenter.X) > 0.1 && Math.Abs(current.Y - targetCenter.Y) > 0.1)
+            candidate.Add(new RoutedLinkPoint(targetCenter.X, current.Y));
+        candidate.Add(targetCenter);
+        return FinalizeCandidate(candidate, source, target);
+    }
+
+    private static List<RoutedLinkPoint> FinalizeCandidate(
+        IEnumerable<RoutedLinkPoint> raw,
+        NetworkDiagramService.DiagramPoint source,
+        NetworkDiagramService.DiagramPoint target)
+    {
+        var points = Compress(raw).ToList();
+        if (points.Count < 2) return points;
+        points[0] = BoundaryAnchor(source, points[1]);
+        points[^1] = BoundaryAnchor(target, points[^2]);
+        return Compress(points).ToList();
+    }
+
+    private static IEnumerable<RoutedLinkPoint> Compress(IEnumerable<RoutedLinkPoint> raw)
+    {
+        var result = new List<RoutedLinkPoint>();
+        foreach (var point in raw)
+        {
+            if (result.Count > 0 && Distance(result[^1], point) < 0.5) continue;
+            result.Add(point);
+            while (result.Count >= 3)
+            {
+                var a = result[^3];
+                var b = result[^2];
+                var c = result[^1];
+                var collinear = (Math.Abs(a.X - b.X) < 0.5 && Math.Abs(b.X - c.X) < 0.5) ||
+                                (Math.Abs(a.Y - b.Y) < 0.5 && Math.Abs(b.Y - c.Y) < 0.5);
+                if (!collinear) break;
+                result.RemoveAt(result.Count - 2);
+            }
+        }
+        return result;
+    }
+
+    private static double Score(IReadOnlyList<RoutedLinkPoint> points, IReadOnlyList<RouteRect> obstacles)
+    {
+        var score = Math.Max(0, points.Count - 2) * 15.0;
+        for (var i = 1; i < points.Count; i++)
+        {
+            score += Distance(points[i - 1], points[i]);
+            foreach (var obstacle in obstacles)
+                if (Intersects(points[i - 1], points[i], obstacle)) score += 100000;
+        }
+        return score;
+    }
+
+    private static bool Intersects(RoutedLinkPoint a, RoutedLinkPoint b, RouteRect rect)
+    {
+        if (Math.Abs(a.X - b.X) < 0.5)
+        {
+            var x = a.X;
+            var minY = Math.Min(a.Y, b.Y);
+            var maxY = Math.Max(a.Y, b.Y);
+            return x >= rect.Left && x <= rect.Right && maxY >= rect.Top && minY <= rect.Bottom;
+        }
+        if (Math.Abs(a.Y - b.Y) < 0.5)
+        {
+            var y = a.Y;
+            var minX = Math.Min(a.X, b.X);
+            var maxX = Math.Max(a.X, b.X);
+            return y >= rect.Top && y <= rect.Bottom && maxX >= rect.Left && minX <= rect.Right;
+        }
+
+        var segmentLeft = Math.Min(a.X, b.X);
+        var segmentRight = Math.Max(a.X, b.X);
+        var segmentTop = Math.Min(a.Y, b.Y);
+        var segmentBottom = Math.Max(a.Y, b.Y);
+        return segmentRight >= rect.Left && segmentLeft <= rect.Right && segmentBottom >= rect.Top && segmentTop <= rect.Bottom;
+    }
+
+    private static RoutedLinkPoint BoundaryAnchor(NetworkDiagramService.DiagramPoint rect, RoutedLinkPoint toward)
+    {
+        var center = Center(rect);
+        var dx = toward.X - center.X;
+        var dy = toward.Y - center.Y;
+        if (Math.Abs(dx) / Math.Max(1, rect.Width) >= Math.Abs(dy) / Math.Max(1, rect.Height))
+            return new RoutedLinkPoint(dx >= 0 ? rect.X + rect.Width : rect.X, center.Y);
+        return new RoutedLinkPoint(center.X, dy >= 0 ? rect.Y + rect.Height : rect.Y);
+    }
+
+    private static RoutedLinkPoint Center(NetworkDiagramService.DiagramPoint rect) =>
+        new(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+
+    private static RouteRect Expand(NetworkDiagramService.DiagramPoint rect, double padding) =>
+        new(rect.X - padding, rect.Y - padding, rect.X + rect.Width + padding, rect.Y + rect.Height + padding);
+
+    private static double Distance(RoutedLinkPoint a, RoutedLinkPoint b) =>
+        Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+
+    private sealed record RouteRect(double Left, double Top, double Right, double Bottom);
+}
+
 public sealed record DiscoveryNeighbor(string Protocol, string RemoteDevice, string LocalInterface, string RemoteInterface);
 public sealed record StaticRouteInfo(string Device, string Vrf, string Network, string MaskOrPrefix, string NextHop, string AddressFamily);
 public sealed record RoutingProtocolInfo(string Device, string Protocol, string Instance, string Details);
@@ -671,6 +874,8 @@ public static class ProjectPackageExportService
         try
         {
             var deviceFolder = Directory.CreateDirectory(Path.Combine(tempRoot, "devices")).FullName;
+            var inventoryFolder = Directory.CreateDirectory(Path.Combine(tempRoot, "inventory")).FullName;
+            var versionFolder = Directory.CreateDirectory(Path.Combine(tempRoot, "versions")).FullName;
             var rollbackFolder = Directory.CreateDirectory(Path.Combine(tempRoot, "rollback")).FullName;
             var tableFolder = Directory.CreateDirectory(Path.Combine(tempRoot, "tables")).FullName;
             var analysisFolder = Directory.CreateDirectory(Path.Combine(tempRoot, "analysis")).FullName;
@@ -684,6 +889,8 @@ public static class ProjectPackageExportService
             {
                 var safeName = SafeName(device.Name);
                 File.WriteAllText(Path.Combine(deviceFolder, safeName + ".txt"), device.GeneratedConfiguration ?? string.Empty, new UTF8Encoding(false));
+                if (device.Inventory != null && device.Inventory.CollectedUtc != default)
+                    File.WriteAllText(Path.Combine(inventoryFolder, safeName + ".inventory.json"), JsonSerializer.Serialize(device.Inventory, jsonOptions), new UTF8Encoding(false));
 
                 var latestBackup = project.Backups
                     .Where(backup => backup.DeviceName.Equals(device.Name, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(backup.Content))
@@ -695,6 +902,28 @@ public static class ProjectPackageExportService
                     File.WriteAllText(Path.Combine(rollbackFolder, safeName + "_rollback.txt"), ConfigDiffService.CreateRollback(diff), new UTF8Encoding(false));
                     File.WriteAllText(Path.Combine(rollbackFolder, safeName + "_previous_config.txt"), latestBackup.Content, new UTF8Encoding(false));
                 }
+            }
+
+
+            var versionMetadata = project.VersionHistory.Select(version => new
+            {
+                version.Id,
+                version.Label,
+                version.Comment,
+                version.CreatedUtc,
+                version.IsAutomatic,
+                version.ContentHash,
+                version.DeviceCount,
+                version.LinkCount,
+                version.IpamCount,
+                version.AclRuleCount
+            }).ToList();
+            File.WriteAllText(Path.Combine(versionFolder, "history.json"), JsonSerializer.Serialize(versionMetadata, jsonOptions), new UTF8Encoding(false));
+            foreach (var version in project.VersionHistory.Where(version => !string.IsNullOrWhiteSpace(version.SnapshotJson)))
+            {
+                var stamp = version.CreatedUtc.ToLocalTime().ToString("yyyyMMdd-HHmmss");
+                var label = SafeName(version.Label);
+                File.WriteAllText(Path.Combine(versionFolder, $"{stamp}_{label}.ciscoproject.json"), version.SnapshotJson, new UTF8Encoding(false));
             }
 
             ReportExportService.ExportHtml(Path.Combine(networkPlanFolder, "network-plan.html"), project, dependencies, security);
@@ -713,10 +942,13 @@ public static class ProjectPackageExportService
 
             var manifest = new
             {
+                applicationVersion = VersionInfo.Current,
                 project = project.Name,
                 projectNumber = project.ProjectInfo?.ProjectNumber ?? string.Empty,
                 exportedUtc = DateTime.UtcNow,
                 devices = project.Devices.Count,
+                inventoriedDevices = project.Devices.Count(device => device.Inventory != null && device.Inventory.CollectedUtc != default),
+                projectVersions = project.VersionHistory.Count,
                 links = project.Links.Count,
                 ipamEntries = project.IpamEntries.Count,
                 aclRules = project.AclRules.Count,
@@ -743,6 +975,8 @@ Exportiert: {DateTime.Now:yyyy-MM-dd HH:mm}
 
 - `project.ciscoproject.json`: vollständige Projektdatei
 - `devices/`: erzeugte Gerätekonfigurationen
+- `inventory/`: per SSH erfasste Geräteinventare, sofern vorhanden
+- `versions/`: Projektversionsverlauf und gespeicherte Versionsstände
 - `rollback/`: Rollback-Entwürfe und vorherige Konfigurationen, sofern Backups vorhanden sind
 - `network-plan/`: HTML-Netzplan und SVG-Diagramm
 - `tables/`: IPAM, Links, ACLs, Routen und Routingprotokolle als CSV
@@ -761,12 +995,13 @@ Exportiert: {DateTime.Now:yyyy-MM-dd HH:mm}
 
     private static void WriteLinksCsv(string path, NetworkProject project)
     {
-        var lines = new List<string> { "SourceDevice;SourceInterface;TargetDevice;TargetInterface;Type;Description;DiscoverySource" };
+        var lines = new List<string> { "SourceDevice;SourceInterface;TargetDevice;TargetInterface;Type;Description;DiscoverySource;ManualRoute;RoutePoints" };
         foreach (var link in project.Links)
         {
             var source = project.Devices.FirstOrDefault(device => device.Id == link.SourceDeviceId)?.Name ?? link.SourceDeviceId;
             var target = project.Devices.FirstOrDefault(device => device.Id == link.TargetDeviceId)?.Name ?? link.TargetDeviceId;
-            lines.Add(string.Join(";", Csv(source), Csv(link.SourceInterface), Csv(target), Csv(link.TargetInterface), Csv(link.LinkType), Csv(link.Description), Csv(link.DiscoverySource)));
+            var routePoints = string.Join(" | ", (link.RoutePoints ?? new System.Collections.ObjectModel.ObservableCollection<ProjectLinkRoutePoint>()).Select(point => $"{point.X:0.##},{point.Y:0.##}"));
+            lines.Add(string.Join(";", Csv(source), Csv(link.SourceInterface), Csv(target), Csv(link.TargetInterface), Csv(link.LinkType), Csv(link.Description), Csv(link.DiscoverySource), link.ManualRoute.ToString(), Csv(routePoints)));
         }
         File.WriteAllLines(path, lines, new UTF8Encoding(true));
     }

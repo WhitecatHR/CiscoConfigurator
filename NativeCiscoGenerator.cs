@@ -148,12 +148,22 @@ public static class NativeCiscoGenerator
             GenerateMpls();
             GenerateVoip();
             GenerateQinQ();
+            GeneratePluginModules();
 
             Sec("ABSCHLUSS");
             AddLine("end");
             if (V("writeMem") == "Ja") AddLine("write memory");
 
             return NormalizeCiscoPasteScript(string.Join("\r\n", _lines));
+        }
+
+        private void GeneratePluginModules()
+        {
+            foreach (var section in PluginModuleService.Generate(_values, _modules))
+            {
+                Sec(section.Section);
+                foreach (var line in section.Lines) AddLine(line);
+            }
         }
 
         private void GenerateBasic()

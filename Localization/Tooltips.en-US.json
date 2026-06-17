@@ -34,7 +34,7 @@
     "basic": [
       "Grunddaten",
       "General settings",
-      "Abschluss",
+      "Completion",
       "Completion"
     ],
     "banner": [
@@ -61,7 +61,7 @@
       "Login-Audit"
     ],
     "userRights": [
-      "Benutzer",
+      "Users",
       "user",
       "Users",
       "Parser View"
@@ -248,7 +248,7 @@
       "GRE"
     ],
     "customCommands": [
-      "Eigene Befehle",
+      "Custom commands",
       "custom commands",
       "Custom commands"
     ],

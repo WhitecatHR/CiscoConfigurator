@@ -102,8 +102,14 @@ public static class NetworkDiagramService
     public static string BuildSvg(NetworkProject project, int width = 1400, int height = 1150)
     {
         var settings = ApplicationSettingsService.Current;
-        var requiredWidth = project.Devices.Where(device => device.DiagramX.HasValue).Select(device => device.DiagramX!.Value + 260).DefaultIfEmpty(width).Max();
-        var requiredHeight = project.Devices.Where(device => device.DiagramY.HasValue).Select(device => device.DiagramY!.Value + 210).DefaultIfEmpty(height).Max();
+        var requiredWidth = Math.Max(
+            project.Devices.Where(device => device.DiagramX.HasValue).Select(device => device.DiagramX!.Value + 260).DefaultIfEmpty(width).Max(),
+            project.Links.SelectMany(link => link.RoutePoints ?? new System.Collections.ObjectModel.ObservableCollection<ProjectLinkRoutePoint>())
+                .Select(point => point.X + 40).DefaultIfEmpty(width).Max());
+        var requiredHeight = Math.Max(
+            project.Devices.Where(device => device.DiagramY.HasValue).Select(device => device.DiagramY!.Value + 210).DefaultIfEmpty(height).Max(),
+            project.Links.SelectMany(link => link.RoutePoints ?? new System.Collections.ObjectModel.ObservableCollection<ProjectLinkRoutePoint>())
+                .Select(point => point.Y + 40).DefaultIfEmpty(height).Max());
         width = Math.Max(width, (int)Math.Ceiling(requiredWidth));
         height = Math.Max(height, (int)Math.Ceiling(requiredHeight));
         var layout = CalculateLayout(project, width, height);
@@ -141,18 +147,19 @@ public static class NetworkDiagramService
                 continue;
             }
 
-            var x1 = a.X + a.Width / 2;
-            var y1 = a.Y + a.Height / 2;
-            var x2 = b.X + b.Width / 2;
-            var y2 = b.Y + b.Height / 2;
+            var route = ConnectionRoutingService.CalculateRoute(link, layout, width, height);
+            if (route.Count < 2) continue;
             var color = GetLinkColor(link.LinkType);
             var dash = GetLinkDashArray(link.LinkType);
             var dashAttribute = string.IsNullOrWhiteSpace(dash)
                 ? string.Empty
                 : $" stroke-dasharray='{dash}'";
+            var routePoints = string.Join(" ", route.Select(point => $"{point.X:0},{point.Y:0}"));
+            var sourcePoint = route[0];
+            var targetPoint = route[^1];
 
-            sb.AppendLine($"<line x1='{x1:0}' y1='{y1:0}' x2='{x2:0}' y2='{y2:0}' stroke='{color}' stroke-width='{GetLinkThickness(link.LinkType):0}'{dashAttribute}/>");
-            sb.AppendLine($"<circle cx='{x1:0}' cy='{y1:0}' r='5' fill='{color}'/><circle cx='{x2:0}' cy='{y2:0}' r='5' fill='{color}'/>");
+            sb.AppendLine($"<polyline points='{routePoints}' fill='none' stroke='{color}' stroke-width='{GetLinkThickness(link.LinkType):0}' stroke-linejoin='round' stroke-linecap='round'{dashAttribute}/>");
+            sb.AppendLine($"<circle cx='{sourcePoint.X:0}' cy='{sourcePoint.Y:0}' r='5' fill='{color}'/><circle cx='{targetPoint.X:0}' cy='{targetPoint.Y:0}' r='5' fill='{color}'/>");
 
             var labelParts = new List<string>();
             var type = string.IsNullOrWhiteSpace(link.LinkType) ? "Ethernet" : link.LinkType.Trim();
@@ -168,8 +175,9 @@ public static class NetworkDiagramService
             if (labelParts.Count > 0)
             {
                 var label = SecurityElement.Escape(string.Join(" · ", labelParts));
-                var labelX = (x1 + x2) / 2;
-                var labelY = (y1 + y2) / 2;
+                var midpoint = ConnectionRoutingService.GetPathMidpoint(route);
+                var labelX = midpoint.X;
+                var labelY = midpoint.Y;
                 sb.AppendLine($"<rect x='{labelX - 105:0}' y='{labelY - 22:0}' width='210' height='22' rx='6' fill='#0b0e13' fill-opacity='0.92' stroke='{color}' stroke-width='1'/>");
                 sb.AppendLine($"<text x='{labelX:0}' y='{labelY - 7:0}' fill='{color}' font-family='Segoe UI' font-size='12' font-weight='bold' text-anchor='middle'>{label}</text>");
             }
@@ -271,6 +279,14 @@ public static class ReportExportService
             var vrfs = string.Join(", ", ExtractVrfs(d.GeneratedConfiguration));
             var acls = string.Join(", ", ExtractAclBindings(d.GeneratedConfiguration).Select(x => x.Acl).Distinct(StringComparer.OrdinalIgnoreCase));
             sb.AppendLine($"- {d.Name} | {label} | {d.DeviceType} | {d.ConfigMode} | {TopologyPlanningService.InferRole(d)} | {TopologyPlanningService.InferSite(d)}");
+            if (d.Inventory != null && d.Inventory.CollectedUtc != default)
+            {
+                var platform = string.Join(" ", new[] { d.Inventory.Platform, d.Inventory.SoftwareVersion }.Where(value => !string.IsNullOrWhiteSpace(value)));
+                if (!string.IsNullOrWhiteSpace(d.Inventory.Model)) sb.AppendLine($"  {R("Modell", "Model")}: {d.Inventory.Model}");
+                if (!string.IsNullOrWhiteSpace(d.Inventory.SerialNumber)) sb.AppendLine($"  {R("Seriennummer", "Serial number")}: {d.Inventory.SerialNumber}");
+                if (!string.IsNullOrWhiteSpace(platform)) sb.AppendLine($"  Software: {platform}");
+                sb.AppendLine($"  {R("Inventarisiert", "Inventoried")}: {d.Inventory.CollectedUtc.ToLocalTime():dd.MM.yyyy HH:mm}");
+            }
             if (!string.IsNullOrWhiteSpace(protocols)) sb.AppendLine($"  {R("Routing", "Routing")}: {protocols}");
             if (!string.IsNullOrWhiteSpace(vrfs)) sb.AppendLine($"  VRF: {vrfs}");
             if (!string.IsNullOrWhiteSpace(acls)) sb.AppendLine($"  ACL: {acls}");

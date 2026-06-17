@@ -2,11 +2,14 @@
 
 [Deutsch](README.de.md) | [English](README.en.md)
 
+**Current version:** `0.15-pre.Release`  
+[View changelog](CHANGELOG.md)
+
 ## Overview
 
 Cisco Configurator is a C# WPF application for structured creation, management, validation, and documentation of Cisco IOS and IOS-XE configurations. It supports routers, Layer 3 switches, and Layer 2 switches and provides the required functions through clearly separated technical modules.
 
-The application goes beyond basic configuration generation. It includes multi-device projects, IPAM, port planning, peer configuration generation, configuration analysis, SSH transfer, backups, intelligent network diagrams, ACL rule analysis, routing overlays, exportable network plans, and complete project packages.
+The application goes beyond basic configuration generation. It includes multi-device projects, IPAM, port planning, peer configuration generation, configuration analysis, SSH transfer, backups, intelligent network diagrams, ACL rule analysis, routing overlays, internal project versioning, a graphical Plugin Manager, SSH live inventory, exportable network plans, and complete project packages.
 
 
 ## Usage
@@ -76,8 +79,12 @@ Visible modules and input fields are filtered according to the selected device t
 7. Import CDP or LLDP neighbor output to add missing connections between existing project devices automatically.
 8. Enable the **Routing Overlay** to display OSPF areas, BGP AS numbers, EIGRP, IS-IS, VRFs, HSRP, and addressed routed links.
 9. Continue adjusting devices through drag and drop.
-10. Routers, Layer 3 switches, and Layer 2 switches use dedicated vector symbols.
-11. Export the standalone network diagram as SVG.
+10. Connections are routed orthogonally and avoid other device nodes where possible.
+11. Drag the small waypoint on a connection to adjust its route manually.
+12. Right-click the waypoint or connection label to restore automatic routing.
+13. Use **Reset connection routes** to remove all manual waypoints.
+14. Routers, Layer 3 switches, and Layer 2 switches use dedicated vector symbols.
+15. Export the standalone network diagram as SVG.
 
 Connections are created and maintained only in the **Diagram** area. The network plan automatically reuses these connection records.
 
@@ -124,6 +131,19 @@ Review and resolve detected warnings and errors before export or transfer.
 
 SSH passwords are not stored in project or AutoSave files.
 
+#### SSH live inventory
+
+The **Inventory** subtab uses the credentials configured in the SSH area and collects the current device state through Cisco `show` commands. It can collect:
+
+- hostname, model, serial number, and IOS / IOS-XE version
+- uptime and detected device type
+- IPv4/IPv6 interfaces and descriptions
+- VLANs, trunks, and port channels
+- CDP/LLDP neighbors
+- detected routing protocols, VRFs, and HSRP
+
+Results are displayed as a preview first. The device, IPAM entries, and discovered neighbor links can then be imported selectively into the project or exported as JSON. Unsupported commands or insufficient permissions are recorded without aborting the complete inventory process.
+
 ### 11. Export the network plan
 
 1. Complete the project information, devices, IPAM data, and connections.
@@ -159,7 +179,11 @@ Use **Project Package ZIP** to export the complete project state as one archive.
 
 ### 12. Save and continue the project
 
-Save project changes regularly. AutoSave and restoration can also be configured through Settings. Project files do not contain SSH passwords, but they may contain sensitive network data and configurations and should be protected accordingly.
+Save project changes regularly. AutoSave is disabled by default for new installations and can be enabled through Settings when required. Restoration and save-on-exit remain separately configurable. Project files do not contain SSH passwords, but they may contain sensitive network data and configurations and should be protected accordingly.
+
+### 13. Manage project versions
+
+Use **Project → Versions** to create, comment, compare, delete, and restore internal project snapshots. A version can be created automatically during normal project saving when configuration history is enabled in Settings. Before restoring an older version, the current state is saved automatically. Version history is stored inside the `.ciscoproject.json` file and is included in complete project-package exports.
 
 
 ## Supported device types
@@ -204,6 +228,9 @@ Modules and input fields are filtered according to device type and configuration
 ### System
 
 - Settings
+  - application settings
+  - translation audit
+  - Plugin Manager
 
 ## Configuration modules
 
@@ -413,6 +440,9 @@ Diagram functions:
 
 - drag-and-drop positioning
 - automatic layout
+- orthogonal connection routing with obstacle detection
+- draggable and persistent connection waypoints
+- reset options for individual or all connection routes
 - interface labels
 - connection types
 - custom connection descriptions
@@ -447,6 +477,19 @@ Export formats:
 - DOCX network plan
 - PDF network plan
 
+## Plugin-capable module architecture
+
+Additional configuration modules can be added through data-only `*.ciscoplugin.json` files. Plugins do not load executable assemblies; they contain localized module definitions and command templates only.
+
+Supported plugin locations:
+
+- `Plugins` next to the application
+- `%APPDATA%/CiscoKonfigurator/Plugins`
+
+Plugin modules are inserted into the existing technical areas. Module and field names must be unique. An example manifest and plugin documentation are included in the `Plugins` directory.
+
+The **Plugin Manager** is available under **System → Settings**. It displays discovered plugins, version, state, module count, languages, and validation diagnostics. Plugins can be enabled or disabled there. Module-interface changes take effect after an application restart. Validation covers localization completeness, duplicate IDs, module and field conflicts, generator assignments, required fields, and unknown placeholders.
+
 ## Localization
 
 - German user interface
@@ -461,7 +504,7 @@ Export formats:
 ## Operation and data protection
 
 - save and load templates
-- AutoSave
+- AutoSave disabled by default and optionally configurable
 - restoration of the latest project state
 - configurable start page
 - search and filtering functions
@@ -471,7 +514,7 @@ Export formats:
 
 ## Project files
 
-Network projects are stored as `.ciscoproject.json` files. The file contains the project structure, devices, connections, IPAM data, diagram positions, and technical metadata.
+Network projects are stored as `.ciscoproject.json` files. The file contains the project structure, devices, connections, IPAM data, diagram positions, manual connection waypoints, inventory data, internal project versions, and technical metadata.
 
 ## Technical foundation
 
@@ -479,6 +522,7 @@ Network projects are stored as `.ciscoproject.json` files. The file contains the
 - .NET 8
 - WPF
 - embedded JSON catalogs
+- data-driven module plugins
 - System.IO.Ports
 - native WPF vector graphics
 - HTML, SVG, DOCX, and PDF output

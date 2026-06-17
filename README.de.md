@@ -2,11 +2,14 @@
 
 [Deutsch](README.de.md) | [English](README.en.md)
 
+**Aktuelle Version:** `0.15-pre.Release`  
+[Changelog anzeigen](CHANGELOG.md)
+
 ## Überblick
 
 Der Cisco Konfigurator ist eine C#-WPF-Anwendung für die strukturierte Erstellung, Verwaltung, Prüfung und Dokumentation von Cisco-IOS- und IOS-XE-Konfigurationen. Die Anwendung unterstützt Router, Layer-3-Switches und Layer-2-Switches und stellt die benötigten Funktionen über fachlich gegliederte Module bereit.
 
-Der Funktionsumfang geht über die reine Konfigurationserzeugung hinaus. Enthalten sind Mehrgeräte-Projekte, IPAM, Portplanung, Gegenstellenkonfigurationen, Konfigurationsanalyse, SSH-Übertragung, Backups, intelligente Netzwerkdiagramme, ACL-Regelanalysen, Routing-Overlays, exportierbare Netzpläne und vollständige Projektpakete.
+Der Funktionsumfang geht über die reine Konfigurationserzeugung hinaus. Enthalten sind Mehrgeräte-Projekte, IPAM, Portplanung, Gegenstellenkonfigurationen, Konfigurationsanalyse, SSH-Übertragung, Backups, intelligente Netzwerkdiagramme, ACL-Regelanalysen, Routing-Overlays, interne Projektversionierung, ein grafischer Plugin-Manager, SSH-Live-Inventarisierung, exportierbare Netzpläne und vollständige Projektpakete.
 
 
 ## Benutzung
@@ -76,8 +79,12 @@ Die sichtbaren Module und Eingabefelder werden passend zu Gerätetyp und Modus g
 7. CDP- oder LLDP-Nachbarausgaben importieren, um fehlende Verbindungen zwischen vorhandenen Projektgeräten automatisch zu ergänzen.
 8. Das **Routing-Overlay** aktivieren, um OSPF-Areas, BGP-AS, EIGRP, IS-IS, VRFs, HSRP und adressierte Routingverbindungen anzuzeigen.
 9. Geräte weiterhin per Drag-and-drop nachbearbeiten.
-10. Router, Layer-3-Switches und Layer-2-Switches werden durch eigene Vektorsymbole dargestellt.
-11. Das reine Netzwerkdiagramm kann als SVG exportiert werden.
+10. Verbindungen werden automatisch orthogonal geführt und nach Möglichkeit um andere Geräteknoten herumgeleitet.
+11. Den kleinen Wegpunkt einer Verbindung ziehen, um den Verlauf manuell anzupassen.
+12. Per Rechtsklick auf den Wegpunkt oder die Verbindungsbeschriftung kann die automatische Route wiederhergestellt werden.
+13. Über **Verbindungswege zurücksetzen** werden alle manuellen Wegpunkte entfernt.
+14. Router, Layer-3-Switches und Layer-2-Switches werden durch eigene Vektorsymbole dargestellt.
+15. Das reine Netzwerkdiagramm kann als SVG exportiert werden.
 
 Verbindungen werden ausschließlich im Bereich **Diagramm** erstellt und gepflegt. Der Netzplan übernimmt diese Daten automatisch.
 
@@ -124,6 +131,19 @@ Erkannte Warnungen und Fehler sollten vor Export oder Übertragung geprüft und 
 
 SSH-Passwörter werden nicht in Projekt- oder AutoSave-Dateien gespeichert.
 
+#### SSH-Live-Inventarisierung
+
+Im Unterreiter **Inventarisierung** verwendet die Anwendung die im SSH-Bereich eingetragenen Zugangsdaten und liest den aktuellen Gerätestand über Cisco-`show`-Befehle aus. Erfasst werden unter anderem:
+
+- Hostname, Modell, Seriennummer und IOS-/IOS-XE-Version
+- Uptime und erkannter Gerätetyp
+- IPv4-/IPv6-Interfaces und Beschreibungen
+- VLANs, Trunks und Port-Channels
+- CDP-/LLDP-Nachbarn
+- erkannte Routingprotokolle, VRFs und HSRP
+
+Die Ergebnisse werden zunächst als Vorschau angezeigt. Anschließend können das Gerät, IPAM-Einträge und erkannte Nachbarverbindungen gezielt in das Projekt übernommen oder als JSON exportiert werden. Nicht unterstützte oder nicht berechtigte `show`-Befehle werden protokolliert, ohne die gesamte Inventarisierung abzubrechen.
+
 ### 11. Netzplan exportieren
 
 1. Projektinformationen, Geräte, IPAM-Daten und Verbindungen vollständig pflegen.
@@ -159,7 +179,11 @@ Der Netzplan enthält abhängig vom vorhandenen Projektstand unter anderem:
 
 ### 12. Projekt speichern und fortsetzen
 
-Projektänderungen sollten regelmäßig gespeichert werden. AutoSave und Wiederherstellung können zusätzlich über die Einstellungen konfiguriert werden. Projektdateien enthalten keine SSH-Passwörter, können jedoch technische Netzwerkdaten und Konfigurationen enthalten und sollten entsprechend geschützt werden.
+Projektänderungen sollten regelmäßig gespeichert werden. AutoSave ist bei neuen Installationen standardmäßig deaktiviert und kann bei Bedarf über die Einstellungen aktiviert werden. Wiederherstellung und Speichern beim Beenden bleiben separat konfigurierbar. Projektdateien enthalten keine SSH-Passwörter, können jedoch technische Netzwerkdaten und Konfigurationen enthalten und sollten entsprechend geschützt werden.
+
+### 13. Projektversionen verwalten
+
+Über **Projekt → Versionen** können interne Projektstände erstellt, kommentiert, verglichen, gelöscht und wiederhergestellt werden. Beim normalen Speichern kann automatisch ein Versionsstand erzeugt werden, sofern die Konfigurationshistorie in den Einstellungen aktiviert ist. Vor einer Wiederherstellung wird der aktuelle Stand zusätzlich gesichert. Die Versionshistorie ist Bestandteil der `.ciscoproject.json`-Datei und wird im vollständigen Projektpaket mit exportiert.
 
 
 ## Unterstützte Gerätetypen
@@ -204,6 +228,9 @@ Module und Eingabefelder werden abhängig von Gerätetyp und Konfigurationsmodus
 ### System
 
 - Einstellungen
+  - Anwendungseinstellungen
+  - Übersetzungsprüfung
+  - Plugin-Manager
 
 ## Konfigurationsmodule
 
@@ -413,6 +440,9 @@ Das Diagramm unterstützt:
 
 - Drag-and-drop-Positionierung
 - automatische Anordnung
+- orthogonale Verbindungsführung mit Hinderniserkennung
+- manuell verschiebbare und speicherbare Verbindungswegpunkte
+- Zurücksetzen einzelner oder aller Verbindungswege
 - Interface-Beschriftungen
 - Verbindungstypen
 - frei definierbare Verbindungsbeschreibungen
@@ -447,6 +477,19 @@ Exportformate:
 - DOCX-Netzplan
 - PDF-Netzplan
 
+## Pluginfähige Modularchitektur
+
+Zusätzliche Konfigurationsmodule können datenbasiert über `*.ciscoplugin.json` ergänzt werden. Die Plugins enthalten keine ausführbaren Assemblies, sondern ausschließlich lokalisierte Moduldefinitionen und Befehlsvorlagen.
+
+Unterstützte Plugin-Pfade:
+
+- `Plugins` neben der Anwendung
+- `%APPDATA%/CiscoKonfigurator/Plugins`
+
+Plugin-Module werden in bestehende Fachbereiche einsortiert. Modul- und Feldnamen müssen eindeutig sein. Ein Beispielmanifest und eine separate Plugin-Beschreibung befinden sich im Ordner `Plugins`.
+
+Der **Plugin-Manager** befindet sich unter **System → Einstellungen**. Er zeigt gefundene Plugins, Version, Status, Modulanzahl, Sprachen und Validierungsdiagnosen an. Plugins können dort aktiviert oder deaktiviert werden. Änderungen an der Moduloberfläche werden nach einem Neustart wirksam. Die Validierung prüft unter anderem Sprachvollständigkeit, doppelte IDs, Modul- und Feldkonflikte, Generatorzuordnungen, Pflichtfelder und unbekannte Platzhalter.
+
 ## Lokalisierung
 
 - deutsche Benutzeroberfläche
@@ -461,7 +504,7 @@ Exportformate:
 ## Bedienung und Datensicherheit
 
 - Vorlagen speichern und laden
-- AutoSave
+- AutoSave standardmäßig deaktiviert und optional aktivierbar
 - Wiederherstellung des letzten Projektstands
 - konfigurierbare Startseite
 - Such- und Filterfunktionen
@@ -471,7 +514,7 @@ Exportformate:
 
 ## Projektdateien
 
-Netzwerkprojekte werden als `.ciscoproject.json` gespeichert. Die Datei enthält die Projektstruktur, Geräte, Verbindungen, IPAM-Daten, Diagrammpositionen und technische Metadaten.
+Netzwerkprojekte werden als `.ciscoproject.json` gespeichert. Die Datei enthält die Projektstruktur, Geräte, Verbindungen, IPAM-Daten, Diagrammpositionen, manuelle Verbindungswegpunkte, Inventarisierungsdaten, interne Projektversionen und technische Metadaten.
 
 ## Technische Grundlage
 
@@ -479,6 +522,7 @@ Netzwerkprojekte werden als `.ciscoproject.json` gespeichert. Die Datei enthält
 - .NET 8
 - WPF
 - eingebettete JSON-Kataloge
+- datenbasierte Modulplugins
 - System.IO.Ports
 - native WPF-Vektorgrafiken
 - HTML-, SVG-, DOCX- und PDF-Ausgabe

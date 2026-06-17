@@ -6,7 +6,7 @@ namespace CiscoConfigGuiWpf;
 
 public sealed class ApplicationSettings
 {
-    public int FormatVersion { get; set; } = 1;
+    public int FormatVersion { get; set; } = 2;
 
     // Allgemein / Sprache
     public string Language { get; set; } = "system";
@@ -53,7 +53,7 @@ public sealed class ApplicationSettings
     public bool ExportReportsTogether { get; set; }
 
     // Projekte / Sicherung
-    public bool AutoSaveEnabled { get; set; } = true;
+    public bool AutoSaveEnabled { get; set; } = false;
     public int AutoSaveIntervalSeconds { get; set; } = 60;
     public int BackupCount { get; set; } = 20;
     public string BackupFolder { get; set; } = "";
@@ -93,6 +93,10 @@ public sealed class ApplicationSettings
     public bool StrictImportValidation { get; set; } = true;
     public bool DeveloperMode { get; set; }
     public bool IncludeDiagnosticDetails { get; set; } = true;
+
+    // Plugins
+    public List<string> DisabledPluginIds { get; set; } = new();
+    public bool ValidatePluginsOnStartup { get; set; } = true;
 }
 
 public static class ApplicationSettingsService
@@ -116,8 +120,10 @@ public static class ApplicationSettingsService
         try
         {
             if (!File.Exists(SettingsPath)) return new ApplicationSettings();
-            var settings = JsonSerializer.Deserialize<ApplicationSettings>(File.ReadAllText(SettingsPath, Encoding.UTF8), JsonOptions);
-            return settings ?? new ApplicationSettings();
+            var settings = JsonSerializer.Deserialize<ApplicationSettings>(File.ReadAllText(SettingsPath, Encoding.UTF8), JsonOptions)
+                           ?? new ApplicationSettings();
+            settings.DisabledPluginIds ??= new List<string>();
+            return settings;
         }
         catch
         {
@@ -137,6 +143,7 @@ public static class ApplicationSettingsService
     {
         var settings = JsonSerializer.Deserialize<ApplicationSettings>(File.ReadAllText(fileName, Encoding.UTF8), JsonOptions)
                        ?? throw new InvalidDataException("Die Einstellungsdatei enthält keine gültigen Daten.");
+        settings.DisabledPluginIds ??= new List<string>();
         Save(settings);
     }
 

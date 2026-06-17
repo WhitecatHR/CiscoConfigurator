@@ -14,7 +14,7 @@ public static class SshDeviceService
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(settings.ConnectionTimeoutSeconds, 1, 600)));
             await client.ConnectAsync(settings.Host, settings.Port, timeout.Token);
-            return new(true, $"TCP-Verbindung zu {settings.Host}:{settings.Port} erfolgreich.", "", 0);
+            return new(true, LocalizationService.Format("ssh.tcp_success", settings.Host, settings.Port), "", 0);
         }
         catch (Exception ex)
         {
@@ -44,6 +44,17 @@ public static class SshDeviceService
             ? "show startup-config"
             : "show running-config";
         return RunInteractiveAsync(settings, new[] { "terminal length 0", showCommand, "exit" }, cancellationToken);
+    }
+
+    public static Task<SshOperationResult> RunCommandsAsync(
+        SshConnectionSettings settings,
+        IEnumerable<string> commands,
+        CancellationToken cancellationToken = default)
+    {
+        var commandList = new List<string> { "terminal length 0" };
+        commandList.AddRange(commands.Where(command => !string.IsNullOrWhiteSpace(command)));
+        commandList.Add("exit");
+        return RunInteractiveAsync(settings, commandList, cancellationToken);
     }
 
     private static async Task<SshOperationResult> RunInteractiveAsync(
@@ -122,11 +133,11 @@ public static class SshDeviceService
         }
         catch (OperationCanceledException)
         {
-            return new(false, "", "SSH-Vorgang wurde abgebrochen oder hat das Zeitlimit überschritten.", -1);
+            return new(false, "", LocalizationService.Get("ssh.operation_cancelled_or_timeout", "Der SSH-Vorgang wurde abgebrochen oder hat das Zeitlimit überschritten."), -1);
         }
         catch (Exception ex)
         {
-            return new(false, "", $"{ex.Message}\n\nBenötigtes Programm: {executable}. OpenSSH arbeitet schlüsselbasiert; für Passwortauthentifizierung muss plink.exe im PATH liegen.", -1);
+            return new(false, "", LocalizationService.Format("ssh.required_program", ex.Message, executable), -1);
         }
     }
 

@@ -22,11 +22,24 @@ public static class ProjectService
     public static NetworkProject Load(string path)
     {
         var project = JsonSerializer.Deserialize<NetworkProject>(File.ReadAllText(path, Encoding.UTF8), JsonOptions)
-                      ?? throw new InvalidDataException("Die Projektdatei enthält keine gültigen Daten.");
+                      ?? throw new InvalidDataException(LocalizationService.Get("project.error_invalid_file", "Die Projektdatei enthält keine gültigen Daten."));
+        project.FormatVersion = Math.Max(project.FormatVersion, 2);
         project.Devices ??= new();
         project.IpamEntries ??= new();
         project.Links ??= new();
         project.Backups ??= new();
+        project.AclRules ??= new();
+        project.AclBindings ??= new();
+        project.VersionHistory ??= new();
+        project.ProjectInfo ??= new();
+        foreach (var device in project.Devices)
+        {
+            device.Values ??= new(StringComparer.OrdinalIgnoreCase);
+            device.Modules ??= new(StringComparer.OrdinalIgnoreCase);
+            device.Inventory ??= new();
+        }
+        foreach (var link in project.Links)
+            link.RoutePoints ??= new();
         return project;
     }
 
