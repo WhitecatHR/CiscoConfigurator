@@ -1,8 +1,6 @@
 using Microsoft.Win32;
 using System.Globalization;
-using IOPath = System.IO.Path;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -550,11 +548,10 @@ public partial class MainWindow
 
         if (WriteMemCombo.Items.Count > 0)
             WriteMemCombo.SelectedItem = _appSettings.IncludeWriteMemory ? "Ja" : "Nein";
-        if (_autoSaveTimer != null)
-        {
-            _autoSaveTimer.Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600));
-            if (_appSettings.AutoSaveEnabled) _autoSaveTimer.Start(); else _autoSaveTimer.Stop();
-        }
+        if (_appSettings.AutoSaveEnabled)
+            ScheduleAutoSave();
+        else
+            _projectAutoSaveService.CancelPending();
         if (_sshPortBox != null) _sshPortBox.Text = _appSettings.DefaultSshPort.ToString(CultureInfo.InvariantCulture);
         if (_sshDelayBox != null) _sshDelayBox.Text = _appSettings.CommandDelayMilliseconds.ToString(CultureInfo.InvariantCulture);
         RefreshNetworkDiagram();
@@ -932,7 +929,7 @@ public partial class MainWindow
                 dataGrid.IsVisibleChanged += (_, _) =>
                 {
                     if (!dataGrid.IsVisible) return;
-                    try { dataGrid.Items.Refresh(); } catch { }
+                    try { dataGrid.Items.Refresh(); } catch (Exception ex) { StartupDiagnostics.WriteWarning($"Data grid localization refresh failed: {ex.Message}"); }
                 };
             }
 
@@ -940,7 +937,7 @@ public partial class MainWindow
             // Sprachwechsel nicht sofort hunderte Befehlsbeschreibungen rendern.
             if (dataGrid.IsVisible)
             {
-                try { dataGrid.Items.Refresh(); } catch { }
+                try { dataGrid.Items.Refresh(); } catch (Exception ex) { StartupDiagnostics.WriteWarning($"Data grid localization refresh failed: {ex.Message}"); }
             }
         }
     }
@@ -1322,36 +1319,7 @@ public partial class MainWindow
         Resources[key] = replacement;
     }
 
-    private string ApplyConfigurationOutputSettings(string configuration)
-    {
-        var lines = (configuration ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n').ToList();
-        if (!_appSettings.IncludeComments)
-            lines = lines.Where(x => !x.TrimStart().StartsWith("!", StringComparison.Ordinal)).ToList();
-        else if (!_appSettings.IncludeSectionSeparators)
-            lines = lines.Where(x => !Regex.IsMatch(x.Trim(), @"^!\s*[=\-]{3,}\s*$")).ToList();
 
-        if (!_appSettings.IncludeEnable) lines.RemoveAll(x => x.Trim().Equals("enable", StringComparison.OrdinalIgnoreCase));
-        if (!_appSettings.IncludeConfigureTerminal) lines.RemoveAll(x => x.Trim().Equals("configure terminal", StringComparison.OrdinalIgnoreCase) || x.Trim().Equals("conf t", StringComparison.OrdinalIgnoreCase));
-        if (!_appSettings.IncludeEnd) lines.RemoveAll(x => x.Trim().Equals("end", StringComparison.OrdinalIgnoreCase));
-        if (!_appSettings.IncludeWriteMemory) lines.RemoveAll(x => x.Trim().Equals("write memory", StringComparison.OrdinalIgnoreCase) || x.Trim().Equals("copy running-config startup-config", StringComparison.OrdinalIgnoreCase));
 
-        var newline = _appSettings.LineEndings.Equals("Unix (LF)", StringComparison.OrdinalIgnoreCase) ? "\n" : "\r\n";
-        return string.Join(newline, lines).TrimEnd() + newline;
-    }
 
-    private string BuildExportFileName()
-    {
-        var hostname = GetFieldValue("hostname");
-        if (string.IsNullOrWhiteSpace(hostname)) hostname = "device";
-        var pattern = string.IsNullOrWhiteSpace(_appSettings.ExportFileNamePattern) ? "cisco_config_{hostname}" : _appSettings.ExportFileNamePattern;
-        var name = pattern.Replace("{hostname}", hostname, StringComparison.OrdinalIgnoreCase)
-            .Replace("{device}", DeviceTypeCombo.SelectedItem?.ToString() ?? "device", StringComparison.OrdinalIgnoreCase)
-            .Replace("{date}", DateTime.Now.ToString("yyyyMMdd"), StringComparison.OrdinalIgnoreCase)
-            .Replace("{time}", DateTime.Now.ToString("HHmmss"), StringComparison.OrdinalIgnoreCase);
-        if (_appSettings.TimestampInFileName && !name.Contains(DateTime.Now.ToString("yyyyMMdd"), StringComparison.Ordinal))
-            name += "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        foreach (var invalid in IOPath.GetInvalidFileNameChars()) name = name.Replace(invalid, '_');
-        if (!name.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)) name += ".txt";
-        return name;
-    }
 }

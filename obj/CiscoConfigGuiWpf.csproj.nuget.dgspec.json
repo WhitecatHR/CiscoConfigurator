@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj": {}
+    "C:\\Users\\Norman\\Documents\\Codex\\CiscoConfigurator\\CiscoConfigGuiWpf.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj": {
+    "C:\\Users\\Norman\\Documents\\Codex\\CiscoConfigurator\\CiscoConfigGuiWpf.csproj": {
       "version": "0.15.0-pre",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj",
-        "projectName": "Cisco Konfigurator",
-        "projectPath": "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj",
+        "projectUniqueName": "C:\\Users\\Norman\\Documents\\Codex\\CiscoConfigurator\\CiscoConfigGuiWpf.csproj",
+        "projectName": "Cisco Configuration Tool",
+        "projectPath": "C:\\Users\\Norman\\Documents\\Codex\\CiscoConfigurator\\CiscoConfigGuiWpf.csproj",
         "packagesPath": "C:\\Users\\Norman\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Norman\\Desktop\\Test\\obj\\",
+        "outputPath": "C:\\Users\\Norman\\Documents\\Codex\\CiscoConfigurator\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Norman\\AppData\\Roaming\\NuGet\\NuGet.Config"

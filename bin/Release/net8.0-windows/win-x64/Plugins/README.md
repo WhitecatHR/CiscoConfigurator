@@ -1,4 +1,4 @@
-# Cisco Configurator module plugins
+# Cisco Configuration Tool module plugins
 
 [Deutsch](README.de.md) | [English](README.en.md)
 

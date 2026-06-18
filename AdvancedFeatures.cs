@@ -4,7 +4,6 @@ using System.Globalization;
 using IOPath = System.IO.Path;
 using System.Collections.ObjectModel;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +17,8 @@ namespace CiscoConfigGuiWpf;
 
 public partial class MainWindow
 {
+    private readonly ProjectWorkflowService _projectWorkflowService = new();
+    private readonly ProjectAutoSaveService _projectAutoSaveService = new();
     private NetworkProject _currentProject = new();
     private string _currentProjectPath = string.Empty;
     private TextBox? _projectNameBox;
@@ -83,7 +84,6 @@ public partial class MainWindow
         public required Ellipse TargetEndpoint { get; init; }
         public required Ellipse RouteHandle { get; init; }
     }
-    private DispatcherTimer? _autoSaveTimer;
     private readonly Dictionary<string, TextBox> _moduleLivePreviewBoxes = new(StringComparer.OrdinalIgnoreCase);
     private IReadOnlyList<DependencyFinding> _advancedDependencyFindings = Array.Empty<DependencyFinding>();
     private IReadOnlyList<SecurityFinding> _advancedSecurityFindings = Array.Empty<SecurityFinding>();
@@ -116,8 +116,8 @@ public partial class MainWindow
         var versionsButton = new Button { Content = LocalizationService.Get("versioning.button", "Versionen") };
         var packageButton = new Button { Content = LocalizationService.Get("project.package_zip", "Projektpaket ZIP") };
         newButton.Click += (_, _) => NewNetworkProject();
-        openButton.Click += (_, _) => OpenNetworkProject();
-        saveButton.Click += (_, _) => SaveNetworkProject(false);
+        openButton.Click += async (_, _) => await OpenNetworkProjectAsync();
+        saveButton.Click += async (_, _) => await SaveNetworkProjectAsync(false);
         versionsButton.Click += (_, _) => OpenProjectVersionManager();
         packageButton.Click += async (_, _) => await ExportProjectPackageAsync();
         headerActions.Children.Add(newButton);
@@ -940,25 +940,27 @@ public partial class MainWindow
     private async Task CaptureCurrentDeviceAsync(bool silent)
     {
         var values = CollectValues();
-        var name = values.TryGetValue("hostname", out var hostname) && !string.IsNullOrWhiteSpace(hostname)
-            ? hostname.Trim()
-            : $"DEVICE-{_currentProject.Devices.Count + 1}";
-        var snapshot = new ProjectDeviceSnapshot
+        var modules = ModuleCatalog.All.ToDictionary(
+            module => module.Name,
+            module => _moduleChecks.TryGetValue(module.Name, out var checkBox) && checkBox.IsChecked == true,
+            StringComparer.OrdinalIgnoreCase);
+        var result = _projectWorkflowService.AddCurrentDevice(_currentProject, new ProjectDeviceWorkflowInput
         {
-            Name = name,
+            Values = values,
+            Modules = modules,
             DeviceType = DeviceTypeCombo.SelectedItem?.ToString() ?? "Router",
             ConfigMode = ConfigModeCombo.SelectedItem?.ToString() ?? "Ohne VRF",
-            Values = new Dictionary<string, string>(values, StringComparer.OrdinalIgnoreCase),
-            Modules = ModuleCatalog.All.ToDictionary(m => m.Name, m => _moduleChecks.TryGetValue(m.Name, out var cb) && cb.IsChecked == true, StringComparer.OrdinalIgnoreCase),
-            GeneratedConfiguration = await GenerateConfigAsync(),
-            LastUpdatedUtc = DateTime.UtcNow
-        };
-        _currentProject.Devices.Add(snapshot);
+            GeneratedConfiguration = await GenerateConfigAsync()
+        });
+        var snapshot = result.Device;
+        if (snapshot == null) return;
+
         _projectDeviceGrid?.ScrollIntoView(snapshot);
         RefreshProjectDeviceBindings();
         RefreshNetworkDiagram();
         ScheduleAutoSave();
-        if (!silent) MessageBox.Show(this, LocalizationService.Format("message.device_added_to_project", snapshot.Name), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
+        if (!silent)
+            MessageBox.Show(this, LocalizationService.Format("message.device_added_to_project", snapshot.Name), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private async Task UpdateSelectedProjectDeviceAsync()
@@ -968,13 +970,20 @@ public partial class MainWindow
             MessageBox.Show(this, T("text.bitte_zuerst_ein_projektgerat_auswahlen"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
-        snapshot.Name = GetFieldValue("hostname") is { Length: > 0 } hostname ? hostname : snapshot.Name;
-        snapshot.DeviceType = DeviceTypeCombo.SelectedItem?.ToString() ?? snapshot.DeviceType;
-        snapshot.ConfigMode = ConfigModeCombo.SelectedItem?.ToString() ?? snapshot.ConfigMode;
-        snapshot.Values = new Dictionary<string, string>(CollectValues(), StringComparer.OrdinalIgnoreCase);
-        snapshot.Modules = ModuleCatalog.All.ToDictionary(m => m.Name, m => _moduleChecks.TryGetValue(m.Name, out var cb) && cb.IsChecked == true, StringComparer.OrdinalIgnoreCase);
-        snapshot.GeneratedConfiguration = await GenerateConfigAsync();
-        snapshot.LastUpdatedUtc = DateTime.UtcNow;
+
+        var modules = ModuleCatalog.All.ToDictionary(
+            module => module.Name,
+            module => _moduleChecks.TryGetValue(module.Name, out var checkBox) && checkBox.IsChecked == true,
+            StringComparer.OrdinalIgnoreCase);
+        _projectWorkflowService.UpdateDevice(_currentProject, snapshot, new ProjectDeviceWorkflowInput
+        {
+            Values = CollectValues(),
+            Modules = modules,
+            DeviceType = DeviceTypeCombo.SelectedItem?.ToString() ?? snapshot.DeviceType,
+            ConfigMode = ConfigModeCombo.SelectedItem?.ToString() ?? snapshot.ConfigMode,
+            GeneratedConfiguration = await GenerateConfigAsync()
+        });
+
         _projectDeviceGrid?.Items.Refresh();
         RefreshNetworkDiagram();
         ScheduleAutoSave();
@@ -1024,7 +1033,7 @@ public partial class MainWindow
             ConfigMode = ConfigModeCombo.SelectedItem?.ToString() ?? "Ohne VRF",
             Values = values,
             Modules = modules,
-            GeneratedConfiguration = PeerConfigurationGenerator.GenerateDraft(BuildRequest(), peerName),
+            GeneratedConfiguration = PeerConfigurationGenerator.GenerateDraft(GetCurrentGenerationRequest(), peerName),
             LastUpdatedUtc = DateTime.UtcNow
         };
         _currentProject.Devices.Add(snapshot);
@@ -1086,54 +1095,77 @@ public partial class MainWindow
     private void NewNetworkProject()
     {
         if (MessageBox.Show(this, T("text.aktuelles_projekt_verwerfen_und_ein_neues_projekt_beginnen"), T("text.neues_projekt"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-        _currentProject = new NetworkProject();
+        var result = _projectWorkflowService.CreateNewProject();
+        _currentProject = result.Project;
         _currentProjectPath = string.Empty;
-        RebindProjectCollections();
-        RefreshProjectEditors();
-        RefreshNetworkDiagram();
+        UpdateProjectUiAfterStateChange();
         ScheduleAutoSave();
     }
 
-    private void OpenNetworkProject()
+    private async Task OpenNetworkProjectAsync(CancellationToken cancellationToken = default)
     {
-        var dialog = new OpenFileDialog { Title = LocalizationService.Get("text.netzwerkprojekt_offnen"), Filter = "Cisco-Projekt (*.ciscoproject.json)|*.ciscoproject.json|JSON (*.json)|*.json|Alle Dateien (*.*)|*.*" };
+        var dialog = new OpenFileDialog
+        {
+            Title = LocalizationService.Get("text.netzwerkprojekt_offnen"),
+            Filter = LocalizationService.Get("text.cisco_projekt_ciscoproject_json_ciscoproject_json_json_json_")
+        };
         if (dialog.ShowDialog(this) != true) return;
+
         try
         {
-            _currentProject = ProjectService.Load(dialog.FileName);
-            _currentProjectPath = dialog.FileName;
-            RebindProjectCollections();
-            RefreshProjectEditors();
-            RefreshNetworkDiagram();
+            var result = await _projectWorkflowService.LoadAsync(dialog.FileName, cancellationToken);
+            _currentProject = result.Project;
+            _currentProjectPath = result.ProjectPath;
+            UpdateProjectUiAfterStateChange();
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, T("text.projekt_konnte_nicht_geoffnet_werden"), MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (OperationCanceledException)
+        {
+            ValidationTextBlock.Text = LocalizationService.Get("project.workflow.cancelled");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, T("text.projekt_konnte_nicht_geoffnet_werden"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
-    private void SaveNetworkProject(bool saveAs)
+    private async Task SaveNetworkProjectAsync(bool saveAs, CancellationToken cancellationToken = default)
     {
         SyncProjectEditors();
-        if (saveAs || string.IsNullOrWhiteSpace(_currentProjectPath))
+        var targetPath = _currentProjectPath;
+        if (saveAs || string.IsNullOrWhiteSpace(targetPath))
         {
-            var dialog = new SaveFileDialog { Title = LocalizationService.Get("text.netzwerkprojekt_speichern"), Filter = "Cisco-Projekt (*.ciscoproject.json)|*.ciscoproject.json|JSON (*.json)|*.json", FileName = SanitizeFileName(_currentProject.Name) + ".ciscoproject.json" };
+            var dialog = new SaveFileDialog
+            {
+                Title = LocalizationService.Get("text.netzwerkprojekt_speichern"),
+                Filter = LocalizationService.Get("text.cisco_projekt_ciscoproject_json_ciscoproject_json_json_json_.9cae2f02"),
+                FileName = SanitizeFileName(_currentProject.Name) + ".ciscoproject.json"
+            };
             if (dialog.ShowDialog(this) != true) return;
-            _currentProjectPath = dialog.FileName;
+            targetPath = dialog.FileName;
         }
+
         try
         {
-            if (_appSettings.HistoryEnabled)
-            {
-                ProjectVersioningService.CreateVersion(
-                    _currentProject,
-                    LocalizationService.Get("versioning.auto_save_label", "Automatisch vor Speichern"),
-                    LocalizationService.Get("versioning.auto_save_comment", "Automatisch erstellter Versionsstand beim Speichern des Projekts."),
-                    true,
-                    _appSettings.HistoryLimit,
-                    skipDuplicate: true);
-            }
-            ProjectService.Save(_currentProject, _currentProjectPath);
+            var result = await _projectWorkflowService.SaveAsync(
+                _currentProject,
+                targetPath,
+                _appSettings.HistoryEnabled,
+                LocalizationService.Get("versioning.auto_save_label"),
+                LocalizationService.Get("versioning.auto_save_comment"),
+                _appSettings.HistoryLimit,
+                cancellationToken);
+            _currentProject = result.Project;
+            _currentProjectPath = result.ProjectPath;
             MessageBox.Show(this, T("text.projekt_wurde_gespeichert"), T("navigation.project"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, T("text.speicherfehler"), MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (OperationCanceledException)
+        {
+            ValidationTextBlock.Text = LocalizationService.Get("project.workflow.cancelled");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, T("text.speicherfehler"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void SyncProjectEditors()
@@ -1167,23 +1199,15 @@ public partial class MainWindow
 
     private void NormalizeProjectCollections()
     {
-        _currentProject.Devices ??= new();
-        _currentProject.IpamEntries ??= new();
-        _currentProject.Links ??= new();
-        _currentProject.Backups ??= new();
-        _currentProject.AclRules ??= new();
-        _currentProject.AclBindings ??= new();
-        _currentProject.VersionHistory ??= new();
-        foreach (var device in _currentProject.Devices)
-        {
-            device.Values ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            device.Modules ??= new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-            device.Inventory ??= new DeviceInventorySnapshot();
-        }
-        foreach (var link in _currentProject.Links)
-            link.RoutePoints ??= new ObservableCollection<ProjectLinkRoutePoint>();
-        _currentProject.ProjectInfo ??= new ProjectPlanInfo();
-        _currentProject.FormatVersion = Math.Max(_currentProject.FormatVersion, 2);
+        _currentProject = _projectWorkflowService.Normalize(_currentProject);
+    }
+
+    private void UpdateProjectUiAfterStateChange()
+    {
+        NormalizeProjectCollections();
+        RebindProjectCollections();
+        RefreshProjectEditors();
+        RefreshNetworkDiagram();
     }
 
     private void RebindProjectCollections()
@@ -1232,7 +1256,7 @@ public partial class MainWindow
             var match = cb.Items.Cast<object>().FirstOrDefault(x => string.Equals(x?.ToString(), value, StringComparison.OrdinalIgnoreCase));
             if (match != null) cb.SelectedItem = match;
         }
-        else if (control is CheckBox chk) chk.IsChecked = value.Equals("Ja", StringComparison.OrdinalIgnoreCase);
+        else if (control is CheckBox chk) chk.IsChecked = value.Equals("Ja", StringComparison.OrdinalIgnoreCase) || value.Equals("Yes", StringComparison.OrdinalIgnoreCase) || value.Equals("true", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task ImportCurrentConfigIntoIpamAsync()
@@ -1310,7 +1334,7 @@ public partial class MainWindow
 
     private void RefreshAdvancedDependencies()
     {
-        _advancedDependencyFindings = DependencyValidationService.Analyze(BuildRequest());
+        _advancedDependencyFindings = DependencyValidationService.Analyze(GetCurrentGenerationRequest());
         if (_dependencyGrid != null) _dependencyGrid.ItemsSource = _advancedDependencyFindings;
     }
 
@@ -1751,7 +1775,7 @@ public partial class MainWindow
     {
         await EnsureProjectContainsCurrentDeviceAsync();
         SyncProjectEditors();
-        _advancedDependencyFindings = DependencyValidationService.Analyze(BuildRequest());
+        _advancedDependencyFindings = DependencyValidationService.Analyze(GetCurrentGenerationRequest());
         _advancedSecurityFindings = SecurityAuditService.Analyze(await GenerateConfigAsync());
         if (_currentProject.AclRules.Count == 0)
         {
@@ -2334,7 +2358,7 @@ public partial class MainWindow
     private async Task RefreshReportPreviewAsync()
     {
         await EnsureProjectContainsCurrentDeviceAsync();
-        _advancedDependencyFindings = DependencyValidationService.Analyze(BuildRequest());
+        _advancedDependencyFindings = DependencyValidationService.Analyze(GetCurrentGenerationRequest());
         _advancedSecurityFindings = SecurityAuditService.Analyze(await GenerateConfigAsync());
         if (_reportPreviewBox != null) _reportPreviewBox.Text = ReportExportService.BuildPlainText(_currentProject, _advancedDependencyFindings, _advancedSecurityFindings);
     }
@@ -2371,85 +2395,85 @@ public partial class MainWindow
 
     private void InitializeAutoSave()
     {
-        _autoSaveTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600))
-        };
-        _autoSaveTimer.Tick += (_, _) => SaveAutoSaveState();
-        Loaded += (_, _) =>
+        Loaded += async (_, _) =>
         {
             if (_appSettings.LoadLastProject)
-                TryRestoreAutoSaveState(promptUser: false);
+                await TryRestoreAutoSaveStateAsync(promptUser: false);
             else if (_appSettings.RestoreAfterCrash)
-                TryRestoreAutoSaveState(promptUser: true);
-
-            if (_appSettings.AutoSaveEnabled) _autoSaveTimer?.Start();
+                await TryRestoreAutoSaveStateAsync(promptUser: true);
         };
         Closing += (_, _) =>
         {
-            if (_appSettings.SaveProjectOnExit || _appSettings.AutoSaveEnabled) SaveAutoSaveState();
+            _projectAutoSaveService.CancelPending();
+            if (_appSettings.SaveProjectOnExit || _appSettings.AutoSaveEnabled)
+                SaveAutoSaveStateAsync(force: true).GetAwaiter().GetResult();
         };
     }
 
     private void ScheduleAutoSave()
     {
-        if (_autoSaveTimer == null || !_appSettings.AutoSaveEnabled) return;
-        _autoSaveTimer.Stop();
-        _autoSaveTimer.Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600));
-        _autoSaveTimer.Start();
+        if (!_appSettings.AutoSaveEnabled) return;
+        var delay = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600));
+        _projectAutoSaveService.Schedule(delay, cancellationToken => SaveAutoSaveStateAsync(force: false, cancellationToken));
     }
 
-    private void SaveAutoSaveState()
+    private async Task SaveAutoSaveStateAsync(bool force, CancellationToken cancellationToken = default)
     {
-        if (!_appSettings.AutoSaveEnabled && !_appSettings.SaveProjectOnExit) return;
+        if (!force && !_appSettings.AutoSaveEnabled) return;
+        if (force && !_appSettings.AutoSaveEnabled && !_appSettings.SaveProjectOnExit) return;
+
         try
         {
             SyncProjectEditors();
             var state = new AutoSaveState
             {
-                Project = _currentProject,
+                Project = _projectWorkflowService.Normalize(_currentProject),
                 CurrentDevice = new TemplateData
                 {
                     Values = CollectValues(),
-                    Modules = ModuleCatalog.All.ToDictionary(m => m.Name, m => _moduleChecks.TryGetValue(m.Name, out var cb) && cb.IsChecked == true, StringComparer.OrdinalIgnoreCase)
+                    Modules = ModuleCatalog.All.ToDictionary(
+                        module => module.Name,
+                        module => _moduleChecks.TryGetValue(module.Name, out var checkBox) && checkBox.IsChecked == true,
+                        StringComparer.OrdinalIgnoreCase)
                 },
                 SavedUtc = DateTime.UtcNow
             };
-            var path = ProjectService.AutoSavePath;
-            Directory.CreateDirectory(IOPath.GetDirectoryName(path)!);
-            File.WriteAllText(path, JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true }), new UTF8Encoding(false));
-            if (_autoSaveTimer != null) _autoSaveTimer.Interval = TimeSpan.FromSeconds(Math.Clamp(_appSettings.AutoSaveIntervalSeconds, 10, 3600));
+            await _projectAutoSaveService.SaveStateAsync(ProjectService.AutoSavePath, state, cancellationToken).ConfigureAwait(false);
         }
-        catch
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Autosave darf die Bedienung nicht unterbrechen.
+            return;
+        }
+        catch (Exception ex)
+        {
+            StartupDiagnostics.WriteWarning($"Project autosave failed: {ex.Message}");
         }
     }
 
-    private void TryRestoreAutoSaveState(bool promptUser)
+    private async Task TryRestoreAutoSaveStateAsync(bool promptUser, CancellationToken cancellationToken = default)
     {
         if (!_appSettings.LoadLastProject && !_appSettings.RestoreAfterCrash) return;
-        var path = ProjectService.AutoSavePath;
-        if (!File.Exists(path)) return;
-        try
+
+        var result = await _projectAutoSaveService.LoadStateAsync(ProjectService.AutoSavePath, TimeSpan.FromDays(30), cancellationToken);
+        if (result.Code != ProjectAutoSaveLoadCode.Loaded || result.State == null)
         {
-            var state = JsonSerializer.Deserialize<AutoSaveState>(File.ReadAllText(path, Encoding.UTF8), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (state == null || DateTime.UtcNow - state.SavedUtc > TimeSpan.FromDays(30)) return;
-            if (promptUser && MessageBox.Show(this,
-                    LocalizationService.TranslateText($"Es wurde ein Autosave vom {state.SavedUtc.ToLocalTime():dd.MM.yyyy HH:mm} gefunden. Wiederherstellen?"),
-                    "Autosave", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-                return;
-            _currentProject = state.Project ?? new NetworkProject();
-            NormalizeProjectCollections();
-            RebindProjectCollections();
-            RefreshProjectEditors();
-            ApplyTemplateData(state.CurrentDevice ?? new TemplateData());
-            RefreshNetworkDiagram();
+            if (result.Error != null)
+                StartupDiagnostics.WriteWarning($"Project autosave could not be restored: {result.Error.Message}");
+            return;
         }
-        catch
-        {
-            // Beschädigte Autosaves werden ignoriert.
-        }
+
+        var state = result.State;
+        if (promptUser && MessageBox.Show(this,
+                LocalizationService.Format("project.workflow.autosave_restore_prompt", state.SavedUtc.ToLocalTime()),
+                LocalizationService.Get("project.workflow.autosave_title"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+
+        _currentProject = _projectWorkflowService.Normalize(state.Project ?? new NetworkProject());
+        _currentProjectPath = string.Empty;
+        UpdateProjectUiAfterStateChange();
+        ApplyTemplateData(state.CurrentDevice ?? new TemplateData());
     }
 
     private FrameworkElement CreateModuleLivePreview(ModuleDefinition module)
@@ -2506,7 +2530,7 @@ public partial class MainWindow
         }
         try
         {
-            var config = await NativeCiscoGenerator.GenerateAsync(BuildRequest());
+            var config = await _configurationWorkflowService.GenerateRawAsync(GetCurrentGenerationRequest());
             var title = GetGeneratorSectionTitle(moduleName);
             var section = ExtractGeneratedSection(config, title);
             if (section.StartsWith("Für die aktuellen Angaben", StringComparison.OrdinalIgnoreCase))

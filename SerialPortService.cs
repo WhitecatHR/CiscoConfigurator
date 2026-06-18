@@ -25,7 +25,7 @@ public static class SerialPortService
         var lines = normalized.Split('\n');
 
         await using var writer = new StreamWriter(path, append: false, Encoding.UTF8);
-        await writer.WriteLineAsync("Cisco Konfigurator - COM-Testmodus");
+        await writer.WriteLineAsync("Cisco Configuration Tool - COM test mode");
         await writer.WriteLineAsync($"Zeit: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         await writer.WriteLineAsync($"Port: {TestPortName}");
         await writer.WriteLineAsync($"Baudrate: {settings.BaudRate}");

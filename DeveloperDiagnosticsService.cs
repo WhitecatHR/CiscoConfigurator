@@ -66,7 +66,7 @@ public static class DeveloperDiagnosticsService
                 .ToList();
 
             var sb = new StringBuilder();
-            sb.AppendLine("Cisco Configurator - Translation Audit");
+            sb.AppendLine("Cisco Configuration Tool - Translation Audit");
             sb.AppendLine("Created: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             sb.AppendLine("Language: " + LocalizationService.CurrentLanguage);
             sb.AppendLine("Findings: " + distinct.Count);

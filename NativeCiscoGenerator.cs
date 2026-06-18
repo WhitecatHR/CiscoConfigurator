@@ -11,8 +11,20 @@ public static class NativeCiscoGenerator
 {
     public static Task<string> GenerateAsync(GenerationRequest request, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        var pluginSections = PluginModuleService.Generate(request.Values, request.Modules);
+        return GenerateAsync(request, pluginSections, cancellationToken);
+    }
+
+    public static Task<string> GenerateAsync(
+        GenerationRequest request,
+        IReadOnlyList<PluginGeneratedSection> pluginSections,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(pluginSections);
         cancellationToken.ThrowIfCancellationRequested();
-        var generator = new Builder(request);
+        var generator = new Builder(request, pluginSections);
         return Task.FromResult(generator.Generate());
     }
 
@@ -20,12 +32,14 @@ public static class NativeCiscoGenerator
     {
         private readonly IReadOnlyDictionary<string, string> _values;
         private readonly IReadOnlyDictionary<string, bool> _modules;
+        private readonly IReadOnlyList<PluginGeneratedSection> _pluginSections;
         private readonly List<string> _lines = new();
 
-        public Builder(GenerationRequest request)
+        public Builder(GenerationRequest request, IReadOnlyList<PluginGeneratedSection> pluginSections)
         {
             _values = request.Values ?? new Dictionary<string, string>();
             _modules = request.Modules ?? new Dictionary<string, bool>();
+            _pluginSections = pluginSections;
         }
 
         private string V(string name) => _values.TryGetValue(name, out var value) ? (value ?? string.Empty).Trim() : string.Empty;
@@ -46,7 +60,10 @@ public static class NativeCiscoGenerator
 
         private static List<string> Parts(string line) => line.Split('|').Select(x => x.Trim()).ToList();
         private static bool Like(string value, string pattern) => Regex.IsMatch(value ?? string.Empty, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        private static bool YesLike(string value) => Like(value, "ja|yes|true");
+        private static bool YesLike(string value) => Like(value, "^(?:ja|yes|true)$");
+        private static bool NoLike(string value) => Like(value, "^(?:nein|no|false)$");
+        private static bool AutomaticLike(string value) => Like(value, "^(?:automatisch|automatic)$");
+        private static bool NetworkLike(string value) => Like(value, "^(?:netz|network)$");
 
         private void AddLine(string? line)
         {
@@ -152,14 +169,14 @@ public static class NativeCiscoGenerator
 
             Sec("ABSCHLUSS");
             AddLine("end");
-            if (V("writeMem") == "Ja") AddLine("write memory");
+            if (YesLike(V("writeMem"))) AddLine("write memory");
 
             return NormalizeCiscoPasteScript(string.Join("\r\n", _lines));
         }
 
         private void GeneratePluginModules()
         {
-            foreach (var section in PluginModuleService.Generate(_values, _modules))
+            foreach (var section in _pluginSections)
             {
                 Sec(section.Section);
                 foreach (var line in section.Lines) AddLine(line);
@@ -173,8 +190,8 @@ public static class NativeCiscoGenerator
             AddLine($"hostname {V("hostname")}");
             if (V("domain") != string.Empty) AddLine($"ip domain-name {V("domain")}");
             if (V("enableSecret") != string.Empty) AddLine($"enable secret {V("enableSecret")}");
-            if (V("noDomainLookup") == "Ja") AddLine("no ip domain-lookup");
-            if (V("servicePass") == "Ja") AddLine("service password-encryption");
+            if (YesLike(V("noDomainLookup"))) AddLine("no ip domain-lookup");
+            if (YesLike(V("servicePass"))) AddLine("service password-encryption");
             if (V("minPass") != string.Empty) AddLine($"security passwords min-length {V("minPass")}");
             if (V("clockTimezoneName") != string.Empty && V("clockTimezoneHours") != string.Empty)
             {
@@ -189,8 +206,8 @@ public static class NativeCiscoGenerator
         {
             if (!M("routingBase")) return;
             Sec("ROUTING ALLGEMEIN");
-            if (V("ipRouting") == "Ja") AddLine("ip routing");
-            else if (V("ipRouting") == "Nein") AddLine("no ip routing");
+            if (YesLike(V("ipRouting"))) AddLine("ip routing");
+            else if (NoLike(V("ipRouting"))) AddLine("no ip routing");
         }
 
         private void GenerateBanner()
@@ -213,7 +230,7 @@ public static class NativeCiscoGenerator
             if (V("sshTimeout") != string.Empty) AddLine($"ip ssh time-out {V("sshTimeout")}");
             if (V("sshRetries") != string.Empty) AddLine($"ip ssh authentication-retries {V("sshRetries")}");
             if (V("sshSourceIf") != string.Empty) AddLine($"ip ssh source-interface {V("sshSourceIf")}");
-            if (V("sshLogEvents") == "Ja") AddLine("ip ssh logging events");
+            if (YesLike(V("sshLogEvents"))) AddLine("ip ssh logging events");
             if (V("sshAlgorithm") != string.Empty && V("sshAlgorithm") != "Standard") AddLine($"ip ssh server algorithm encryption {V("sshAlgorithm")}");
 
             var vtyStart = string.IsNullOrWhiteSpace(V("vtyStart")) ? "0" : V("vtyStart");
@@ -232,7 +249,7 @@ public static class NativeCiscoGenerator
 
             AddLine(" transport input ssh");
             if (V("vtyExecTimeout") != string.Empty) AddLine($" exec-timeout {V("vtyExecTimeout")}");
-            if (V("vtyLoggingSync") == "Ja") AddLine(" logging synchronous");
+            if (YesLike(V("vtyLoggingSync"))) AddLine(" logging synchronous");
             if (V("vtyPrivilege") != string.Empty) AddLine($" privilege level {V("vtyPrivilege")}");
         }
 
@@ -240,7 +257,7 @@ public static class NativeCiscoGenerator
         {
             if (!M("aaa")) return;
             Sec("AAA / CONSOLE");
-            if (V("aaaLocal") == "Ja" && !M("radiusTacacs"))
+            if (YesLike(V("aaaLocal")) && !M("radiusTacacs"))
             {
                 AddLine("aaa new-model");
                 AddLine("aaa authentication login default local");
@@ -248,7 +265,7 @@ public static class NativeCiscoGenerator
             }
             var timeout = string.IsNullOrWhiteSpace(V("execTimeout")) ? "10 0" : V("execTimeout");
             AddLine("line console 0");
-            if (V("consoleLoggingSync") == "Ja") AddLine(" logging synchronous");
+            if (YesLike(V("consoleLoggingSync"))) AddLine(" logging synchronous");
             AddLine($" exec-timeout {timeout}");
             if (V("consoleLogin") == "login local") AddLine(" login local");
         }
@@ -290,7 +307,7 @@ public static class NativeCiscoGenerator
                     if (p.Count >= 1) AddLine($" server name {p[0]}");
                 }
             }
-            if (V("aaaUseRadius") == "Ja")
+            if (YesLike(V("aaaUseRadius")))
             {
                 AddLine("aaa new-model");
                 if (V("aaaRadiusGroup") != string.Empty)
@@ -335,23 +352,23 @@ public static class NativeCiscoGenerator
                 AddLine($"snmp-server group {p[0]} v3 priv");
                 AddLine($"snmp-server user {p[1]} {p[0]} v3 auth {p[2]} {p[3]} priv {p[4]} {p[5]}");
             }
-            if (V("logTimestamps") == "Ja")
+            if (YesLike(V("logTimestamps")))
             {
                 AddLine("service timestamps debug datetime msec localtime show-timezone");
                 AddLine("service timestamps log datetime msec localtime show-timezone");
             }
             if (V("logBuffered") != string.Empty) AddLine($"logging buffered {V("logBuffered")}");
             if (V("logTrap") != string.Empty) AddLine($"logging trap {V("logTrap")}");
-            if (V("archiveLog") == "Ja")
+            if (YesLike(V("archiveLog")))
             {
                 AddLine("archive"); AddLine(" log config"); AddLine("  logging enable"); AddLine("  notify syslog"); AddLine("  hidekeys");
             }
-            if (V("loginAudit") == "Ja") { AddLine("login on-failure log"); AddLine("login on-success log"); }
-            if (V("archivePath") != string.Empty || V("archiveWriteMemory") == "Ja" || V("archiveTimePeriod") != string.Empty)
+            if (YesLike(V("loginAudit"))) { AddLine("login on-failure log"); AddLine("login on-success log"); }
+            if (V("archivePath") != string.Empty || YesLike(V("archiveWriteMemory")) || V("archiveTimePeriod") != string.Empty)
             {
                 AddLine("archive");
                 if (V("archivePath") != string.Empty) AddLine($" path {V("archivePath")}");
-                if (V("archiveWriteMemory") == "Ja") AddLine(" write-memory");
+                if (YesLike(V("archiveWriteMemory"))) AddLine(" write-memory");
                 if (V("archiveTimePeriod") != string.Empty) AddLine($" time-period {V("archiveTimePeriod")}");
             }
         }
@@ -411,7 +428,7 @@ public static class NativeCiscoGenerator
             var native = V("rosNativeVlan");
             if (parent == string.Empty) return;
             AddLine($"interface {parent}");
-            if (V("rosParentNoShutdown") == "Ja") AddLine(" no shutdown");
+            if (YesLike(V("rosParentNoShutdown"))) AddLine(" no shutdown");
             foreach (var line in Lines(V("rosVlanList")))
             {
                 var p = Parts(line);
@@ -491,7 +508,7 @@ public static class NativeCiscoGenerator
             AddLine($"router ospf {pid}");
             if (V("ospfRid") != string.Empty) AddLine($" router-id {V("ospfRid")}");
             if (V("ospfRef") != string.Empty) AddLine($" auto-cost reference-bandwidth {V("ospfRef")}");
-            if (V("ospfLogAdjacency") == "Ja") AddLine(" log-adjacency-changes");
+            if (YesLike(V("ospfLogAdjacency"))) AddLine(" log-adjacency-changes");
             else if (V("ospfLogAdjacency") == "Detail") AddLine(" log-adjacency-changes detail");
             if (useProcessNetworks)
             {
@@ -501,9 +518,9 @@ public static class NativeCiscoGenerator
                     if (p.Count >= 3) AddLine($" network {p[0]} {p[1]} area {p[2]}");
                 }
             }
-            if (V("ospfPassiveDefault") == "Ja") AddLine(" passive-interface default");
+            if (YesLike(V("ospfPassiveDefault"))) AddLine(" passive-interface default");
             foreach (var ifc in Lines(V("ospfNoPassiveList"))) AddLine($" no passive-interface {ifc}");
-            if (V("ospfDefaultOriginate") == "Ja") AddLine(" default-information originate");
+            if (YesLike(V("ospfDefaultOriginate"))) AddLine(" default-information originate");
             else if (V("ospfDefaultOriginate") == "Immer") AddLine(" default-information originate always");
             foreach (var area in Lines(V("ospfStubAreas"))) AddLine($" area {area} stub no-summary");
             if (useInterfaceAssignments)
@@ -658,11 +675,11 @@ public static class NativeCiscoGenerator
             if (V("minPass") == string.Empty) AddLine("security passwords min-length 10");
             AddLine("no ip http server");
             AddLine("no ip http secure-server");
-            if (V("hardNoPad") == "Ja") AddLine("no service pad");
-            if (V("hardNoSourceRoute") == "Ja") AddLine("no ip source-route");
-            if (V("hardNoBootp") == "Ja") AddLine("no ip bootp server");
-            if (V("hardCdp") == "Nein") AddLine("no cdp run");
-            if (V("hardLldp") == "Ja") AddLine("lldp run");
+            if (YesLike(V("hardNoPad"))) AddLine("no service pad");
+            if (YesLike(V("hardNoSourceRoute"))) AddLine("no ip source-route");
+            if (YesLike(V("hardNoBootp"))) AddLine("no ip bootp server");
+            if (NoLike(V("hardCdp"))) AddLine("no cdp run");
+            if (YesLike(V("hardLldp"))) AddLine("lldp run");
             if (V("hardUnusedRange") != string.Empty) { AddLine($"interface range {V("hardUnusedRange")}"); AddLine(" description UNUSED - SHUTDOWN"); AddLine(" shutdown"); }
         }
 
@@ -820,27 +837,27 @@ public static class NativeCiscoGenerator
             Sec("STP ERWEITERT");
 
             var mode = V("stpGlobalMode").ToLowerInvariant();
-            var strict = V("stpStrictCompatibility").Equals("Ja", StringComparison.OrdinalIgnoreCase);
+            var strict = YesLike(V("stpStrictCompatibility"));
             var platform = V("stpPlatformProfile");
             var rapidFeatures = mode is "rapid-pvst" or "mst";
             var vlanBasedMode = mode is "pvst" or "rapid-pvst";
 
-            if (!string.IsNullOrWhiteSpace(platform) && !platform.Equals("Automatisch", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(platform) && !AutomaticLike(platform))
                 AddLine($"! Plattformprofil: {platform}{(V("stpSwitchModel") != string.Empty ? " / " + V("stpSwitchModel") : string.Empty)}{(V("stpIosVersion") != string.Empty ? " / " + V("stpIosVersion") : string.Empty)}");
 
             if (mode != string.Empty) AddLine($"spanning-tree mode {mode}");
-            if (V("stpExtendSystemId") == "Ja") AddLine("spanning-tree extend system-id");
+            if (YesLike(V("stpExtendSystemId"))) AddLine("spanning-tree extend system-id");
             if (V("stpPathcostMethod") != string.Empty) AddLine($"spanning-tree pathcost method {V("stpPathcostMethod")}");
-            if (V("stpPortfastDefault") == "Ja") AddLine("spanning-tree portfast default");
-            if (V("stpBpduguardDefault") == "Ja") AddLine("spanning-tree portfast bpduguard default");
-            if (V("stpBpdufilterDefault") == "Ja") AddLine("spanning-tree portfast bpdufilter default");
-            if (V("stpLoopguardDefault") == "Ja") AddLine("spanning-tree loopguard default");
-            if (V("stpEtherchannelGuard") == "Ja") AddLine("spanning-tree etherchannel guard misconfig");
+            if (YesLike(V("stpPortfastDefault"))) AddLine("spanning-tree portfast default");
+            if (YesLike(V("stpBpduguardDefault"))) AddLine("spanning-tree portfast bpduguard default");
+            if (YesLike(V("stpBpdufilterDefault"))) AddLine("spanning-tree portfast bpdufilter default");
+            if (YesLike(V("stpLoopguardDefault"))) AddLine("spanning-tree loopguard default");
+            if (YesLike(V("stpEtherchannelGuard"))) AddLine("spanning-tree etherchannel guard misconfig");
 
             if (mode == "pvst")
             {
-                if (V("stpUplinkFast") == "Ja") AddLine("spanning-tree uplinkfast");
-                if (V("stpBackboneFast") == "Ja") AddLine("spanning-tree backbonefast");
+                if (YesLike(V("stpUplinkFast"))) AddLine("spanning-tree uplinkfast");
+                if (YesLike(V("stpBackboneFast"))) AddLine("spanning-tree backbonefast");
             }
 
             if (vlanBasedMode)
@@ -852,7 +869,7 @@ public static class NativeCiscoGenerator
                 {
                     if (role.Equals("primary", StringComparison.OrdinalIgnoreCase) || role.Equals("secondary", StringComparison.OrdinalIgnoreCase))
                         AddLine($"spanning-tree vlan {target} root {role.ToLowerInvariant()}");
-                    else if ((role.StartsWith("Manuell", StringComparison.OrdinalIgnoreCase) || role == string.Empty) && priority != string.Empty)
+                    else if ((role.StartsWith("Manuell", StringComparison.OrdinalIgnoreCase) || role.StartsWith("Manual", StringComparison.OrdinalIgnoreCase) || role == string.Empty) && priority != string.Empty)
                         AddLine($"spanning-tree vlan {target} priority {priority}");
                 }
 
@@ -977,7 +994,7 @@ public static class NativeCiscoGenerator
                 {
                     if (mstRole.Equals("primary", StringComparison.OrdinalIgnoreCase) || mstRole.Equals("secondary", StringComparison.OrdinalIgnoreCase))
                         AddLine($"spanning-tree mst {targetInstance} root {mstRole.ToLowerInvariant()}");
-                    else if ((mstRole.StartsWith("Manuell", StringComparison.OrdinalIgnoreCase) || mstRole == string.Empty) && mstPriority != string.Empty)
+                    else if ((mstRole.StartsWith("Manuell", StringComparison.OrdinalIgnoreCase) || mstRole.StartsWith("Manual", StringComparison.OrdinalIgnoreCase) || mstRole == string.Empty) && mstPriority != string.Empty)
                         AddLine($"spanning-tree mst {targetInstance} priority {mstPriority}");
                 }
 
@@ -998,7 +1015,7 @@ public static class NativeCiscoGenerator
                 }
             }
 
-            if (V("stpErrdisableBpduguard") == "Ja")
+            if (YesLike(V("stpErrdisableBpduguard")))
             {
                 AddLine("errdisable recovery cause bpduguard");
                 if (V("stpErrdisableInterval") != string.Empty)
@@ -1319,12 +1336,12 @@ public static class NativeCiscoGenerator
             if (aclName == string.Empty || action == string.Empty || proto == string.Empty) return;
             var srcExpr = "any";
             if (srcType == "host" && srcVal != string.Empty) srcExpr = $"host {srcVal}";
-            else if (srcType == "netz" && srcVal != string.Empty) srcExpr = srcVal;
+            else if (NetworkLike(srcType) && srcVal != string.Empty) srcExpr = srcVal;
             var dstExpr = "any";
             if (dstType == "host" && dstVal != string.Empty) dstExpr = $"host {dstVal}";
-            else if (dstType == "netz" && dstVal != string.Empty) dstExpr = dstVal;
+            else if (NetworkLike(dstType) && dstVal != string.Empty) dstExpr = dstVal;
             var portExpr = "";
-            if ((proto == "tcp" || proto == "udp") && port != string.Empty && port != "kein Port")
+            if ((proto == "tcp" || proto == "udp") && port != string.Empty && !port.Equals("kein Port", StringComparison.OrdinalIgnoreCase) && !port.Equals("no port", StringComparison.OrdinalIgnoreCase))
             {
                 if (Like(port, "^22")) portExpr = " eq 22";
                 else if (Like(port, "^23")) portExpr = " eq 23";
@@ -1401,15 +1418,15 @@ public static class NativeCiscoGenerator
 
             Sec("MPLS / LDP / L3VPN");
 
-            if (V("mplsCef") == "Ja") AddLine("ip cef");
-            if (V("mplsGlobal") == "Ja") AddLine("mpls ip");
+            if (YesLike(V("mplsCef"))) AddLine("ip cef");
+            if (YesLike(V("mplsGlobal"))) AddLine("mpls ip");
             if (V("mplsLabelProtocol").Equals("ldp", StringComparison.OrdinalIgnoreCase))
                 AddLine("mpls label protocol ldp");
 
             var ldpRid = V("mplsLdpRouterId");
             if (!string.IsNullOrWhiteSpace(ldpRid))
             {
-                var force = V("mplsLdpRouterIdForce") == "Ja" ? " force" : string.Empty;
+                var force = YesLike(V("mplsLdpRouterIdForce")) ? " force" : string.Empty;
                 AddLine($"mpls ldp router-id {ldpRid}{force}");
             }
 
@@ -1513,10 +1530,10 @@ public static class NativeCiscoGenerator
             var dataVlan = V("voipDataVlan"); var dataName = V("voipDataVlanName"); var voiceVlan = V("voipVoiceVlan"); var voiceName = V("voipVoiceVlanName");
             if (dataVlan != string.Empty) { AddLine($"vlan {dataVlan}"); if (dataName != string.Empty) AddLine($" name {dataName}"); }
             if (voiceVlan != string.Empty) { AddLine($"vlan {voiceVlan}"); if (voiceName != string.Empty) AddLine($" name {voiceName}"); }
-            if (V("voipCdp") == "Ja") AddLine("cdp run");
-            if (V("voipLldp") == "Ja") { AddLine("lldp run"); AddLine("lldp med-tlv-select network-policy"); }
+            if (YesLike(V("voipCdp"))) AddLine("cdp run");
+            if (YesLike(V("voipLldp"))) { AddLine("lldp run"); AddLine("lldp med-tlv-select network-policy"); }
             var qosMode = V("voipQosMode");
-            if (qosMode != string.Empty && qosMode != "Nein" && qosMode.StartsWith("mls qos", StringComparison.OrdinalIgnoreCase)) AddLine("mls qos");
+            if (qosMode != string.Empty && !NoLike(qosMode) && qosMode.StartsWith("mls qos", StringComparison.OrdinalIgnoreCase)) AddLine("mls qos");
             var pool = V("voipDhcpPool"); var net = V("voipNetwork"); var mask = V("voipMask"); var gw = V("voipGateway"); var dns = V("voipDns"); var tftp = V("voipTftp"); var excluded = V("voipExcluded");
             if (excluded != string.Empty) AddLine($"ip dhcp excluded-address {excluded}");
             if (pool != string.Empty && net != string.Empty && mask != string.Empty && gw != string.Empty) { AddLine($"ip dhcp pool {pool}"); AddLine($" network {net} {mask}"); AddLine($" default-router {gw}"); if (dns != string.Empty) AddLine($" dns-server {dns}"); if (tftp != string.Empty) AddLine($" option 150 ip {tftp}"); }
@@ -1527,7 +1544,7 @@ public static class NativeCiscoGenerator
                 AddLine($"interface {ifc}"); if (desc != string.Empty) AddLine($" description {desc}"); AddLine(" switchport mode access");
                 if (access != string.Empty) AddLine($" switchport access vlan {access}");
                 if (voice != string.Empty) AddLine($" switchport voice vlan {voice}");
-                if (qos != string.Empty && qos != "Nein")
+                if (qos != string.Empty && !NoLike(qos))
                 {
                     if (qos == "auto qos voip cisco-phone") AddLine(" auto qos voip cisco-phone");
                     else if (qos == "mls qos trust dscp") AddLine(" mls qos trust dscp");
@@ -1577,7 +1594,7 @@ public static class NativeCiscoGenerator
                 }
             }
 
-            if (V("qinqGlobalDot1q") == "Ja")
+            if (YesLike(V("qinqGlobalDot1q")))
                 AddLine("! Hinweis: Globales dot1q tunneling/Ethertype ist plattformabhängig. Prüfe IOS/IOS-XE Syntax.");
 
             var providerVlans = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);

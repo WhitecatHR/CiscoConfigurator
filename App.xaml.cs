@@ -68,9 +68,9 @@ public partial class App : Application
         {
             StartupDiagnostics.WriteError("DispatcherUnhandledException", args.Exception);
             ShowErrorDialog(
-                SafeText("text.cisco_konfigurator_wurde_durch_einen_fehler_gestoppt", "Cisco Configurator encountered an error."),
+                SafeText("text.cisco_konfigurator_wurde_durch_einen_fehler_gestoppt", "Cisco Configuration Tool encountered an error."),
                 args.Exception,
-                SafeText("text.cisco_konfigurator_fehler", "Cisco Configurator error"));
+                SafeText("text.cisco_konfigurator_fehler", "Cisco Configuration Tool error"));
 
             args.Handled = true;
             if (MainWindow == null || !MainWindow.IsLoaded)
@@ -82,7 +82,7 @@ public partial class App : Application
     {
         StartupDiagnostics.WriteError(phase, exception);
         ShowErrorDialog(
-            SafeText("text.cisco_konfigurator_konnte_nicht_gestartet_werden", "Cisco Configurator could not be started."),
+            SafeText("text.cisco_konfigurator_konnte_nicht_gestartet_werden", "Cisco Configuration Tool could not be started."),
             exception,
             SafeText("app.startup_error_title", "Startup error"));
         Shutdown(-1);

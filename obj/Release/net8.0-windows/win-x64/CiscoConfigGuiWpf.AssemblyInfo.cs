@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("Cisco Konfigurator")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Cisco Configuration Tool")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("0.15.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.15-pre.Release")]
-[assembly: System.Reflection.AssemblyProductAttribute("Cisco Konfigurator")]
-[assembly: System.Reflection.AssemblyTitleAttribute("Cisco Konfigurator")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.15-pre.Release+6810c75f17fe475bb00e9a168bda5863f895dff7")]
+[assembly: System.Reflection.AssemblyProductAttribute("Cisco Configuration Tool")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Cisco Configuration Tool")]
 [assembly: System.Reflection.AssemblyVersionAttribute("0.15.0.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]

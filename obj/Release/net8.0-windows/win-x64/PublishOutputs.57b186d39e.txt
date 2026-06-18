@@ -1,0 +1,5 @@
+C:\Users\Norman\Documents\Codex\CiscoConfigurator\bin\Release\net8.0-windows\win-x64\publish\Plugins\Example.ciscoplugin.json.example
+C:\Users\Norman\Documents\Codex\CiscoConfigurator\bin\Release\net8.0-windows\win-x64\publish\Plugins\README.de.md
+C:\Users\Norman\Documents\Codex\CiscoConfigurator\bin\Release\net8.0-windows\win-x64\publish\Plugins\README.en.md
+C:\Users\Norman\Documents\Codex\CiscoConfigurator\bin\Release\net8.0-windows\win-x64\publish\Plugins\README.md
+C:\Users\Norman\Documents\Codex\CiscoConfigurator\bin\Release\net8.0-windows\win-x64\publish\Cisco Configuration Tool.exe

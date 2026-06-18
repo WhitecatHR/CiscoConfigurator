@@ -1,8 +1,8 @@
 # Changelog
 
-Alle wesentlichen Änderungen am Cisco Konfigurator werden in dieser Datei dokumentiert.
+Alle wesentlichen Änderungen am Cisco Configuration Tool werden in dieser Datei dokumentiert.
 
-All notable changes to Cisco Configurator are documented in this file.
+All notable changes to Cisco Configuration Tool are documented in this file.
 
 ---
 
@@ -10,25 +10,55 @@ All notable changes to Cisco Configurator are documented in this file.
 
 ### Deutsch
 
+#### Geändert
+
+- Konfigurations-, Import- und Projektabläufe schrittweise aus den großen UI-Partial-Klassen in eigenständige Workflow-Services ausgelagert
+- AutoSave-Verzögerung, Speicherung und Wiederherstellung in einen separaten Projekt-AutoSave-Service überführt
+- Produkt-, Assembly- und Dateibeschreibung auf `Cisco Configuration Tool` vereinheitlicht; die veröffentlichte Datei heißt `Cisco Configuration Tool.exe`
+- Self-Contained Single-File-Veröffentlichung beibehalten und `PublishTrimmed` ausdrücklich deaktiviert
+- deutsche und englische Workflow-Meldungen gemeinsam über identische Lokalisierungsschlüssel ergänzt
+
+#### Technische Verbesserungen
+
+- Generatoraufrufe, Zusammenführung integrierter und pluginbasierter Abschnitte, Ausgabeaufbereitung, Duplikatprüfung, Kopierlogik und TXT-Export ohne WPF-Control-Abhängigkeiten gekapselt
+- Importanalyse, Anwendungsvorbereitung und Export unbekannter Befehle von Dateidialogen und Control-Zuweisungen getrennt
+- Projektladen, Projektspeichern, Normalisierung, Geräteübernahme und Projektversionierung über wiederverwendbare Services koordiniert
+- asynchrone Dateizugriffe und Abbruchunterstützung in den neuen Workflows ergänzt
+- vollständig verschluckte Ausnahmen in den bearbeiteten Bereichen durch Diagnoseprotokollierung ersetzt
+
 #### Behoben
 
-- fehlenden `System.IO`-Namespace in `ProjectVersioningService.cs` ergänzt
-- Compilerfehler bei `InvalidDataException` in der Projektversionierung behoben
-- daraus resultierende Nullability-Warnung `CS8619` beim Wiederherstellen eines Projektstands behoben
-- fehlenden `System.IO`-Namespace in `SshInventoryUi.cs` ergänzt
-- Compilerfehler bei `File.WriteAllText` im JSON-Export der SSH-Inventarisierung behoben
+- englisch lokalisierte STP- und MST-Auswahl `Manual priority` wird vom Generator korrekt als manuelle Priorität erkannt
+- gemischtsprachige Workflow- und Dialogmeldungen in den bearbeiteten Konfigurations-, Import- und Projektpfaden bereinigt
+- vollständig verschluckte Fehler beim AutoSave, bei der Lokalisierungsaktualisierung und bei temporären Exportdateien werden diagnostisch protokolliert
+- fehlende `System.IO`-Auflösung in den neuen Workflow-Services behoben; Datei- und Verzeichniszugriffe sind nun vollständig qualifiziert
 
 ---
 
 ### English
 
+#### Changed
+
+- incrementally moved configuration, import, and project operations out of the large UI partial classes into dedicated workflow services
+- moved AutoSave debouncing, persistence, and restoration into a separate project AutoSave service
+- standardized product, assembly, and file-description metadata as `Cisco Configuration Tool`; the published file is named `Cisco Configuration Tool.exe`
+- retained self-contained single-file publishing and explicitly disabled `PublishTrimmed`
+- added matching German and English localization keys for workflow messages
+
+#### Technical improvements
+
+- encapsulated generator calls, merging of built-in and plugin-based sections, output processing, duplicate detection, copy handling, and TXT export without WPF control dependencies
+- separated import analysis, application planning, and unknown-command export from file dialogs and control assignments
+- coordinated project loading, saving, normalization, device capture, and project versioning through reusable services
+- added asynchronous file access and cancellation support to the new workflows
+- replaced fully swallowed exceptions in the touched areas with diagnostic logging
+
 #### Fixed
 
-- added the missing `System.IO` namespace to `ProjectVersioningService.cs`
-- fixed compiler errors for `InvalidDataException` in project versioning
-- fixed the resulting `CS8619` nullability warning when restoring a project version
-- added the missing `System.IO` namespace to `SshInventoryUi.cs`
-- fixed the compiler error for `File.WriteAllText` in SSH inventory JSON export
+- English-localized STP and MST option `Manual priority` is now recognized correctly as a manual priority by the generator
+- removed mixed-language workflow and dialog messages from the touched configuration, import, and project paths
+- errors previously swallowed during AutoSave, localization refresh, and temporary export cleanup are now written to diagnostics
+- fixed missing `System.IO` resolution in the new workflow services; file and directory access is now fully qualified
 
 ---
 

@@ -26,9 +26,9 @@ public static class LocalizationService
     {
         ["app.startup_error_title"] = "Startup error",
         ["app.log_file"] = "Log file",
-        ["text.cisco_konfigurator_konnte_nicht_gestartet_werden"] = "Cisco Configurator could not be started.",
-        ["text.cisco_konfigurator_wurde_durch_einen_fehler_gestoppt"] = "Cisco Configurator encountered an error.",
-        ["text.cisco_konfigurator_fehler"] = "Cisco Configurator error",
+        ["text.cisco_konfigurator_konnte_nicht_gestartet_werden"] = "Cisco Configuration Tool could not be started.",
+        ["text.cisco_konfigurator_wurde_durch_einen_fehler_gestoppt"] = "Cisco Configuration Tool encountered an error.",
+        ["text.cisco_konfigurator_fehler"] = "Cisco Configuration Tool error",
         ["common.apply"] = "Apply",
         ["common.save"] = "Save",
         ["common.cancel"] = "Cancel",

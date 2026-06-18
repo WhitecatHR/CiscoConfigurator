@@ -37,7 +37,7 @@ public static class ValidationService
         if (M("ssh") && V("vtyLoginMode") == "login authentication default" && !M("aaa") && !M("radiusTacacs"))
             warnings.Add("SSH/VTY: login authentication default benötigt eine passende AAA-Authentifizierungsmethode.");
 
-        if (M("radiusTacacs") && V("aaaUseRadius") == "Ja" && string.IsNullOrWhiteSpace(V("radiusList")))
+        if (M("radiusTacacs") && IsYes(V("aaaUseRadius")) && string.IsNullOrWhiteSpace(V("radiusList")))
             warnings.Add("RADIUS/TACACS: AAA Radius nutzen ist Ja, aber RADIUS-Liste ist leer.");
 
         if (V("configMode") == "Mit VRF" && (!M("vrfDefs") || string.IsNullOrWhiteSpace(V("vrfDefList"))))
@@ -126,6 +126,11 @@ public static class ValidationService
 
         return warnings.Count == 0 ? "Keine kritischen Hinweise." : string.Join(Environment.NewLine, warnings);
     }
+
+    private static bool IsYes(string? value) =>
+        value?.Equals("Ja", StringComparison.OrdinalIgnoreCase) == true ||
+        value?.Equals("Yes", StringComparison.OrdinalIgnoreCase) == true ||
+        value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
 
     private static IEnumerable<string> FindDuplicateFirstColumns(IReadOnlyDictionary<string, string> values)
     {
@@ -254,14 +259,14 @@ public static class StpValidationService
         if (mode == "mst")
             ValidateMst(V, warnings);
 
-        if (V("stpErrdisableBpduguard").Equals("Ja", StringComparison.OrdinalIgnoreCase))
+        if (IsYes(V("stpErrdisableBpduguard")))
             ValidateRange(V("stpErrdisableInterval"), 1, 86400, "Errdisable-Intervall", "stpErrdisableInterval", warnings, required: true);
 
         ValidateResetRows(V("stpResetList"), warnings);
         ValidatePortChannelConsistency(V, mode, warnings);
 
         var platform = V("stpPlatformProfile");
-        if (V("stpStrictCompatibility").Equals("Ja", StringComparison.OrdinalIgnoreCase) && platform.Equals("Automatisch", StringComparison.OrdinalIgnoreCase))
+        if (IsYes(V("stpStrictCompatibility")) && IsAutomatic(platform))
             warnings.Add(new("stpPlatformProfile", "Strikte Kompatibilität ist aktiv, aber kein konkretes Plattformprofil wurde gewählt."));
         if (platform.Equals("Packet Tracer", StringComparison.OrdinalIgnoreCase) && HasAdvancedFeatures(V))
             warnings.Add(new("stpPlatformProfile", "Packet Tracer unterstützt je nach simuliertem Switch nicht alle erweiterten STP-, MST-, Guard- und Errdisable-Befehle. Ausgabe am Zielgerät prüfen."));
@@ -401,8 +406,8 @@ public static class StpValidationService
     {
         var mode = v("stpGlobalMode");
         return mode.Equals("mst", StringComparison.OrdinalIgnoreCase) ||
-               v("stpBpdufilterDefault").Equals("Ja", StringComparison.OrdinalIgnoreCase) ||
-               v("stpLoopguardDefault").Equals("Ja", StringComparison.OrdinalIgnoreCase) ||
+               IsYes(v("stpBpdufilterDefault")) ||
+               IsYes(v("stpLoopguardDefault")) ||
                ((mode.Equals("pvst", StringComparison.OrdinalIgnoreCase) || mode.Equals("rapid-pvst", StringComparison.OrdinalIgnoreCase)) &&
                 !string.IsNullOrWhiteSpace(v("stpVlanInterfaceList"))) ||
                (mode.Equals("mst", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(v("stpMstInterfaceList"))) ||
@@ -549,6 +554,7 @@ public static class StpValidationService
 
     private static string[] Parts(string row) => row.Split('|').Select(x => x.Trim()).ToArray();
     private static bool IsYes(string? value) => value?.Equals("Ja", StringComparison.OrdinalIgnoreCase) == true || value?.Equals("Yes", StringComparison.OrdinalIgnoreCase) == true || value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+    private static bool IsAutomatic(string? value) => value?.Equals("Automatisch", StringComparison.OrdinalIgnoreCase) == true || value?.Equals("Automatic", StringComparison.OrdinalIgnoreCase) == true;
 }
 
 public static class SubnettingCalculator

@@ -11,9 +11,13 @@ public static class DependencyValidationService
         var findings = new List<DependencyFinding>();
         string V(string key) => request.Values.TryGetValue(key, out var value) ? value.Trim() : string.Empty;
         bool M(string key) => request.Modules.TryGetValue(key, out var active) && active;
+        static bool IsYes(string? value) =>
+            value?.Equals("Ja", StringComparison.OrdinalIgnoreCase) == true ||
+            value?.Equals("Yes", StringComparison.OrdinalIgnoreCase) == true ||
+            value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
 
         if (RoutingModules.Any(M) && V("deviceType").Equals("L3-Switch", StringComparison.OrdinalIgnoreCase) &&
-            (!M("routingBase") || !V("ipRouting").Equals("Ja", StringComparison.OrdinalIgnoreCase)))
+            (!M("routingBase") || !IsYes(V("ipRouting"))))
             findings.Add(new("Fehler", "Routing", "Routingprotokolle sind aktiv, aber 'ip routing' ist auf dem Layer-3-Switch nicht aktiviert.", "enable-ip-routing", "routingBase", "ipRouting"));
 
         if (M("ssh"))

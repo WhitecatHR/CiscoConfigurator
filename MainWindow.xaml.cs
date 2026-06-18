@@ -16,6 +16,8 @@ namespace CiscoConfigGuiWpf;
 public partial class MainWindow : Window
 {
     private readonly Dictionary<string, Control> _valueControls = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConfigurationWorkflowService _configurationWorkflowService = new();
+    private readonly ImportWorkflowService _importWorkflowService = new();
     private readonly Dictionary<string, FrameworkElement> _fieldWrappers = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FieldDefinition> _fieldDefinitions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, TextBox> _previewControls = new(StringComparer.OrdinalIgnoreCase);
@@ -41,11 +43,12 @@ public partial class MainWindow : Window
     private string _peerRequirementsText = string.Empty;
     private IReadOnlyList<DuplicateConfigIssue> _lastDuplicateConfigIssues = Array.Empty<DuplicateConfigIssue>();
     private bool _duplicateCheckHasRun;
+    private ConfigurationWorkflowResult? _lastConfigurationWorkflowResult;
     private SerialPortSettings _serialSettings = new("", 9600, 8, Parity.None, StopBits.One, 35);
     private bool _serialTestMode;
     private TextBox? _importConfigBox;
     private TextBox? _importResultBox;
-    private ImportedConfigAnalysis? _lastImportAnalysis;
+    private ImportResult? _lastImportResult;
     private IReadOnlyList<UiValidationIssue> _currentValidationIssues = Array.Empty<UiValidationIssue>();
     private bool _updatingStpPreview;
 
@@ -88,7 +91,6 @@ public partial class MainWindow : Window
         ["Security/WAN"] = new[] { "security", "zoneFirewall", "dmzAssistant", "nat", "wanFailover", "vpn", "greIpsec", "vpnAdvanced", "customCommands" }
     };
 
-    private sealed record DuplicateConfigIssue(string Context, string Command, int Count, IReadOnlyList<int> Lines);
     private sealed record UiValidationIssue(
         string Tab,
         string ModuleName,
@@ -1147,7 +1149,7 @@ public partial class MainWindow : Window
                 return;
             }
 
-            var config = await NativeCiscoGenerator.GenerateAsync(BuildRequest());
+            var config = await _configurationWorkflowService.GenerateRawAsync(GetCurrentGenerationRequest());
             preview.Text = ExtractGeneratedSection(config, "STP ERWEITERT");
             preview.ScrollToHome();
         }
@@ -1306,7 +1308,7 @@ public partial class MainWindow : Window
             BorderThickness = new Thickness(0),
             Foreground = new SolidColorBrush(Color.FromRgb(229, 231, 235))
         };
-        SetConfigurationPreviewText("Klicke auf 'Vorschau aktualisieren', um die aktuelle Cisco-Konfiguration zu erzeugen.");
+        SetConfigurationPreviewText(LocalizationService.Get("configuration.workflow.preview.initial"));
 
         var previewBorder = new Border
         {
@@ -1332,11 +1334,8 @@ public partial class MainWindow : Window
             if (!ReferenceEquals(e.Source, MainTabs)) return;
             if (!ReferenceEquals(MainTabs.SelectedItem, tab)) return;
 
-            if (_configurationPreviewBox != null &&
-                (_configurationPreviewText.StartsWith("Klicke auf", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(_configurationPreviewText)))
-            {
+            if (_configurationPreviewBox != null && _lastConfigurationWorkflowResult == null)
                 await RefreshConfigurationPreviewAsync();
-            }
         };
     }
 
@@ -1346,13 +1345,13 @@ public partial class MainWindow : Window
 
         try
         {
-            SetConfigurationPreviewText("Konfiguration wird erzeugt ...");
-            var config = await GenerateConfigAsync();
-            SetConfigurationPreviewText(AddDuplicateReportToPreview(config));
+            SetConfigurationPreviewText(LocalizationService.Get("configuration.workflow.preview.generating"));
+            var result = await GenerateConfigurationWorkflowAsync();
+            SetConfigurationPreviewText(result.Preview);
         }
         catch (Exception ex)
         {
-            SetConfigurationPreviewText("Fehler beim Erzeugen der Konfiguration:\n" + ex.Message);
+            SetConfigurationPreviewText(LocalizationService.Format("configuration.workflow.preview.error", ex.Message));
         }
     }
 
@@ -1360,15 +1359,18 @@ public partial class MainWindow : Window
     {
         if (_configurationPreviewBox == null) return;
 
-        if (string.IsNullOrWhiteSpace(_configurationPreviewText) ||
-            _configurationPreviewText.StartsWith("Klicke auf", StringComparison.OrdinalIgnoreCase) ||
-            _configurationPreviewText.StartsWith("Konfiguration wird", StringComparison.OrdinalIgnoreCase))
+        try
         {
-            await RefreshConfigurationPreviewAsync();
+            var result = _lastConfigurationWorkflowResult ?? await GenerateConfigurationWorkflowAsync();
+            var copyText = _configurationWorkflowService.GetCopyText(result, includePreview: true);
+            SetConfigurationPreviewText(result.Preview);
+            Clipboard.SetText(copyText);
+            MessageBox.Show(this, LocalizationService.Get("text.vorschau_wurde_in_die_zwischenablage_kopiert"), LocalizationService.Get("text.kopiert"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
-
-        Clipboard.SetText(_configurationPreviewText ?? string.Empty);
-        MessageBox.Show(this, LocalizationService.Get("text.vorschau_wurde_in_die_zwischenablage_kopiert"), LocalizationService.Get("text.kopiert"), MessageBoxButton.OK, MessageBoxImage.Information);
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("text.fehler_beim_erzeugen"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
 
@@ -1499,7 +1501,7 @@ public partial class MainWindow : Window
         if (_peerRequirementsBox == null) return;
         try
         {
-            _peerRequirementsText = PeerRequirementGenerator.Generate(BuildRequest());
+            _peerRequirementsText = _configurationWorkflowService.GeneratePeerRequirements(GetCurrentGenerationRequest());
             _peerRequirementsBox.Text = _peerRequirementsText;
             _peerRequirementsBox.ScrollToHome();
         }
@@ -1568,10 +1570,10 @@ public partial class MainWindow : Window
         var applyButton = new Button { Content = LocalizationService.Get("text.daten_ubernehmen"), Style = TryFindResource("PrimaryButtonStyle") as Style, ToolTip = LocalizationService.Get("text.ubernimmt_erkannte_werte_in_die_vorhandenen_module_und_aktiv") };
         var exportUnknownButton = new Button { Content = LocalizationService.Get("import.export_unknown"), ToolTip = LocalizationService.Get("import.export_unknown_tooltip") };
 
-        loadButton.Click += (_, _) => LoadConfigForImport();
+        loadButton.Click += async (_, _) => await LoadConfigForImportAsync();
         analyzeButton.Click += (_, _) => AnalyzeImportedConfig();
         applyButton.Click += (_, _) => ApplyImportedConfig();
-        exportUnknownButton.Click += (_, _) => ExportUnknownImportedCommands();
+        exportUnknownButton.Click += async (_, _) => await ExportUnknownImportedCommandsAsync();
 
         importButtons.Children.Add(loadButton);
         importButtons.Children.Add(analyzeButton);
@@ -1668,52 +1670,67 @@ public partial class MainWindow : Window
         MainTabs.Items.Add(tab);
     }
 
-    private void LoadConfigForImport()
+    private async Task LoadConfigForImportAsync(CancellationToken cancellationToken = default)
     {
         var dialog = new OpenFileDialog
         {
             Title = LocalizationService.Get("text.cisco_konfiguration_laden"),
-            Filter = "Cisco/Text (*.txt;*.cfg;*.conf)|*.txt;*.cfg;*.conf|Alle Dateien (*.*)|*.*"
+            Filter = LocalizationService.Get("text.konfiguration_txt_cfg_conf_txt_cfg_conf_alle_dateien")
         };
-        if (dialog.ShowDialog(this) != true) return;
-        if (_importConfigBox == null) return;
+        if (dialog.ShowDialog(this) != true || _importConfigBox == null) return;
 
-        _importConfigBox.Text = File.ReadAllText(dialog.FileName, Encoding.UTF8);
-        AnalyzeImportedConfig();
+        try
+        {
+            _importConfigBox.Text = await _importWorkflowService.LoadConfigurationFileAsync(dialog.FileName, cancellationToken);
+            AnalyzeImportedConfig();
+        }
+        catch (OperationCanceledException)
+        {
+            ValidationTextBlock.Text = LocalizationService.Get("import.workflow.cancelled");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("import.workflow.load_error_title"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void AnalyzeImportedConfig()
     {
         if (_importConfigBox == null || _importResultBox == null) return;
-        _lastImportAnalysis = ImportedConfigAnalyzer.Analyze(_importConfigBox.Text);
-        _importResultBox.Text = FormatImportAnalysis(_lastImportAnalysis);
-        ValidationTextBlock.Text = _lastImportAnalysis.UnknownCommands.Count == 0
-            ? (LocalizationService.IsEnglish
-                ? $"Import analysis: {_lastImportAnalysis.AppliedFields} fields recognized · no unknown commands"
-                : $"Importanalyse: {_lastImportAnalysis.AppliedFields} Felder erkannt · keine unbekannten Befehle")
-            : (LocalizationService.IsEnglish
-                ? $"Import analysis: {_lastImportAnalysis.AppliedFields} fields recognized · {_lastImportAnalysis.UnknownCommands.Count} unknown commands"
-                : $"Importanalyse: {_lastImportAnalysis.AppliedFields} Felder erkannt · {_lastImportAnalysis.UnknownCommands.Count} unbekannte Befehle");
-        ValidationTextBlock.Foreground = _lastImportAnalysis.UnknownCommands.Count == 0
-            ? new SolidColorBrush(Color.FromRgb(134, 239, 172))
-            : new SolidColorBrush(Color.FromRgb(251, 191, 36));
+
+        var moduleTitles = ModuleCatalog.All.ToDictionary(
+            module => module.Name,
+            module => module.Title,
+            StringComparer.OrdinalIgnoreCase);
+        _lastImportResult = _importWorkflowService.Analyze(
+            _importConfigBox.Text,
+            moduleTitles,
+            GetImportWorkflowText());
+        _importResultBox.Text = _lastImportResult.Preview;
+
+        ValidationTextBlock.Text = _lastImportResult.HasUnknownCommands
+            ? LocalizationService.Format("import.workflow.status_with_unknown", _lastImportResult.Analysis.AppliedFields, _lastImportResult.Analysis.UnknownCommands.Count)
+            : LocalizationService.Format("import.workflow.status_success", _lastImportResult.Analysis.AppliedFields);
+        ValidationTextBlock.Foreground = _lastImportResult.HasUnknownCommands
+            ? new SolidColorBrush(Color.FromRgb(251, 191, 36))
+            : new SolidColorBrush(Color.FromRgb(134, 239, 172));
     }
 
     private void ApplyImportedConfig()
     {
-        if (_lastImportAnalysis == null)
-            AnalyzeImportedConfig();
-        if (_lastImportAnalysis == null) return;
+        if (_lastImportResult == null) AnalyzeImportedConfig();
+        if (_lastImportResult == null) return;
 
-        ResetControlsForImportedModules(_lastImportAnalysis);
+        var plan = _importWorkflowService.CreateApplicationPlan(_lastImportResult, ModuleCatalog.All);
+        ResetControlsForImportedFields(plan.FieldsToReset);
 
-        foreach (var pair in _lastImportAnalysis.Values)
+        foreach (var pair in plan.Values)
             SetControlValue(pair.Key, pair.Value);
 
         foreach (var check in _moduleChecks.Values)
             check.IsChecked = false;
 
-        foreach (var pair in _lastImportAnalysis.Modules)
+        foreach (var pair in plan.Modules)
         {
             if (_moduleChecks.TryGetValue(pair.Key, out var check))
                 check.IsChecked = pair.Value;
@@ -1727,136 +1744,101 @@ public partial class MainWindow : Window
         RefreshStpPreview();
 
         MessageBox.Show(this,
-            $"Import übernommen.\n\nFelder: {_lastImportAnalysis.AppliedFields}\nModule aktiviert: {_lastImportAnalysis.ActiveModules}\nUnbekannte Befehle: {_lastImportAnalysis.UnknownCommands.Count}",
-            "Import übernommen",
+            LocalizationService.Format(
+                "import.workflow.applied_body",
+                _lastImportResult.Analysis.AppliedFields,
+                _lastImportResult.Analysis.ActiveModules,
+                _lastImportResult.Analysis.UnknownCommands.Count),
+            LocalizationService.Get("import.workflow.applied_title"),
             MessageBoxButton.OK,
-            _lastImportAnalysis.UnknownCommands.Count == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            _lastImportResult.HasUnknownCommands ? MessageBoxImage.Warning : MessageBoxImage.Information);
     }
 
-    private void ResetControlsForImportedModules(ImportedConfigAnalysis analysis)
+    private void ResetControlsForImportedFields(IReadOnlySet<string> fieldNames)
     {
-        var activeModuleNames = analysis.Modules
-            .Where(x => x.Value)
-            .Select(x => x.Key)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var module in ModuleCatalog.All.Where(x => activeModuleNames.Contains(x.Name)))
+        foreach (var fieldName in fieldNames)
         {
-            foreach (var field in module.Fields)
+            if (!_valueControls.TryGetValue(fieldName, out var control)) continue;
+
+            if (control is TextBox textBox)
             {
-                if (!_valueControls.TryGetValue(field.Name, out var control)) continue;
+                textBox.Text = string.Empty;
+                continue;
+            }
 
-                if (control is TextBox textBox)
-                {
-                    textBox.Text = string.Empty;
-                    continue;
-                }
-
-                if (control is ComboBox comboBox)
-                {
-                    var neutral = comboBox.Items.Cast<object>()
-                        .FirstOrDefault(x => string.IsNullOrWhiteSpace(x?.ToString()))
-                        ?? comboBox.Items.Cast<object>()
-                            .FirstOrDefault(x => string.Equals(x?.ToString(), "Nein", StringComparison.OrdinalIgnoreCase))
-                        ?? comboBox.Items.Cast<object>().FirstOrDefault();
-
-                    comboBox.SelectedItem = neutral;
-                }
+            if (control is ComboBox comboBox)
+            {
+                var neutral = comboBox.Items.Cast<object>()
+                    .FirstOrDefault(item => string.IsNullOrWhiteSpace(item?.ToString()))
+                    ?? comboBox.Items.Cast<object>()
+                        .FirstOrDefault(item =>
+                            string.Equals(item?.ToString(), "Nein", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(item?.ToString(), "No", StringComparison.OrdinalIgnoreCase))
+                    ?? comboBox.Items.Cast<object>().FirstOrDefault();
+                comboBox.SelectedItem = neutral;
             }
         }
     }
 
-    private void ExportUnknownImportedCommands()
+    private async Task ExportUnknownImportedCommandsAsync(CancellationToken cancellationToken = default)
     {
-        if (_lastImportAnalysis == null)
-            AnalyzeImportedConfig();
-        if (_lastImportAnalysis == null) return;
+        if (_lastImportResult == null) AnalyzeImportedConfig();
+        if (_lastImportResult == null) return;
 
         var dialog = new SaveFileDialog
         {
             Title = LocalizationService.Get("text.unbekannte_importbefehle_speichern"),
-            Filter = "Textdatei (*.txt)|*.txt|Alle Dateien (*.*)|*.*",
-            FileName = "unbekannte_cisco_befehle.txt"
+            Filter = LocalizationService.Get("dialog.filter.text_all"),
+            FileName = LocalizationService.Get("import.workflow.unknown_filename")
         };
         if (dialog.ShowDialog(this) != true) return;
-        File.WriteAllText(dialog.FileName, FormatUnknownImportedCommands(_lastImportAnalysis), new UTF8Encoding(false));
+
+        try
+        {
+            await _importWorkflowService.ExportUnknownCommandsAsync(dialog.FileName, _lastImportResult, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            ValidationTextBlock.Text = LocalizationService.Get("import.workflow.cancelled");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, LocalizationService.Get("import.workflow.export_error_title"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void CopyUnknownImportedCommands()
     {
-        if (_lastImportAnalysis == null)
-            AnalyzeImportedConfig();
-        if (_lastImportAnalysis == null) return;
-        Clipboard.SetText(FormatUnknownImportedCommands(_lastImportAnalysis));
+        if (_lastImportResult == null) AnalyzeImportedConfig();
+        if (_lastImportResult == null) return;
+        Clipboard.SetText(_importWorkflowService.GetUnknownCommandsCopyText(_lastImportResult));
     }
 
-    private string FormatImportAnalysis(ImportedConfigAnalysis analysis)
+
+
+
+
+    private static ImportWorkflowText GetImportWorkflowText() => new()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("IMPORT-ZUSAMMENFASSUNG");
-        sb.AppendLine("====================");
-        sb.AppendLine($"Befehlszeilen gesamt     : {analysis.TotalCommands}");
-        sb.AppendLine($"Bekannt / zugeordnet     : {analysis.KnownCommands}");
-        sb.AppendLine($"Felder übernehmbar       : {analysis.AppliedFields}");
-        sb.AppendLine($"Module aktivierbar       : {analysis.ActiveModules}");
-        sb.AppendLine($"Unbekannte Befehle       : {analysis.UnknownCommands.Count}");
-        sb.AppendLine();
-
-        if (analysis.Notes.Count > 0)
-        {
-            sb.AppendLine("HINWEISE");
-            sb.AppendLine("--------");
-            foreach (var note in analysis.Notes)
-                sb.AppendLine("- " + note);
-            sb.AppendLine();
-        }
-
-        sb.AppendLine("ERKANNTE MODULE");
-        sb.AppendLine("---------------");
-        foreach (var moduleName in analysis.Modules.Where(x => x.Value).Select(x => x.Key).OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
-        {
-            var module = ModuleCatalog.All.FirstOrDefault(m => m.Name.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
-            sb.AppendLine("- " + (module?.Title ?? moduleName) + $" [{moduleName}]");
-        }
-        sb.AppendLine();
-
-        sb.AppendLine("ÜBERNEHMBARE FELDER");
-        sb.AppendLine("-------------------");
-        foreach (var pair in analysis.Values.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
-        {
-            var preview = (pair.Value ?? string.Empty).Replace("\r\n", " ").Replace("\n", " ");
-            if (preview.Length > 140) preview = preview[..140] + " ...";
-            sb.AppendLine($"{pair.Key}: {preview}");
-        }
-        sb.AppendLine();
-
-        sb.AppendLine("UNBEKANNTE BEFEHLE");
-        sb.AppendLine("------------------");
-        if (analysis.UnknownCommands.Count == 0)
-        {
-            sb.AppendLine("Keine unbekannten Befehle erkannt.");
-        }
-        else
-        {
-            foreach (var item in analysis.UnknownCommands.Take(300))
-                sb.AppendLine($"Zeile {item.LineNumber,4} | {item.Context,-16} | {item.Command}");
-            if (analysis.UnknownCommands.Count > 300)
-                sb.AppendLine($"... weitere {analysis.UnknownCommands.Count - 300} Befehle ausgeblendet.");
-        }
-        return sb.ToString();
-    }
-
-    private static string FormatUnknownImportedCommands(ImportedConfigAnalysis analysis)
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("Unbekannte Cisco-Befehle aus Import");
-        sb.AppendLine("===================================");
-        sb.AppendLine($"Anzahl: {analysis.UnknownCommands.Count}");
-        sb.AppendLine();
-        foreach (var item in analysis.UnknownCommands)
-            sb.AppendLine($"Zeile {item.LineNumber,4} | Kontext: {item.Context} | {item.Command}");
-        return sb.ToString();
-    }
+        SummaryHeading = LocalizationService.Get("import.workflow.summary_heading"),
+        TotalCommands = LocalizationService.Get("import.workflow.total_commands"),
+        KnownCommands = LocalizationService.Get("import.workflow.known_commands"),
+        ApplicableFields = LocalizationService.Get("import.workflow.applicable_fields"),
+        ApplicableModules = LocalizationService.Get("import.workflow.applicable_modules"),
+        UnknownCommands = LocalizationService.Get("import.workflow.unknown_commands"),
+        NotesHeading = LocalizationService.Get("import.workflow.notes_heading"),
+        EmptyConfigurationNote = LocalizationService.Get("import.workflow.note_empty"),
+        UnknownCommandsNoteFormat = LocalizationService.Get("import.workflow.note_unknown"),
+        NoApplicableFieldsNote = LocalizationService.Get("import.workflow.note_no_fields"),
+        RecognizedModulesHeading = LocalizationService.Get("import.workflow.recognized_modules_heading"),
+        ApplicableFieldsHeading = LocalizationService.Get("import.workflow.applicable_fields_heading"),
+        UnknownCommandsHeading = LocalizationService.Get("import.workflow.unknown_commands_heading"),
+        NoUnknownCommands = LocalizationService.Get("import.workflow.no_unknown_commands"),
+        UnknownCommandLineFormat = LocalizationService.Get("import.workflow.unknown_line_format"),
+        MoreUnknownCommandsFormat = LocalizationService.Get("import.workflow.more_unknown"),
+        UnknownExportHeading = LocalizationService.Get("import.workflow.unknown_export_heading"),
+        CountLabel = LocalizationService.Get("import.workflow.count")
+    };
 
     private void SetControlValue(string name, string value)
     {
@@ -2509,7 +2491,7 @@ public partial class MainWindow : Window
 
         if (module.Name.Equals("stpExtended", StringComparison.OrdinalIgnoreCase))
         {
-            var request = BuildRequest();
+            var request = GetCurrentGenerationRequest();
             foreach (var warning in StpValidationService.Validate(request.Values, request.Modules))
                 yield return warning.Message;
         }
@@ -2552,7 +2534,7 @@ public partial class MainWindow : Window
 
             if (module.Name.Equals("stpExtended", StringComparison.OrdinalIgnoreCase))
             {
-                var request = BuildRequest();
+                var request = GetCurrentGenerationRequest();
                 foreach (var warning in StpValidationService.Validate(request.Values, request.Modules))
                 {
                     var field = module.Fields.FirstOrDefault(x => x.Name.Equals(warning.FieldName, StringComparison.OrdinalIgnoreCase));
@@ -2841,26 +2823,37 @@ public partial class MainWindow : Window
     }
 
 
-    private GenerationRequest BuildRequest()
+    private GenerationRequest GetCurrentGenerationRequest()
     {
-        var values = CollectValues();
+        var selectedModules = ModuleCatalog.All.ToDictionary(
+            module => module.Name,
+            module => _moduleChecks.TryGetValue(module.Name, out var checkBox) && checkBox.IsChecked == true,
+            StringComparer.OrdinalIgnoreCase);
 
-        var modules = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var module in ModuleCatalog.All)
-        {
-            modules[module.Name] =
-                IsAllowed(module)
-                && _moduleChecks.TryGetValue(module.Name, out var cb)
-                && cb.IsChecked == true;
-        }
-
-        return new GenerationRequest
-        {
-            Values = values,
-            Modules = modules
-        };
+        return _configurationWorkflowService.BuildRequest(CollectValues(), selectedModules, ModuleCatalog.All);
     }
+
+    private ConfigurationWorkflowOptions GetConfigurationWorkflowOptions() => new()
+    {
+        IncludeComments = _appSettings.IncludeComments,
+        IncludeSectionSeparators = _appSettings.IncludeSectionSeparators,
+        IncludeEnable = _appSettings.IncludeEnable,
+        IncludeConfigureTerminal = _appSettings.IncludeConfigureTerminal,
+        IncludeEnd = _appSettings.IncludeEnd,
+        IncludeWriteMemory = _appSettings.IncludeWriteMemory,
+        LineEndings = _appSettings.LineEndings,
+        ExportFileNamePattern = _appSettings.ExportFileNamePattern,
+        TimestampInFileName = _appSettings.TimestampInFileName
+    };
+
+    private static ConfigurationPreviewText GetConfigurationPreviewText() => new()
+    {
+        Heading = LocalizationService.Get("configuration.workflow.duplicate.heading"),
+        ResultFormat = LocalizationService.Get("configuration.workflow.duplicate.result"),
+        Recommendation = LocalizationService.Get("configuration.workflow.duplicate.recommendation"),
+        IssueFormat = LocalizationService.Get("configuration.workflow.duplicate.issue"),
+        MoreIssuesFormat = LocalizationService.Get("configuration.workflow.duplicate.more")
+    };
 
     private Dictionary<string, string> CollectValues()
     {
@@ -2892,175 +2885,69 @@ public partial class MainWindow : Window
     {
         _lastDuplicateConfigIssues = Array.Empty<DuplicateConfigIssue>();
         _duplicateCheckHasRun = false;
+        _lastConfigurationWorkflowResult = null;
         _peerRequirementsText = string.Empty;
         if (_peerRequirementsBox != null)
             _peerRequirementsBox.Text = LocalizationService.Get("text.eingaben_wurden_geandert_klicke_auf_gegenstelle_aktualisiere");
     }
 
-    private string AddDuplicateReportToPreview(string config)
-    {
-        if (!_duplicateCheckHasRun || _lastDuplicateConfigIssues.Count == 0)
-            return config;
 
-        var sb = new StringBuilder();
-        sb.AppendLine("! DUPLIKATPRÜFUNG");
-        sb.AppendLine($"! Ergebnis: {_lastDuplicateConfigIssues.Count} mögliche doppelte Konfigurationsbefehle erkannt.");
-        sb.AppendLine("! Bewertung: Kontextgleich doppelte Zeilen prüfen und nach Bedarf bereinigen.");
-        sb.AppendLine("!");
-
-        foreach (var issue in _lastDuplicateConfigIssues.Take(25))
-            sb.AppendLine($"! - [{issue.Context}] {issue.Command} | {issue.Count}x | Zeilen: {string.Join(", ", issue.Lines)}");
-
-        if (_lastDuplicateConfigIssues.Count > 25)
-            sb.AppendLine($"! - weitere {_lastDuplicateConfigIssues.Count - 25} Einträge ausgeblendet.");
-
-        sb.AppendLine("!");
-        sb.AppendLine(config);
-        return sb.ToString();
-    }
 
     private void ShowDuplicateWarningIfNeeded(string action)
     {
         if (!_duplicateCheckHasRun || _lastDuplicateConfigIssues.Count == 0) return;
 
-        var preview = string.Join(Environment.NewLine, _lastDuplicateConfigIssues.Take(8).Select(i =>
-            $"- [{i.Context}] {i.Command} ({i.Count}x, Zeilen: {string.Join(", ", i.Lines)})"));
-
-        if (_lastDuplicateConfigIssues.Count > 8)
-            preview += Environment.NewLine + $"- weitere {_lastDuplicateConfigIssues.Count - 8} Einträge";
+        var issueText = _configurationWorkflowService.BuildDuplicateWarning(
+            _lastDuplicateConfigIssues,
+            LocalizationService.Get("configuration.workflow.duplicate.warning_issue"),
+            LocalizationService.Get("configuration.workflow.duplicate.warning_more"));
+        var message = string.Format(
+            System.Globalization.CultureInfo.CurrentCulture,
+            LocalizationService.Get("configuration.workflow.duplicate.warning_body"),
+            action,
+            issueText);
 
         MessageBox.Show(this,
-            $"Die Konfiguration wurde {action}, aber die Duplikatprüfung hat mögliche doppelte Befehle erkannt.\n\n{preview}",
-            "Duplikatprüfung",
+            message,
+            LocalizationService.Get("configuration.workflow.duplicate.warning_title"),
             MessageBoxButton.OK,
             MessageBoxImage.Warning);
     }
 
-    private static IReadOnlyList<DuplicateConfigIssue> FindDuplicateConfigIssues(string? config)
+
+
+
+
+
+
+
+
+
+    private async Task<ConfigurationWorkflowResult> GenerateConfigurationWorkflowAsync(CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(config))
-            return Array.Empty<DuplicateConfigIssue>();
-
-        var occurrences = new Dictionary<string, (string Context, string Command, List<int> Lines)>(StringComparer.OrdinalIgnoreCase);
-        var currentContext = "global";
-        var lines = config.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-
-        for (var i = 0; i < lines.Length; i++)
-        {
-            var trimmed = lines[i].Trim();
-            if (IsContextReset(trimmed))
-            {
-                currentContext = "global";
-                continue;
-            }
-
-            if (ShouldIgnoreDuplicateLine(trimmed))
-                continue;
-
-            if (TryGetConfigContext(trimmed, currentContext, out var newContext))
-            {
-                currentContext = newContext;
-                continue;
-            }
-
-            var normalizedCommand = NormalizeConfigCommand(trimmed);
-            if (string.IsNullOrWhiteSpace(normalizedCommand))
-                continue;
-
-            var key = currentContext + "\u001F" + normalizedCommand;
-            if (!occurrences.TryGetValue(key, out var entry))
-            {
-                entry = (currentContext, normalizedCommand, new List<int>());
-                occurrences[key] = entry;
-            }
-
-            entry.Lines.Add(i + 1);
-        }
-
-        return occurrences.Values
-            .Where(x => x.Lines.Count > 1)
-            .OrderByDescending(x => x.Lines.Count)
-            .ThenBy(x => x.Context, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(x => x.Command, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new DuplicateConfigIssue(x.Context, x.Command, x.Lines.Count, x.Lines))
-            .ToList();
-    }
-
-    private static bool ShouldIgnoreDuplicateLine(string line)
-    {
-        if (string.IsNullOrWhiteSpace(line)) return true;
-        if (line.StartsWith("!", StringComparison.OrdinalIgnoreCase)) return true;
-
-        var normalized = NormalizeConfigCommand(line);
-        return normalized is
-            "enable" or
-            "configure terminal" or
-            "conf t" or
-            "end" or
-            "exit" or
-            "exit-address-family" or
-            "write memory" or
-            "wr" or
-            "no shutdown";
-    }
-
-    private static bool IsContextReset(string line)
-    {
-        var normalized = NormalizeConfigCommand(line);
-        return normalized is "exit" or "exit-address-family" or "end";
-    }
-
-    private static bool TryGetConfigContext(string line, string currentContext, out string context)
-    {
-        var normalized = NormalizeConfigCommand(line);
-        var headers = new[]
-        {
-            "interface ", "router ", "line ", "vlan ", "ip dhcp pool ",
-            "ip access-list ", "ipv6 access-list ", "route-map ", "class-map ",
-            "policy-map ", "crypto isakmp policy ", "crypto ipsec transform-set ",
-            "crypto map ", "key chain ", "vrf definition ", "ip vrf ",
-            "control-plane", "voice class ", "dial-peer voice ", "telephony-service",
-            "call-manager-fallback", "zone security ", "zone-pair security ",
-            "parameter-map ", "object-group ", "ip sla ", "track "
-        };
-
-        if (headers.Any(h => normalized.StartsWith(h, StringComparison.OrdinalIgnoreCase) || normalized.Equals(h.Trim(), StringComparison.OrdinalIgnoreCase)))
-        {
-            context = normalized;
-            return true;
-        }
-
-        if (normalized.StartsWith("address-family ", StringComparison.OrdinalIgnoreCase))
-        {
-            context = currentContext + " > " + normalized;
-            return true;
-        }
-
-        context = currentContext;
-        return false;
-    }
-
-    private static string NormalizeConfigCommand(string line) =>
-        string.Join(" ", (line ?? string.Empty).Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries));
-
-    private async Task<string> GenerateConfigAsync()
-    {
-        var request = BuildRequest();
-        var config = await NativeCiscoGenerator.GenerateAsync(request);
-        config = ApplyConfigurationOutputSettings(config);
-        _lastDuplicateConfigIssues = FindDuplicateConfigIssues(config);
+        var request = GetCurrentGenerationRequest();
+        var result = await _configurationWorkflowService.GenerateAsync(
+            request,
+            GetConfigurationWorkflowOptions(),
+            GetConfigurationPreviewText(),
+            cancellationToken);
+        _lastConfigurationWorkflowResult = result;
+        _lastDuplicateConfigIssues = result.DuplicateIssues;
         _duplicateCheckHasRun = true;
         UpdateStatusBar();
-        return config;
+        return result;
     }
+
+    private async Task<string> GenerateConfigAsync(CancellationToken cancellationToken = default) =>
+        (await GenerateConfigurationWorkflowAsync(cancellationToken)).Configuration;
 
     private async Task CopyGeneratedConfigAsync()
     {
         try
         {
-            var config = await GenerateConfigAsync();
-            Clipboard.SetText(config ?? string.Empty);
-            ShowDuplicateWarningIfNeeded("kopiert");
+            var result = await GenerateConfigurationWorkflowAsync();
+            Clipboard.SetText(_configurationWorkflowService.GetCopyText(result, includePreview: false));
+            ShowDuplicateWarningIfNeeded(LocalizationService.Get("configuration.workflow.action.copied"));
             MessageBox.Show(this, LocalizationService.Get("text.konfiguration_wurde_in_die_zwischenablage_kopiert"), LocalizationService.Get("text.kopiert"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
@@ -3071,13 +2958,13 @@ public partial class MainWindow : Window
 
     private async Task SaveTextExportAsync()
     {
+        var options = GetConfigurationWorkflowOptions();
+        var values = CollectValues();
         var dialog = new SaveFileDialog
         {
             Title = LocalizationService.Get("text.cisco_konfiguration_speichern"),
-            Filter = LocalizationService.IsEnglish
-                ? "Text file (*.txt)|*.txt|All files (*.*)|*.*"
-                : "Textdatei (*.txt)|*.txt|Alle Dateien (*.*)|*.*",
-            FileName = BuildExportFileName()
+            Filter = LocalizationService.Get("dialog.filter.text_all"),
+            FileName = _configurationWorkflowService.BuildSafeExportFileName(options, values, DateTime.Now)
         };
         if (!string.IsNullOrWhiteSpace(_appSettings.DefaultExportFolder) && Directory.Exists(_appSettings.DefaultExportFolder))
             dialog.InitialDirectory = _appSettings.DefaultExportFolder;
@@ -3085,22 +2972,17 @@ public partial class MainWindow : Window
 
         try
         {
-            var config = await GenerateConfigAsync();
-            File.WriteAllText(dialog.FileName, config ?? string.Empty, new UTF8Encoding(false));
-
-            var directory = Path.GetDirectoryName(dialog.FileName) ?? Environment.CurrentDirectory;
-            var baseName = Path.GetFileNameWithoutExtension(dialog.FileName);
-            if (_appSettings.ExportPeerConfiguration)
+            var generation = await GenerateConfigurationWorkflowAsync();
+            await _configurationWorkflowService.ExportAsync(new ConfigurationExportRequest
             {
-                var peer = PeerRequirementGenerator.Generate(BuildRequest());
-                File.WriteAllText(Path.Combine(directory, baseName + "_peer.txt"), peer, new UTF8Encoding(false));
-            }
-            if (_appSettings.GenerateRollbackFile && _rollbackBox != null && !string.IsNullOrWhiteSpace(_rollbackBox.Text))
-                File.WriteAllText(Path.Combine(directory, baseName + "_rollback.txt"), _rollbackBox.Text, new UTF8Encoding(false));
-            if (_appSettings.ExportReportsTogether && _reportPreviewBox != null && !string.IsNullOrWhiteSpace(_reportPreviewBox.Text))
-                File.WriteAllText(Path.Combine(directory, baseName + "_report.txt"), _reportPreviewBox.Text, new UTF8Encoding(false));
+                TargetPath = dialog.FileName,
+                Generation = generation,
+                ExportPeerConfiguration = _appSettings.ExportPeerConfiguration,
+                RollbackText = _appSettings.GenerateRollbackFile ? _rollbackBox?.Text ?? string.Empty : string.Empty,
+                ReportText = _appSettings.ExportReportsTogether ? _reportPreviewBox?.Text ?? string.Empty : string.Empty
+            });
 
-            ShowDuplicateWarningIfNeeded(LocalizationService.IsEnglish ? "exported" : "exportiert");
+            ShowDuplicateWarningIfNeeded(LocalizationService.Get("configuration.workflow.action.exported"));
             MessageBox.Show(this, LocalizationService.Get("text.konfiguration_wurde_gespeichert"), LocalizationService.Get("text.export_abgeschlossen"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
@@ -3312,14 +3194,14 @@ public partial class MainWindow : Window
             }
         }
 
-        _lastImportAnalysis = null;
+        _lastImportResult = null;
         if (_importConfigBox != null) _importConfigBox.Clear();
         if (_importResultBox != null) _importResultBox.Clear();
         _lastDuplicateConfigIssues = Array.Empty<DuplicateConfigIssue>();
         _duplicateCheckHasRun = false;
         _currentValidationIssues = Array.Empty<UiValidationIssue>();
         _configurationPreviewText = string.Empty;
-        SetConfigurationPreviewText("Klicke auf 'Vorschau aktualisieren', um die aktuelle Cisco-Konfiguration zu erzeugen.");
+        SetConfigurationPreviewText(LocalizationService.Get("configuration.workflow.preview.initial"));
         _peerRequirementsText = string.Empty;
         if (_peerRequirementsBox != null)
             _peerRequirementsBox.Text = LocalizationService.Get("text.klicke_auf_gegenstelle_aktualisieren_um_die_anforderungen_de");

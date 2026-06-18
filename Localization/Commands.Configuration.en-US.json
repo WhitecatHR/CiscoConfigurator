@@ -980,7 +980,7 @@
         "module": "STP diagnostics",
         "mode": "EXEC",
         "command": "show spanning-tree inconsistentports",
-        "meaning": "Displays through Guard- or Konsistenzmechanismen blocked ports."
+        "meaning": "Displays ports blocked by guard or consistency mechanisms."
       },
       {
         "module": "MST diagnostics",

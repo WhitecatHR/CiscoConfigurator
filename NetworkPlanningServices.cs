@@ -55,7 +55,7 @@ public static class TopologyPlanningService
                 {
                     var device = devices[index];
                     device.Site = site.Key;
-                    if (string.IsNullOrWhiteSpace(device.TopologyRole) || device.TopologyRole.Equals("Automatisch", StringComparison.OrdinalIgnoreCase))
+                    if (string.IsNullOrWhiteSpace(device.TopologyRole) || (device.TopologyRole.Equals("Automatisch", StringComparison.OrdinalIgnoreCase) || device.TopologyRole.Equals("Automatic", StringComparison.OrdinalIgnoreCase)))
                         device.TopologyRole = role;
                     device.DiagramX = Math.Clamp(firstX + index * (nodeWidth + horizontalGap), 5, Math.Max(5, canvasWidth - nodeWidth - 5));
                     device.DiagramY = Math.Clamp(y, 35, Math.Max(35, canvasHeight - nodeHeight - 5));
@@ -67,7 +67,7 @@ public static class TopologyPlanningService
     public static string InferRole(ProjectDeviceSnapshot device)
     {
         if (!string.IsNullOrWhiteSpace(device.TopologyRole) &&
-            !device.TopologyRole.Equals("Automatisch", StringComparison.OrdinalIgnoreCase))
+            !(device.TopologyRole.Equals("Automatisch", StringComparison.OrdinalIgnoreCase) || device.TopologyRole.Equals("Automatic", StringComparison.OrdinalIgnoreCase)))
             return NormalizeRole(device.TopologyRole);
 
         var name = device.Name ?? string.Empty;
@@ -961,12 +961,12 @@ public static class ProjectPackageExportService
         }
         finally
         {
-            try { if (Directory.Exists(tempRoot)) Directory.Delete(tempRoot, true); } catch { }
+            try { if (Directory.Exists(tempRoot)) Directory.Delete(tempRoot, true); } catch (Exception ex) { StartupDiagnostics.WriteWarning($"Temporary project package folder could not be removed: {ex.Message}"); }
         }
     }
 
     private static string BuildPackageReadme(NetworkProject project) => $"""
-# Cisco-Konfigurator – Projektpaket
+# Cisco Configuration Tool – Projektpaket
 
 Projekt: {project.Name}
 Exportiert: {DateTime.Now:yyyy-MM-dd HH:mm}

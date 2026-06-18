@@ -154,15 +154,15 @@ public partial class MainWindow
             var data = ShowVersionInputDialog(window);
             if (data == null) return;
             SyncProjectEditors();
-            var entry = ProjectVersioningService.CreateVersion(
+            var result = _projectWorkflowService.CreateVersion(
                 _currentProject,
                 data.Value.Label,
                 data.Value.Comment,
-                false,
-                _appSettings.HistoryLimit,
+                automatic: false,
+                historyLimit: _appSettings.HistoryLimit,
                 skipDuplicate: false);
             versionGrid.Items.Refresh();
-            versionGrid.SelectedItem = entry;
+            versionGrid.SelectedItem = result.Version;
             ScheduleAutoSave();
         };
         updateButton.Click += (_, _) =>
@@ -196,18 +196,14 @@ public partial class MainWindow
                     MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
             SyncProjectEditors();
-            ProjectVersioningService.CreateVersion(
+            var restoreResult = _projectWorkflowService.RestoreVersion(
                 _currentProject,
-                LocalizationService.Get("versioning.before_restore", "Vor Wiederherstellung"),
+                selected,
+                LocalizationService.Get("versioning.before_restore"),
                 LocalizationService.Format("versioning.before_restore_comment", selected.Label),
-                true,
-                _appSettings.HistoryLimit,
-                skipDuplicate: false);
-            _currentProject = ProjectVersioningService.RestoreVersion(_currentProject, selected);
-            NormalizeProjectCollections();
-            RebindProjectCollections();
-            RefreshProjectEditors();
-            RefreshNetworkDiagram();
+                _appSettings.HistoryLimit);
+            _currentProject = restoreResult.Project;
+            UpdateProjectUiAfterStateChange();
             ScheduleAutoSave();
             window.Close();
             MessageBox.Show(this,

@@ -47,8 +47,8 @@
         "label": "no domain lookup",
         "name": "noDomainLookup",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Prevents DNS lookups for mistyped commands. Without this command, the router attempts to resolve typing errors as host names, which causes delays.",
@@ -59,8 +59,8 @@
         "label": "password encryption",
         "name": "servicePass",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Encrypts simple passwords in the configuration using type 7. This is not strong protection, but it prevents plain-text display of basic passwords.",
@@ -224,8 +224,8 @@
         "label": "SSH logging events",
         "name": "sshLogEvents",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Enables SSH-Event-Logging, if from the IOS supported.",
@@ -317,8 +317,8 @@
         "label": "Logging synchronous",
         "name": "vtyLoggingSync",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "`logging synchronous` prevents console messages from interrupting command input.",
@@ -356,8 +356,8 @@
         "label": "Local AAA",
         "name": "aaaLocal",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Enables aaa new-model with local authentication when no RADIUS or TACACS+ module is active. When RADIUS or TACACS+ is configured, the default method is generated centrally there to avoid conflicting aaa authentication login default commands.",
@@ -376,8 +376,8 @@
         "label": "Console logging synchronous",
         "name": "consoleLoggingSync",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "`logging synchronous` prevents console messages from interrupting command input.",
@@ -388,7 +388,7 @@
         "label": "Console login",
         "name": "consoleLogin",
         "items": [
-          "keine Änderung",
+          "no change",
           "login local"
         ],
         "selected": 0,
@@ -439,8 +439,8 @@
         "label": "Use AAA RADIUS",
         "name": "aaaUseRadius",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "When enabled, AAA login, authorization, and accounting use RADIUS with a local fallback.",
@@ -499,8 +499,8 @@
         "label": "Timestamp settings",
         "name": "logTimestamps",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Enables detailed timestamps for log and debug messages.",
@@ -527,8 +527,8 @@
         "label": "Archive configuration changes",
         "name": "archiveLog",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Logs configuration changes.",
@@ -539,8 +539,8 @@
         "label": "Login auditing",
         "name": "loginAudit",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Logs successful and failed login attempts.",
@@ -559,8 +559,8 @@
         "label": "Archive on write memory",
         "name": "archiveWriteMemory",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Archives the configuration for write memory, if from the IOS supported.",
@@ -649,7 +649,7 @@
         "type": "Multi",
         "label": "Range|description|access/trunk|VLANs|PortFast|BPDU Guard|PortSecurity",
         "name": "rangesList",
-        "value": "GigabitEthernet0/1-12|Clients|access|10|ja|ja|ja",
+        "value": "GigabitEthernet0/1-12|Clients|access|10|yes|yes|yes",
         "help": "Configures multiple ports at once. Use PortFast only on end-device ports. BPDU Guard disables a port when an unexpected switch or BPDU is detected. Port security limits learned MAC addresses.",
         "w": 1080,
         "h": 85
@@ -710,8 +710,8 @@
         "label": "Enable parent interface",
         "name": "rosParentNoShutdown",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Applies `no shutdown` to the physical parent interface. IP addresses are configured on the subinterfaces.",
@@ -840,8 +840,8 @@
         "label": "Global QinQ option",
         "name": "qinqGlobalDot1q",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Informational option only. Most Catalyst configurations enable QinQ per port with switchport mode dot1q-tunnel. Global Ethertype commands vary by platform and are therefore not generated automatically.",
@@ -1010,8 +1010,8 @@
         "label": "Enable CDP",
         "name": "voipCdp",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "CDP allows Cisco IP phones to discover the configured voice VLAN automatically.",
@@ -1022,8 +1022,8 @@
         "label": "Enable LLDP",
         "name": "voipLldp",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 1,
         "help": "LLDP is vendor-neutral. Many phones use LLDP-MED to discover the voice VLAN and network policy.",
@@ -1034,7 +1034,7 @@
         "label": "QoS mode",
         "name": "voipQosMode",
         "items": [
-          "Nein",
+          "No",
           "mls qos trust dscp",
           "mls qos trust cos",
           "auto qos voip cisco-phone"
@@ -1156,8 +1156,8 @@
         "type": "Multi",
         "label": "Range|Description|Access VLAN|Voice VLAN|PortFast|BPDU Guard|Port Security|Storm Level|Shutdown|Nonegotiate",
         "name": "accessBaseList",
-        "value": "Gi0/1-24|CLIENT-PORTS|10||ja|ja|ja|1.00|nein|ja\nGi0/25-48|UNUSED|999||nein|ja|nein||ja|ja",
-        "help": "Generates common Access-Port-configuration PortFast, BPDU Guard, Port-Security, Storm-Control and Shutdown for ungenutzte ports.",
+        "value": "Gi0/1-24|CLIENT-PORTS|10||yes|yes|yes|1.00|no|yes\nGi0/25-48|UNUSED|999||no|yes|no||yes|yes",
+        "help": "Generates common access-port settings: PortFast, BPDU Guard, port security, storm control, and shutdown for unused ports.",
         "w": 1080,
         "h": 160
       }
@@ -1224,7 +1224,7 @@
         "label": "Platform profile",
         "name": "stpPlatformProfile",
         "items": [
-          "Automatisch",
+          "Automatic",
           "Catalyst IOS-XE",
           "Catalyst IOS",
           "Packet Tracer"
@@ -1254,8 +1254,8 @@
         "label": "Strict compatibility",
         "name": "stpStrictCompatibility",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "When enabled, settings that do not match the selected spanning-tree protocol are excluded from export and reported as warnings.",
@@ -1266,8 +1266,8 @@
         "label": "Extend system ID",
         "name": "stpExtendSystemId",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Generates spanning-tree extend system-id.",
@@ -1291,8 +1291,8 @@
         "label": "Default PortFast",
         "name": "stpPortfastDefault",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Enables PortFast globally for suitable access ports.",
@@ -1303,8 +1303,8 @@
         "label": "Default BPDU Guard",
         "name": "stpBpduguardDefault",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Enables BPDU Guard globally for PortFast-ports.",
@@ -1315,8 +1315,8 @@
         "label": "Default BPDU Filter",
         "name": "stpBpdufilterDefault",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Enables BPDU Filter globally. Use it only deliberately because it can suppress BPDUs.",
@@ -1327,8 +1327,8 @@
         "label": "Default Loop Guard",
         "name": "stpLoopguardDefault",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Enables Loop Guard globally.",
@@ -1339,8 +1339,8 @@
         "label": "EtherChannel guard",
         "name": "stpEtherchannelGuard",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Detects incorrect configured EtherChannels.",
@@ -1351,8 +1351,8 @@
         "label": "UplinkFast (legacy PVST)",
         "name": "stpUplinkFast",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Legacy PVST convergence optimization. It is not exported for Rapid-PVST or MST.",
@@ -1367,8 +1367,8 @@
         "label": "BackboneFast (legacy PVST)",
         "name": "stpBackboneFast",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Legacy PVST optimization for indirect link failures. Do not export it for Rapid-PVST or MST.",
@@ -1399,7 +1399,7 @@
           "",
           "primary",
           "secondary",
-          "Manuelle Priorität"
+          "Manual priority"
         ],
         "selected": 0,
         "help": "Quick assistant for Root Primary, Root Secondary, or a manual bridge priority.",
@@ -1590,7 +1590,7 @@
           "",
           "primary",
           "secondary",
-          "Manuelle Priorität"
+          "Manual priority"
         ],
         "selected": 0,
         "help": "Quick assistant for a root role or a manual instance priority.",
@@ -1675,8 +1675,8 @@
         "label": "BPDU Guard errdisable recovery",
         "name": "stpErrdisableBpduguard",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "Generates errdisable recovery cause bpduguard.",
@@ -1784,7 +1784,7 @@
         "type": "Multi",
         "label": "Interface|Maximum|Sticky yes/no|Violation|Aging time|Aging type",
         "name": "portSecExtList",
-        "value": "Gi0/1|2|ja|restrict|60|inactivity\nGi0/2|1|ja|shutdown||",
+        "value": "Gi0/1|2|yes|restrict|60|inactivity\nGi0/2|1|yes|shutdown||",
         "help": "Advanced Port Security settings per interface.",
         "w": 1080,
         "h": 150
@@ -1806,7 +1806,7 @@
         "type": "Multi",
         "label": "VLAN|Name|IPv4 network|Mask|Gateway|IPv6 gateway|VRF|DHCP yes/no|DNS|Helper|HSRP VIP|OSPF area|BGP yes/no",
         "name": "vlanIpPlanList",
-        "value": "10|CLIENTS|192.168.10.0|255.255.255.0|192.168.10.1|2001:db8:10::1/64|SERVER|ja|1.1.1.1 8.8.8.8|192.168.99.10|192.168.10.254|0|ja\n20|SERVER|192.168.20.0|255.255.255.0|192.168.20.1|2001:db8:20::1/64|SERVER|nein||192.168.99.10||0|ja",
+        "value": "10|CLIENTS|192.168.10.0|255.255.255.0|192.168.10.1|2001:db8:10::1/64|SERVER|yes|1.1.1.1 8.8.8.8|192.168.99.10|192.168.10.254|0|yes\n20|SERVER|192.168.20.0|255.255.255.0|192.168.20.1|2001:db8:20::1/64|SERVER|no||192.168.99.10||0|yes",
         "help": "Maintains a central VLAN and IP plan. Each line can create the VLAN, SVI, optional VRF assignment, IPv4 and IPv6 gateway, helper address, HSRP virtual IP, and DHCP pool. OSPF and BGP values are included as planning information.",
         "w": 1080,
         "h": 350
@@ -1829,8 +1829,8 @@
         "label": "IPv4 routing",
         "name": "ipRouting",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 1,
         "help": "Enables IPv4 routing with `ip routing` on a Layer 3 switch. Routing is usually already active on routers, but the command remains valid and can still be generated.",
@@ -1923,8 +1923,8 @@
         "label": "Adjacency logging",
         "name": "ospfLogAdjacency",
         "items": [
-          "Nein",
-          "Ja",
+          "No",
+          "Yes",
           "Detail"
         ],
         "selected": 0,
@@ -1954,8 +1954,8 @@
         "label": "Passive-interface default",
         "name": "ospfPassiveDefault",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
         "help": "passive-interface default prevents unintended OSPF adjacencies. Add no passive-interface only for the interfaces that should form neighbors.",
@@ -1966,8 +1966,8 @@
         "label": "Default-information originate",
         "name": "ospfDefaultOriginate",
         "items": [
-          "Nein",
-          "Ja",
+          "No",
+          "Yes",
           "Immer"
         ],
         "selected": 0,
@@ -2092,7 +2092,7 @@
         "type": "Multi",
         "label": "Advanced neighbor options: Neighbor|Update source|Multihop|Next-hop self|Password|Maximum prefixes|Soft reconfiguration inbound|Default originate",
         "name": "bgpExtNeighborList",
-        "value": "10.0.0.2|Loopback0|2|ja|bgpSecret|1000|ja|nein",
+        "value": "10.0.0.2|Loopback0|2|yes|bgpSecret|1000|yes|no",
         "help": "Optional per-neighbor extensions. Each entry must match a neighbor from the neighbor list above.",
         "w": 1080,
         "h": 95
@@ -2230,7 +2230,7 @@
         "label": "target|mask|PrimaryNH|TrackID|BackupNH",
         "name": "trackedRouteList",
         "value": "0.0.0.0|0.0.0.0|192.168.1.1|1|192.168.2.1",
-        "help": "Generates getrackte Primary Route plus Floating Backup Route.",
+        "help": "Generates a tracked primary route plus a floating backup route.",
         "w": 1080,
         "h": 70
       }
@@ -2334,8 +2334,8 @@
         "label": "Enable IP CEF",
         "name": "mplsCef",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Enables Cisco Express Forwarding, which is a prerequisite for common MPLS forwarding designs.",
@@ -2346,8 +2346,8 @@
         "label": "Enable MPLS globally",
         "name": "mplsGlobal",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Enables global MPLS forwarding where required by the target platform. MPLS must still be enabled on the intended core or transit interfaces.",
@@ -2378,8 +2378,8 @@
         "label": "Force router ID",
         "name": "mplsLdpRouterIdForce",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Forces the selected LDP router ID. Existing LDP sessions may be rebuilt, so use this option deliberately.",
@@ -2389,7 +2389,7 @@
         "type": "Multi",
         "label": "MPLS interfaces: Interface|Optional description|Optional MPLS MTU|LDP-IGP sync yes/no",
         "name": "mplsInterfaceList",
-        "value": "Gi0/0|Core-Uplink P1||Ja\nGi0/1|Core-Uplink P2||Ja",
+        "value": "Gi0/0|Core-Uplink P1||yes\nGi0/1|Core-Uplink P2||yes",
         "help": "Enables MPLS on core or transit interfaces. An MPLS MTU and LDP-IGP synchronization can be configured when required by the platform and design.",
         "w": 520,
         "h": 130
@@ -2477,7 +2477,7 @@
         "type": "Multi",
         "label": "SVI in VRF: VLAN|VRF|IPv4|Mask|Reserved|Name|IPv6/prefix|IPv6 enable",
         "name": "vrfSviList",
-        "value": "10|SERVER|192.168.10.1|255.255.255.0||SERVER|2001:db8:10::1/64|ja\n20|VOICE|192.168.20.1|255.255.255.0||VOICE|2001:db8:20::1/64|ja",
+        "value": "10|SERVER|192.168.10.1|255.255.255.0||SERVER|2001:db8:10::1/64|yes\n20|VOICE|192.168.20.1|255.255.255.0||VOICE|2001:db8:20::1/64|yes",
         "help": "Creates an SVI inside a VRF. The reserved column remains empty for compatibility with older templates. Optional IPv6 addressing and ipv6 enable can be added to the interface.",
         "w": 1080,
         "h": 155
@@ -2924,7 +2924,7 @@
         "items": [
           "any",
           "host",
-          "netz"
+          "network"
         ],
         "selected": 0,
         "help": "any matches every source. host matches one IP address. network matches an address and wildcard mask.",
@@ -2945,7 +2945,7 @@
         "items": [
           "any",
           "host",
-          "netz"
+          "network"
         ],
         "selected": 1,
         "help": "any matches every destination. host matches one destination IP. network matches a destination network and wildcard mask.",
@@ -2964,7 +2964,7 @@
         "label": "Port",
         "name": "aclAssistPort",
         "items": [
-          "kein Port",
+          "no port",
           "22 SSH",
           "23 TELNET",
           "53 DNS",
@@ -3017,8 +3017,8 @@
         "label": "no service pad",
         "name": "hardNoPad",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Disables PAD Service.",
@@ -3029,8 +3029,8 @@
         "label": "no ip source-route",
         "name": "hardNoSourceRoute",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Disables IP Source Routing.",
@@ -3041,8 +3041,8 @@
         "label": "no ip bootp server",
         "name": "hardNoBootp",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
         "help": "Disables BOOTP Server.",
@@ -3053,11 +3053,11 @@
         "label": "CDP active",
         "name": "hardCdp",
         "items": [
-          "Nein",
-          "Ja"
+          "No",
+          "Yes"
         ],
         "selected": 0,
-        "help": "Nein generated no cdp run.",
+        "help": "No generates no cdp run.",
         "w": 300
       },
       {
@@ -3065,11 +3065,11 @@
         "label": "LLDP active",
         "name": "hardLldp",
         "items": [
-          "Ja",
-          "Nein"
+          "Yes",
+          "No"
         ],
         "selected": 0,
-        "help": "Ja generated lldp run.",
+        "help": "Yes generates lldp run.",
         "w": 300
       },
       {
@@ -3159,7 +3159,7 @@
         "label": "NAT exemption: Route map|ACL|Interface",
         "name": "natExemptList",
         "value": "",
-        "help": "Basis for NAT exemptions, for example VPN traffic.",
+        "help": "Foundation for NAT exemptions, for example VPN traffic.",
         "w": 1080,
         "h": 50
       }
@@ -3374,7 +3374,7 @@
         "label": "Peer|PSK|Outside interface|Crypto ACL|Transform set|Crypto map",
         "name": "ipsecS2SList",
         "value": "203.0.113.2|MeinPSK|Gi0/0|110|TS-S2S|VPN-MAP",
-        "help": "Site-to-Site IPsec without GRE, IKEv1-Basis.",
+        "help": "Site-to-site IPsec without GRE, based on IKEv1.",
         "w": 1080,
         "h": 130
       }

@@ -1,4 +1,4 @@
-# Cisco Konfigurator
+# Cisco Configuration Tool
 
 [Deutsch](README.de.md) | [English](README.en.md)
 
@@ -7,14 +7,14 @@
 
 ## Überblick
 
-Der Cisco Konfigurator ist eine C#-WPF-Anwendung für die strukturierte Erstellung, Verwaltung, Prüfung und Dokumentation von Cisco-IOS- und IOS-XE-Konfigurationen. Die Anwendung unterstützt Router, Layer-3-Switches und Layer-2-Switches und stellt die benötigten Funktionen über fachlich gegliederte Module bereit.
+Das Cisco Configuration Tool ist eine C#-WPF-Anwendung für die strukturierte Erstellung, Verwaltung, Prüfung und Dokumentation von Cisco-IOS- und IOS-XE-Konfigurationen. Die Anwendung unterstützt Router, Layer-3-Switches und Layer-2-Switches und stellt die benötigten Funktionen über fachlich gegliederte Module bereit.
 
 Der Funktionsumfang geht über die reine Konfigurationserzeugung hinaus. Enthalten sind Mehrgeräte-Projekte, IPAM, Portplanung, Gegenstellenkonfigurationen, Konfigurationsanalyse, SSH-Übertragung, Backups, intelligente Netzwerkdiagramme, ACL-Regelanalysen, Routing-Overlays, interne Projektversionierung, ein grafischer Plugin-Manager, SSH-Live-Inventarisierung, exportierbare Netzpläne und vollständige Projektpakete.
 
 
 ## Benutzung
 
-Der Cisco Konfigurator ist für einen projektorientierten Arbeitsablauf ausgelegt. Konfiguration, Geräteverwaltung, Prüfung und Netzplan greifen dabei auf denselben Projektstand zu.
+Das Cisco Configuration Tool ist für einen projektorientierten Arbeitsablauf ausgelegt. Konfiguration, Geräteverwaltung, Prüfung und Netzplan greifen dabei auf denselben Projektstand zu.
 
 ### 1. Projekt anlegen
 
@@ -509,12 +509,20 @@ Der **Plugin-Manager** befindet sich unter **System → Einstellungen**. Er zeig
 - konfigurierbare Startseite
 - Such- und Filterfunktionen
 - ausführliche mehrzeilige Tooltips
-- Single-File-fähige Projektstruktur
+- Self-Contained Single-File-Veröffentlichung ohne Trimming
 - keine Speicherung von SSH-Passwörtern
 
 ## Projektdateien
 
 Netzwerkprojekte werden als `.ciscoproject.json` gespeichert. Die Datei enthält die Projektstruktur, Geräte, Verbindungen, IPAM-Daten, Diagrammpositionen, manuelle Verbindungswegpunkte, Inventarisierungsdaten, interne Projektversionen und technische Metadaten.
+
+## Architektur und Veröffentlichung
+
+Die Benutzeroberfläche bleibt eine C#-WPF-Anwendung auf .NET 8. Konfigurationserzeugung, Importaufbereitung sowie Projekt- und AutoSave-Abläufe sind in eigenständige Workflow-Services ausgelagert. WPF-Controls, Navigation, Dialoge und visuelle Darstellungen verbleiben in der UI-Schicht.
+
+Die Veröffentlichung ist als **Self-Contained Single-File** für `win-x64` konfiguriert. Die erzeugte Anwendung heißt exakt `Cisco Configuration Tool.exe`. Assembly- und Produktmetadaten verwenden denselben Namen. `PublishTrimmed` ist ausdrücklich deaktiviert, damit WPF-, JSON-Ressourcen- und Pluginfunktionen vollständig erhalten bleiben.
+
+Die Sprachkataloge werden als eingebettete WPF-Ressourcen ausgeliefert. Deutsch und Englisch verwenden dieselben Schlüssel- und Modulstrukturen.
 
 ## Technische Grundlage
 
@@ -529,7 +537,7 @@ Netzwerkprojekte werden als `.ciscoproject.json` gespeichert. Die Datei enthält
 
 ## Disclaimer
 
-Der Cisco Konfigurator ist ein Hilfswerkzeug zur Planung, Erzeugung, Analyse und Dokumentation von Cisco-Konfigurationen. Er ersetzt keine fachliche Prüfung durch qualifizierte Netzwerkadministratoren.
+Das Cisco Configuration Tool ist ein Hilfswerkzeug zur Planung, Erzeugung, Analyse und Dokumentation von Cisco-Konfigurationen. Es ersetzt keine fachliche Prüfung durch qualifizierte Netzwerkadministratoren.
 
 - Erzeugte Konfigurationen sind vor dem Einsatz vollständig zu prüfen.
 - Befehle können je nach Plattform, Gerätemodell, Lizenz, IOS-/IOS-XE-Version und aktiviertem Feature-Set abweichen oder nicht unterstützt werden.

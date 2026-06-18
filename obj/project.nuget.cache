@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "her970bYTyc=",
+  "dgSpecHash": "m59mBpcwHng=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Norman\\Desktop\\Test\\CiscoConfigGuiWpf.csproj",
+  "projectFilePath": "C:\\Users\\Norman\\Documents\\Codex\\CiscoConfigurator\\CiscoConfigGuiWpf.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Norman\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.28\\microsoft.net.illink.tasks.8.0.28.nupkg.sha512",
     "C:\\Users\\Norman\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\8.0.0\\runtime.linux-arm.runtime.native.system.io.ports.8.0.0.nupkg.sha512",

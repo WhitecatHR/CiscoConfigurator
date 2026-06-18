@@ -25,7 +25,7 @@ internal static class StartupDiagnostics
         {
             Directory.CreateDirectory(LogDirectory);
             var builder = new StringBuilder();
-            builder.AppendLine("Cisco Configurator - Startup Log");
+            builder.AppendLine("Cisco Configuration Tool - Startup Log");
             builder.AppendLine("Time: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
             builder.AppendLine("Process: " + (Environment.ProcessPath ?? "unknown"));
             builder.AppendLine("Base directory: " + AppContext.BaseDirectory);
@@ -59,7 +59,7 @@ internal static class StartupDiagnostics
                 if (exception == null) return;
 
                 var error = new StringBuilder();
-                error.AppendLine("Cisco Configurator - Startup Error");
+                error.AppendLine("Cisco Configuration Tool - Startup Error");
                 error.AppendLine("Time: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
                 error.AppendLine("Phase: " + message);
                 error.AppendLine();

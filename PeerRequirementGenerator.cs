@@ -13,6 +13,10 @@ public static class PeerRequirementGenerator
         var sectionCount = 0;
         string V(string key) => request.Values.TryGetValue(key, out var value) ? value.Trim() : string.Empty;
         bool M(string key) => request.Modules.TryGetValue(key, out var active) && active;
+        static bool IsYes(string? value) =>
+            value?.Equals("Ja", StringComparison.OrdinalIgnoreCase) == true ||
+            value?.Equals("Yes", StringComparison.OrdinalIgnoreCase) == true ||
+            value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
         var addresses = CollectInterfaceAddresses(V);
 
         void Section(string title, Action body)
@@ -179,7 +183,7 @@ public static class PeerRequirementGenerator
                 sb.AppendLine($"router ospf {pid}");
                 sb.AppendLine(" router-id <EINDEUTIGE-GEGENSTELLEN-ROUTER-ID>");
                 if (V("ospfLogAdjacency").Equals("Detail", StringComparison.OrdinalIgnoreCase)) sb.AppendLine(" log-adjacency-changes detail");
-                else if (V("ospfLogAdjacency").Equals("Ja", StringComparison.OrdinalIgnoreCase)) sb.AppendLine(" log-adjacency-changes");
+                else if (IsYes(V("ospfLogAdjacency"))) sb.AppendLine(" log-adjacency-changes");
                 sb.AppendLine("!");
 
                 foreach (var row in Rows(V("ospfInterfaceAreaList")))
@@ -385,7 +389,7 @@ public static class PeerRequirementGenerator
         {
             Section("MPLS-/LDP-GEGENSTELLE", () =>
             {
-                if (V("mplsCef").Equals("Ja", StringComparison.OrdinalIgnoreCase)) sb.AppendLine("ip cef");
+                if (IsYes(V("mplsCef"))) sb.AppendLine("ip cef");
                 if (V("mplsLabelProtocol").Equals("ldp", StringComparison.OrdinalIgnoreCase)) sb.AppendLine("mpls label protocol ldp");
                 sb.AppendLine("mpls ldp router-id <EINDEUTIGE-LOOPBACK> force");
                 foreach (var row in Rows(V("mplsInterfaceList")))
@@ -394,7 +398,7 @@ public static class PeerRequirementGenerator
                     if (p.Length < 1) continue;
                     sb.AppendLine("interface <GEGENSTELLEN-CORE-INTERFACE>");
                     sb.AppendLine(" mpls ip");
-                    if (p.ElementAtOrDefault(3)?.Equals("Ja", StringComparison.OrdinalIgnoreCase) == true)
+                    if (IsYes(p.ElementAtOrDefault(3)))
                         sb.AppendLine(" mpls ldp igp sync");
                     sb.AppendLine(" no shutdown");
                     sb.AppendLine("!");
